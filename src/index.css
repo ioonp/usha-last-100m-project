@@ -136,5 +136,4 @@ All colors MUST be HSL.
   .shadow-elegant { box-shadow: var(--shadow-elegant); }
   .transition-smooth { transition: all 0.4s var(--transition-smooth); }
   .no-tap-highlight { -webkit-tap-highlight-color: transparent; }
-  }
 }
