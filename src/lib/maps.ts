@@ -9,8 +9,8 @@ export function staticMapUrl(lat: number, lng: number, opts: { width?: number; h
   return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=${zoom}&size=${width}x${height}&markers=${lat},${lng},red-pushpin`;
 }
 
-let mapsPromise: Promise<typeof google> | null = null;
-export function loadGoogleMaps(): Promise<typeof google> | null {
+let mapsPromise: Promise<any> | null = null;
+export function loadGoogleMaps(): Promise<any> | null {
   if (!GOOGLE_MAPS_KEY) return null;
   if (mapsPromise) return mapsPromise;
   mapsPromise = new Promise((resolve, reject) => {
