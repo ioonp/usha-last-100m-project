@@ -14,13 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      checkpoints: {
+        Row: {
+          arrow_direction: string
+          created_at: string
+          id: string
+          location_id: string
+          note: string | null
+          photo_url: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          arrow_direction?: string
+          created_at?: string
+          id?: string
+          location_id: string
+          note?: string | null
+          photo_url: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          arrow_direction?: string
+          created_at?: string
+          id?: string
+          location_id?: string
+          note?: string | null
+          photo_url?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkpoints_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          accent_color: string
+          archived: boolean
+          created_at: string
+          id: string
+          logo_url: string | null
+          owner_id: string
+          published: boolean
+          slug: string
+          start_lat: number | null
+          start_lng: number | null
+          start_note: string | null
+          studio_name: string
+          updated_at: string
+          view_count: number
+          welcome_message: string
+        }
+        Insert: {
+          accent_color?: string
+          archived?: boolean
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          owner_id: string
+          published?: boolean
+          slug: string
+          start_lat?: number | null
+          start_lng?: number | null
+          start_note?: string | null
+          studio_name?: string
+          updated_at?: string
+          view_count?: number
+          welcome_message?: string
+        }
+        Update: {
+          accent_color?: string
+          archived?: boolean
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          owner_id?: string
+          published?: boolean
+          slug?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          start_note?: string | null
+          studio_name?: string
+          updated_at?: string
+          view_count?: number
+          welcome_message?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_location_view: { Args: { p_slug: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
