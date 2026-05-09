@@ -30,7 +30,7 @@ export default function Viewer() {
       if (!l) { setLoading(false); return; }
       setLoc(l as Loc);
       const { data: c } = await supabase.from("checkpoints").select("*").eq("location_id", l.id).order("position");
-      setCps((c as CP[]) || []);
+      setCps((c as unknown as CP[]) || []);
       setLoading(false);
       // Pre-load images
       (c || []).forEach((cp: any) => { const im = new Image(); im.src = cp.photo_url; });
