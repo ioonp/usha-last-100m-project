@@ -112,6 +112,7 @@ export default function Wizard() {
             photo_url: c.photo_url,
             arrow_direction: c.arrow_direction,
             note: c.note || null,
+            indicators: c.indicators ?? [],
           }));
         if (rows.length) {
           const { error } = await supabase.from("checkpoints").insert(rows);

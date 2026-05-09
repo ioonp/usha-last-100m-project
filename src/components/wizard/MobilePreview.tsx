@@ -1,6 +1,45 @@
 import { DirectionalArrow } from "@/components/DirectionalArrow";
-import type { Checkpoint } from "./CheckpointEditor";
+import type { Checkpoint, Indicator } from "./CheckpointEditor";
 import { useState } from "react";
+
+function PreviewIndicators({ indicators, fallbackDir }: { indicators: Indicator[]; fallbackDir: any }) {
+  if (!indicators || indicators.length === 0) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center">
+        <DirectionalArrow direction={fallbackDir} size={120} color="white" pulse />
+      </div>
+    );
+  }
+  return (
+    <>
+      {indicators.map((ind) => (
+        <div
+          key={ind.id}
+          className="absolute"
+          style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
+        >
+          {ind.type === "direction" ? (
+            <div style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
+              <DirectionalArrow direction={ind.direction} size={80} color="white" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
+              <div className="relative">
+                <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
+                <span className="relative block size-4 rounded-full bg-white border-2 border-foreground" />
+              </div>
+              {ind.label && (
+                <span className="mt-1 px-1.5 py-0.5 text-[9px] font-medium text-foreground bg-white/95 rounded">
+                  {ind.label}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
 
 export function MobilePreview({
   studioName, logoUrl, accent, welcome, checkpoints,
@@ -47,9 +86,7 @@ export function MobilePreview({
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">No photo</div>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <DirectionalArrow direction={cp.arrow_direction} size={120} color="white" pulse />
-                  </div>
+                  <PreviewIndicators indicators={cp.indicators ?? []} fallbackDir={cp.arrow_direction} />
                 </div>
                 <div className="bg-card p-3 border-t border-border">
                   {cp.note && <p className="text-xs mb-2">{cp.note}</p>}

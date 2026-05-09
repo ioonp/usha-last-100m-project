@@ -10,7 +10,10 @@ type Loc = {
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null;
 };
-type CP = { id: string; position: number; photo_url: string; arrow_direction: Direction; note: string | null };
+type Indicator =
+  | { id: string; type: "direction"; x: number; y: number; direction: Direction }
+  | { id: string; type: "spot"; x: number; y: number; label: string };
+type CP = { id: string; position: number; photo_url: string; arrow_direction: Direction; note: string | null; indicators?: Indicator[] };
 
 export default function Viewer() {
   const { slug } = useParams();
@@ -27,7 +30,7 @@ export default function Viewer() {
       if (!l) { setLoading(false); return; }
       setLoc(l as Loc);
       const { data: c } = await supabase.from("checkpoints").select("*").eq("location_id", l.id).order("position");
-      setCps((c as CP[]) || []);
+      setCps((c as unknown as CP[]) || []);
       setLoading(false);
       // Pre-load images
       (c || []).forEach((cp: any) => { const im = new Image(); im.src = cp.photo_url; });
@@ -105,9 +108,37 @@ export default function Viewer() {
       <div className="flex-1 relative">
         <img key={cp!.photo_url} src={cp!.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover animate-fade-in" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <DirectionalArrow direction={cp!.arrow_direction} size={Math.min(220, window.innerWidth * 0.5)} color="white" pulse />
-        </div>
+        {cp!.indicators && cp!.indicators.length > 0 ? (
+          cp!.indicators.map((ind) => (
+            <div
+              key={ind.id}
+              className="absolute"
+              style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
+            >
+              {ind.type === "direction" ? (
+                <div style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
+                  <DirectionalArrow direction={ind.direction} size={Math.min(140, window.innerWidth * 0.32)} color="white" />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
+                  <div className="relative">
+                    <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
+                    <span className="relative block size-6 rounded-full bg-white border-2 border-foreground" />
+                  </div>
+                  {ind.label && (
+                    <span className="mt-1.5 px-2 py-0.5 text-xs font-medium text-foreground bg-white/95 rounded-md">
+                      {ind.label}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <DirectionalArrow direction={cp!.arrow_direction} size={Math.min(220, window.innerWidth * 0.5)} color="white" pulse />
+          </div>
+        )}
       </div>
 
       {/* Bottom sheet */}

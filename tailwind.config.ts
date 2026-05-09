@@ -97,6 +97,11 @@ export default {
           "0%,100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-8px)" },
         },
+        "spot-pulse": {
+          "0%": { transform: "scale(1)", opacity: "0.4" },
+          "70%": { transform: "scale(1.6)", opacity: "0" },
+          "100%": { transform: "scale(1.6)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -105,6 +110,7 @@ export default {
         "fade-in": "fade-in 0.4s ease-out",
         "scale-in": "scale-in 0.5s cubic-bezier(0.22,1,0.36,1)",
         "arrow-pulse": "arrow-pulse 1.6s ease-in-out infinite",
+        "spot-pulse": "spot-pulse 1.5s ease-out infinite",
       },
       fontFamily: {
         display: ["Fraunces", "Georgia", "serif"],
