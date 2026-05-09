@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { DirectionalArrow, Direction } from "@/components/DirectionalArrow";
+import { CurvedArrow } from "@/components/CurvedArrow";
+import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirection } from "@/components/wizard/CheckpointEditor";
 import { staticMapUrl } from "@/lib/maps";
 import { Phone, MapPin, X } from "lucide-react";
 
@@ -10,10 +11,13 @@ type Loc = {
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null;
 };
-type Indicator =
-  | { id: string; type: "direction"; x: number; y: number; direction: Direction }
-  | { id: string; type: "spot"; x: number; y: number; label: string };
-type CP = { id: string; position: number; photo_url: string; arrow_direction: Direction; note: string | null; indicators?: Indicator[] };
+type Indicator = EditorIndicator;
+type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
+
+const LEGACY_TO_ANGLE: Record<LegacyDirection, number> = {
+  up: 0, "up-right": 45, right: 90, "down-right": 135,
+  down: 180, "down-left": 225, left: 270, "up-left": 315,
+};
 
 export default function Viewer() {
   const { slug } = useParams();
@@ -109,16 +113,14 @@ export default function Viewer() {
         <img key={cp!.photo_url} src={cp!.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover animate-fade-in" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
         {cp!.indicators && cp!.indicators.length > 0 ? (
-          cp!.indicators.map((ind) => (
+          cp!.indicators.map(normalizeIndicator).map((ind) => (
             <div
               key={ind.id}
               className="absolute"
               style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
             >
               {ind.type === "direction" ? (
-                <div style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
-                  <DirectionalArrow direction={ind.direction} size={Math.min(140, window.innerWidth * 0.32)} color="white" />
-                </div>
+                <CurvedArrow angle={ind.angle} size={Math.min(160, window.innerWidth * 0.4)} color="white" />
               ) : (
                 <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
                   <div className="relative">
@@ -136,7 +138,7 @@ export default function Viewer() {
           ))
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <DirectionalArrow direction={cp!.arrow_direction} size={Math.min(220, window.innerWidth * 0.5)} color="white" pulse />
+            <CurvedArrow angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0} size={Math.min(240, window.innerWidth * 0.55)} color="white" />
           </div>
         )}
       </div>
