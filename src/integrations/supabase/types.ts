@@ -19,6 +19,7 @@ export type Database = {
           arrow_direction: string
           created_at: string
           id: string
+          indicators: Json
           location_id: string
           note: string | null
           photo_url: string
@@ -29,6 +30,7 @@ export type Database = {
           arrow_direction?: string
           created_at?: string
           id?: string
+          indicators?: Json
           location_id: string
           note?: string | null
           photo_url: string
@@ -39,6 +41,7 @@ export type Database = {
           arrow_direction?: string
           created_at?: string
           id?: string
+          indicators?: Json
           location_id?: string
           note?: string | null
           photo_url?: string

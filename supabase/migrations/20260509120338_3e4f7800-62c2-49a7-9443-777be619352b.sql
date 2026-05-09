@@ -1,0 +1,1 @@
+ALTER TABLE public.checkpoints ADD COLUMN IF NOT EXISTS indicators jsonb NOT NULL DEFAULT '[]'::jsonb;
