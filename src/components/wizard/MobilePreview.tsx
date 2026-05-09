@@ -1,27 +1,31 @@
-import { DirectionalArrow } from "@/components/DirectionalArrow";
-import type { Checkpoint, Indicator } from "./CheckpointEditor";
+import { CurvedArrow } from "@/components/CurvedArrow";
+import { normalizeIndicator, type Checkpoint, type Indicator, type LegacyDirection } from "./CheckpointEditor";
 import { useState } from "react";
 
-function PreviewIndicators({ indicators, fallbackDir }: { indicators: Indicator[]; fallbackDir: any }) {
-  if (!indicators || indicators.length === 0) {
+const LEGACY_TO_ANGLE: Record<LegacyDirection, number> = {
+  up: 0, "up-right": 45, right: 90, "down-right": 135,
+  down: 180, "down-left": 225, left: 270, "up-left": 315,
+};
+
+function PreviewIndicators({ indicators, fallbackDir }: { indicators: Indicator[]; fallbackDir: LegacyDirection }) {
+  const list = (indicators ?? []).map(normalizeIndicator);
+  if (!list || list.length === 0) {
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <DirectionalArrow direction={fallbackDir} size={120} color="white" pulse />
+        <CurvedArrow angle={LEGACY_TO_ANGLE[fallbackDir] ?? 0} size={120} color="white" />
       </div>
     );
   }
   return (
     <>
-      {indicators.map((ind) => (
+      {list.map((ind) => (
         <div
           key={ind.id}
           className="absolute"
           style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
         >
           {ind.type === "direction" ? (
-            <div style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
-              <DirectionalArrow direction={ind.direction} size={80} color="white" />
-            </div>
+            <CurvedArrow angle={ind.angle} size={80} color="white" />
           ) : (
             <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
               <div className="relative">
