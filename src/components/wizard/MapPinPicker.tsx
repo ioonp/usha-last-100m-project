@@ -38,31 +38,35 @@ export function MapPinPicker({
     });
   }, []);
 
-  // Initialize map only after a selection (or if there's an existing lat/lng)
+  // Initialize map as soon as Google is ready. Default to Brandenburg Gate, Berlin
+  // until the user picks a suggestion. Marker is only added after a selection.
   useEffect(() => {
-    if (!googleReady || !selected || !mapDivRef.current || mapRef.current) return;
+    if (!googleReady || !mapDivRef.current || mapRef.current) return;
     const g = googleRef.current;
-    const initLat = lat ?? 40.7128;
-    const initLng = lng ?? -74.006;
+    const hasInitial = lat != null && lng != null;
+    const initLat = hasInitial ? (lat as number) : 52.51627;
+    const initLng = hasInitial ? (lng as number) : 13.37769;
     const map = new g.maps.Map(mapDivRef.current, {
       center: { lat: initLat, lng: initLng },
-      zoom: 17,
+      zoom: hasInitial ? 17 : 15,
       disableDefaultUI: true,
       zoomControl: true,
     });
-    const marker = new g.maps.Marker({
-      position: { lat: initLat, lng: initLng },
-      map, draggable: true,
-    });
-    marker.addListener("dragend", () => {
-      const p = marker.getPosition();
-      if (p) onChange(p.lat(), p.lng());
-    });
     mapRef.current = map;
-    markerRef.current = marker;
     placesServiceRef.current = new g.maps.places.PlacesService(map);
+    if (hasInitial) {
+      const marker = new g.maps.Marker({
+        position: { lat: initLat, lng: initLng },
+        map, draggable: true,
+      });
+      marker.addListener("dragend", () => {
+        const p = marker.getPosition();
+        if (p) onChange(p.lat(), p.lng());
+      });
+      markerRef.current = marker;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [googleReady, selected]);
+  }, [googleReady]);
 
   // Debounced autocomplete predictions
   useEffect(() => {
@@ -102,14 +106,24 @@ export function MapPinPicker({
         sessionTokenRef.current = new g.maps.places.AutocompleteSessionToken();
         onChange(la, ln);
         setSelected(true);
-        // Update map/marker if already initialized
-        setTimeout(() => {
-          if (mapRef.current && markerRef.current) {
-            mapRef.current.setCenter({ lat: la, lng: ln });
-            mapRef.current.setZoom(17);
+        // Update map: recenter and create/move marker
+        if (mapRef.current) {
+          mapRef.current.setCenter({ lat: la, lng: ln });
+          mapRef.current.setZoom(17);
+          if (!markerRef.current) {
+            const marker = new g.maps.Marker({
+              position: { lat: la, lng: ln },
+              map: mapRef.current, draggable: true,
+            });
+            marker.addListener("dragend", () => {
+              const p = marker.getPosition();
+              if (p) onChange(p.lat(), p.lng());
+            });
+            markerRef.current = marker;
+          } else {
             markerRef.current.setPosition({ lat: la, lng: ln });
           }
-        }, 0);
+        }
       }
     );
   };
@@ -140,7 +154,7 @@ export function MapPinPicker({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => suggestions.length && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search address, transit stop, or landmark…"
+          placeholder="Search your venue, transit stop, or street address to get started"
           className="pl-9 h-12 rounded-xl"
         />
         {open && suggestions.length > 0 && (
@@ -161,17 +175,9 @@ export function MapPinPicker({
         )}
       </div>
 
-      {selected ? (
-        <>
-          <div ref={mapDivRef} className="w-full h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
-          {lat != null && lng != null && (
-            <div className="text-xs text-muted-foreground font-mono">{lat.toFixed(5)}, {lng.toFixed(5)}</div>
-          )}
-        </>
-      ) : (
-        <div className="w-full h-[320px] rounded-2xl border border-dashed border-border bg-muted/30 flex items-center justify-center">
-          <span className="text-sm text-muted-foreground">Your map will appear here</span>
-        </div>
+      <div ref={mapDivRef} className="w-full h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
+      {selected && lat != null && lng != null && (
+        <div className="text-xs text-muted-foreground font-mono">{lat.toFixed(5)}, {lng.toFixed(5)}</div>
       )}
     </div>
   );
