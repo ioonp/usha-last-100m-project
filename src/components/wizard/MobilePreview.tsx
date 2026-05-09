@@ -1,5 +1,5 @@
 import { DirectionalArrow } from "@/components/DirectionalArrow";
-import type { Checkpoint } from "./CheckpointEditor";
+import type { Checkpoint, Indicator } from "./CheckpointEditor";
 import { useState } from "react";
 
 export function MobilePreview({
@@ -47,9 +47,7 @@ export function MobilePreview({
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">No photo</div>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <DirectionalArrow direction={cp.arrow_direction} size={120} color="white" pulse />
-                  </div>
+                  <PreviewIndicators indicators={cp.indicators ?? []} fallbackDir={cp.arrow_direction} />
                 </div>
                 <div className="bg-card p-3 border-t border-border">
                   {cp.note && <p className="text-xs mb-2">{cp.note}</p>}
