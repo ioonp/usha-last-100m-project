@@ -1,4 +1,8 @@
-export const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
+// NOTE: Browser Maps key — must ship to the client for Maps JS API to work.
+// Lock this down in Google Cloud Console (HTTP referrer + API restrictions) before publishing.
+export const GOOGLE_MAPS_KEY: string | undefined =
+  (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined) ||
+  "AIzaSyAdCECOnMx58_QsCknysQfOaOrxpwP0xW8";
 
 export function staticMapUrl(lat: number, lng: number, opts: { width?: number; height?: number; zoom?: number } = {}) {
   const { width = 600, height = 320, zoom = 16 } = opts;
