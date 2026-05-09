@@ -1,28 +1,49 @@
-import { DIRECTIONS, Direction, DirectionalArrow } from "@/components/DirectionalArrow";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadAsset } from "@/lib/upload";
 import { useAuth } from "@/lib/auth";
-import { ArrowDown, ArrowUp, Trash2, Upload, Plus, ArrowUp as ArrowUpIcon, Circle, X } from "lucide-react";
+import { CurvedArrow } from "@/components/CurvedArrow";
+import { ArrowDown, ArrowUp, Trash2, Upload, Plus, ArrowUp as ArrowUpIcon, Circle, X, RotateCw } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
+// Legacy 8-direction value kept for backward compat with old saved data
+export type LegacyDirection =
+  | "up" | "up-right" | "right" | "down-right"
+  | "down" | "down-left" | "left" | "up-left";
+const LEGACY_DIR_TO_ANGLE: Record<LegacyDirection, number> = {
+  up: 0, "up-right": 45, right: 90, "down-right": 135,
+  down: 180, "down-left": 225, left: 270, "up-left": 315,
+};
+
 export type Indicator =
-  | { id: string; type: "direction"; x: number; y: number; direction: Direction }
+  | { id: string; type: "direction"; x: number; y: number; angle: number; direction?: LegacyDirection }
   | { id: string; type: "spot"; x: number; y: number; label: string };
 
 export type Checkpoint = {
   id?: string;
   position: number;
   photo_url: string;
-  arrow_direction: Direction; // legacy, kept for backward compat
+  arrow_direction: LegacyDirection; // legacy
   note: string | null;
   indicators?: Indicator[];
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
-const nextDir = (d: Direction): Direction => DIRECTIONS[(DIRECTIONS.indexOf(d) + 1) % DIRECTIONS.length];
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
+// Normalize indicators read from DB (may have only legacy `direction` field)
+export function normalizeIndicator(ind: any): Indicator {
+  if (ind?.type === "direction") {
+    const angle =
+      typeof ind.angle === "number"
+        ? ind.angle
+        : LEGACY_DIR_TO_ANGLE[ind.direction as LegacyDirection] ?? 45;
+    return { id: ind.id, type: "direction", x: ind.x, y: ind.y, angle };
+  }
+  return ind as Indicator;
+}
 
 function PhotoCanvas({
   photoUrl,
@@ -34,42 +55,56 @@ function PhotoCanvas({
   onChange: (next: Indicator[]) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const dragRef = useRef<{ id: string; moved: boolean } | null>(null);
+  const dragRef = useRef<{ id: string; mode: "move" | "rotate"; moved: boolean } | null>(null);
 
   const update = (id: string, patch: Partial<Indicator>) =>
     onChange(indicators.map((i) => (i.id === id ? ({ ...i, ...patch } as Indicator) : i)));
   const remove = (id: string) => onChange(indicators.filter((i) => i.id !== id));
 
-  const handlePointerDown = (e: React.PointerEvent, id: string) => {
+  const startDrag = (e: React.PointerEvent, id: string, mode: "move" | "rotate") => {
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    dragRef.current = { id, moved: false };
+    dragRef.current = { id, mode, moved: false };
   };
+
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!dragRef.current || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
     const ind = indicators.find((i) => i.id === dragRef.current!.id);
     if (!ind) return;
-    if (Math.abs(x - ind.x) > 0.005 || Math.abs(y - ind.y) > 0.005) dragRef.current.moved = true;
-    update(dragRef.current.id, { x, y } as Partial<Indicator>);
-  };
-  const handlePointerUp = (e: React.PointerEvent, id: string) => {
-    const wasMoved = dragRef.current?.moved;
-    dragRef.current = null;
-    // tap (no drag) on a direction arrow → cycle direction
-    if (!wasMoved) {
-      const ind = indicators.find((i) => i.id === id);
-      if (ind?.type === "direction") update(id, { direction: nextDir(ind.direction) } as Partial<Indicator>);
+    if (dragRef.current.mode === "move") {
+      const x = clamp01((e.clientX - rect.left) / rect.width);
+      const y = clamp01((e.clientY - rect.top) / rect.height);
+      if (Math.abs(x - ind.x) > 0.005 || Math.abs(y - ind.y) > 0.005) dragRef.current.moved = true;
+      update(dragRef.current.id, { x, y } as Partial<Indicator>);
+    } else if (ind.type === "direction") {
+      const cx = rect.left + ind.x * rect.width;
+      const cy = rect.top + ind.y * rect.height;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      // CSS rotate(θ) maps (0,L) → (−L sinθ, L cosθ).
+      // Solve for θ given the tail at (dx, dy): θ = atan2(−dx, dy)
+      let a = (Math.atan2(-dx, dy) * 180) / Math.PI;
+      if (a < 0) a += 360;
+      dragRef.current.moved = true;
+      update(dragRef.current.id, { angle: a } as Partial<Indicator>);
     }
   };
+
+  const endDrag = () => { dragRef.current = null; };
+
+  const ARROW_SIZE = 120;
+  // Tail offset in pixels from indicator center, before rotation: (0, +TAIL_R)
+  // Matches CurvedArrow viewBox: tail at y=100, scale = ARROW_SIZE / 200 = 0.6 → 60px
+  const TAIL_R = (ARROW_SIZE / 200) * 100;
 
   return (
     <div
       ref={ref}
       className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-muted select-none"
       onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
     >
       <img src={photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
       {indicators.map((ind) => (
@@ -79,18 +114,36 @@ function PhotoCanvas({
           style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)", touchAction: "none" }}
         >
           {ind.type === "direction" ? (
-            <div
-              className="relative cursor-grab active:cursor-grabbing"
-              style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}
-              onPointerDown={(e) => handlePointerDown(e, ind.id)}
-              onPointerUp={(e) => handlePointerUp(e, ind.id)}
-              title="Drag to move • Tap to rotate"
-            >
-              <DirectionalArrow direction={ind.direction} size={80} color="white" />
+            <div className="relative" style={{ width: ARROW_SIZE, height: ARROW_SIZE, marginLeft: -ARROW_SIZE/2, marginTop: -ARROW_SIZE/2, left: "50%", top: "50%", position: "absolute" }}>
+              {/* Arrow body — drag to move (tip stays anchored to indicator center) */}
+              <div
+                className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                onPointerDown={(e) => startDrag(e, ind.id, "move")}
+                title="Drag to move"
+              >
+                <CurvedArrow angle={ind.angle} size={ARROW_SIZE} color="white" />
+              </div>
+              {/* Rotation handle at tail */}
+              <button
+                type="button"
+                onPointerDown={(e) => startDrag(e, ind.id, "rotate")}
+                className="absolute size-6 rounded-full bg-white border-2 border-foreground shadow-md flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
+                style={{
+                  left: `calc(50% + ${-Math.sin((ind.angle * Math.PI) / 180) * TAIL_R}px)`,
+                  top: `calc(50% + ${Math.cos((ind.angle * Math.PI) / 180) * TAIL_R}px)`,
+                  transform: "translate(-50%, -50%)",
+                  touchAction: "none",
+                }}
+                title="Drag to rotate"
+                aria-label="Rotate arrow"
+              >
+                <RotateCw className="size-3 text-foreground" />
+              </button>
+              {/* Remove */}
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-1 -right-1 size-5 rounded-full bg-background border border-border flex items-center justify-center shadow"
+                className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-1 size-5 rounded-full bg-background border border-border flex items-center justify-center shadow"
                 aria-label="Remove arrow"
               >
                 <X className="size-3" />
@@ -100,8 +153,7 @@ function PhotoCanvas({
             <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
               <div
                 className="relative cursor-grab active:cursor-grabbing"
-                onPointerDown={(e) => handlePointerDown(e, ind.id)}
-                onPointerUp={(e) => handlePointerUp(e, ind.id)}
+                onPointerDown={(e) => startDrag(e, ind.id, "move")}
                 title="Drag to move"
               >
                 <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
@@ -180,21 +232,19 @@ export function CheckpointEditor({
     const base = { id: uid(), x: 0.5, y: 0.5 };
     const next: Indicator =
       type === "direction"
-        ? { ...base, type: "direction", direction: "up" }
+        ? { ...base, type: "direction", angle: 45 } // default upper-right
         : { ...base, type: "spot", label: "" };
     update(i, { indicators: [...list, next] });
   };
 
   const setIndicators = (i: number, indicators: Indicator[]) => {
-    // keep legacy arrow_direction in sync with the direction indicator if present
-    const dir = indicators.find((x) => x.type === "direction") as Extract<Indicator, { type: "direction" }> | undefined;
-    update(i, { indicators, ...(dir ? { arrow_direction: dir.direction } : {}) });
+    update(i, { indicators });
   };
 
   return (
     <div className="space-y-4">
       {checkpoints.map((c, i) => {
-        const indicators = c.indicators ?? [];
+        const indicators = (c.indicators ?? []).map(normalizeIndicator);
         const dir = indicators.find((x) => x.type === "direction") as Extract<Indicator, { type: "direction" }> | undefined;
         const hasSpot = indicators.some((x) => x.type === "spot");
         return (
@@ -259,23 +309,9 @@ export function CheckpointEditor({
               )}
 
               {dir && (
-                <div>
-                  <Label className="text-xs">Arrow direction</Label>
-                  <div className="grid grid-cols-8 gap-1 mt-1.5">
-                    {DIRECTIONS.map((d) => (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => setIndicators(i, indicators.map((ind) => ind.id === dir.id ? { ...ind, direction: d } as Indicator : ind))}
-                        className={`aspect-square rounded-lg border flex items-center justify-center transition-smooth ${
-                          dir.direction === d ? "bg-accent text-accent-foreground border-accent" : "border-border hover:border-foreground text-muted-foreground"
-                        }`}
-                      >
-                        <DirectionalArrow direction={d} size={20} color="currentColor" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Drag the arrow to move it. Drag the white handle at the tail to rotate.
+                </p>
               )}
 
               <div>
