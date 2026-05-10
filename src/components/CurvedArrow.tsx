@@ -11,23 +11,46 @@ export function CurvedArrow({
   className?: string;
   withShadow?: boolean;
 }) {
-  // viewBox keeps tip anchored at (0,0) and tail near (0, 100) so the
-  // editor's rotation math (atan2(-dx, dy)) keeps working unchanged.
-  // Shape = perspective-projected road-marking chevron:
-  //   - narrow at the tip (top, receding)
-  //   - wide at the base (bottom, close to viewer)
-  //   - inward notch at the bottom for that classic chevron look
-  const chevron =
-    "M 0 -8 " +        // tip (narrow, far)
-    "L 16 60 " +       // right shoulder (mid)
-    "L 42 100 " +      // right base outer (wide, near)
-    "L 22 100 " +      // right base inner
-    "L 0 55 " +        // bottom notch
-    "L -22 100 " +     // left base inner
-    "L -42 100 " +     // left base outer
-    "L -16 60 " +      // left shoulder (mid)
-    "Z";
-  const fill = color === "white" ? "#FFD60A" : color; // bright road-marking yellow by default
+  // viewBox keeps the tip-of-cascade anchored at (0, ~-100) and the tail
+  // (largest chevron) near (0, +100). The editor's rotation math
+  // (atan2(-dx, dy)) on the tail handle keeps working unchanged because the
+  // bottom-most chevron sits at the bottom of the viewBox.
+  //
+  // Cascading open V chevrons receding toward the top, Google-Maps style:
+  // white fill, blue stroke, soft drop shadow. The top (smallest) chevron is
+  // slightly translucent to reinforce depth.
+  const BLUE = "#4285F4";
+  const fill = color === "white" ? "#FFFFFF" : color;
+
+  // Each chevron defined by: cy (vertical center), w (half-width),
+  // h (half-height of the V), thickness, opacity.
+  const chevrons = [
+    { cy:  72, w: 46, h: 22, t: 14, o: 1.0  }, // bottom — largest, closest
+    { cy:  20, w: 34, h: 18, t: 12, o: 1.0  },
+    { cy: -28, w: 24, h: 14, t: 10, o: 0.95 },
+    { cy: -68, w: 16, h: 10, t:  8, o: 0.85 }, // top — smallest, farthest
+  ];
+
+  // Build an open chevron (V shape, no filled body) as a closed band:
+  // outer V on top, inner V offset down by `t` to give it thickness.
+  const chevronPath = (cy: number, w: number, h: number, t: number) => {
+    const yTip   = cy - h;       // outer tip (top of V)
+    const yArms  = cy;           // outer arm tips (bottom of V)
+    const yTipI  = cy - h + t;   // inner tip
+    const yArmsI = cy + t;       // inner arm tips
+    // proportional inner half-width so the band stays even
+    const wi = w - t;
+    return [
+      `M ${-w} ${yArms}`,
+      `L 0 ${yTip}`,
+      `L ${w} ${yArms}`,
+      `L ${wi} ${yArmsI}`,
+      `L 0 ${yTipI}`,
+      `L ${-wi} ${yArmsI}`,
+      `Z`,
+    ].join(" ");
+  };
+
   return (
     <svg
       width={size}
@@ -37,35 +60,23 @@ export function CurvedArrow({
         transform: `rotate(${angle}deg)`,
         transformOrigin: "50% 50%",
         filter: withShadow
-          ? "drop-shadow(0 6px 8px rgba(0,0,0,0.55)) drop-shadow(0 2px 2px rgba(0,0,0,0.45))"
+          ? "drop-shadow(0 4px 4px rgba(0,0,0,0.35))"
           : undefined,
         overflow: "visible",
       }}
       className={className}
     >
-      {/* Dark contact-shadow plate offset down-left to fake ground contact */}
-      <path
-        d={chevron}
-        fill="rgba(0,0,0,0.45)"
-        transform="translate(3 6)"
-      />
-      {/* Outer dark stroke for legibility on any background */}
-      <path
-        d={chevron}
-        fill={fill}
-        stroke="rgba(0,0,0,0.85)"
-        strokeWidth="3"
-        strokeLinejoin="round"
-      />
-      {/* Subtle highlight along the near edge to sell the painted-floor feel */}
-      <path
-        d="M -38 96 L -14 64 L 14 64 L 38 96"
-        fill="none"
-        stroke="rgba(255,255,255,0.55)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {chevrons.map((c, i) => (
+        <path
+          key={i}
+          d={chevronPath(c.cy, c.w, c.h, c.t)}
+          fill={fill}
+          stroke={BLUE}
+          strokeWidth={3}
+          strokeLinejoin="round"
+          opacity={c.o}
+        />
+      ))}
     </svg>
   );
 }
