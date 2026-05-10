@@ -225,14 +225,17 @@ export function CheckpointEditor({
     }
   };
 
-  const addIndicator = (i: number, type: "direction" | "spot") => {
+  const toggleIndicator = (i: number, type: "direction" | "spot") => {
     const c = checkpoints[i];
-    const list = c.indicators ?? [];
-    if (list.some((ind) => ind.type === type)) return; // one of each type max
+    const list = (c.indicators ?? []).map(normalizeIndicator);
+    if (list.some((ind) => ind.type === type)) {
+      update(i, { indicators: list.filter((ind) => ind.type !== type) });
+      return;
+    }
     const base = { id: uid(), x: 0.5, y: 0.5 };
     const next: Indicator =
       type === "direction"
-        ? { ...base, type: "direction", angle: 45 } // default upper-right
+        ? { ...base, type: "direction", angle: 45 }
         : { ...base, type: "spot", label: "" };
     update(i, { indicators: [...list, next] });
   };
@@ -279,8 +282,9 @@ export function CheckpointEditor({
                 <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={() => addIndicator(i, "direction")}
-                    disabled={!!dir}
+                    onClick={() => toggleIndicator(i, "direction")}
+                    aria-pressed={!!dir}
+                    title={dir ? "Remove direction" : "Add direction"}
                     className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-medium border transition-smooth ${
                       dir
                         ? "bg-foreground text-background border-foreground"
@@ -291,8 +295,9 @@ export function CheckpointEditor({
                   </button>
                   <button
                     type="button"
-                    onClick={() => addIndicator(i, "spot")}
-                    disabled={hasSpot}
+                    onClick={() => toggleIndicator(i, "spot")}
+                    aria-pressed={hasSpot}
+                    title={hasSpot ? "Remove spot" : "Add spot"}
                     className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-medium border transition-smooth ${
                       hasSpot
                         ? "bg-foreground text-background border-foreground"
