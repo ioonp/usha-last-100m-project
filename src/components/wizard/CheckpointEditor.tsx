@@ -141,19 +141,15 @@ function PhotoCanvas({
               >
                 <RotateCw className="size-3 text-foreground" />
               </button>
-              {/* Remove — top-right corner, well clear of rotation handle (which sits at the bottom tail) */}
+              {/* Remove — anchored to the rotation handle's top-right corner */}
               <button
                 type="button"
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
                 className="absolute size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                 style={{
-                  // Dot is ~24px centered at (50%, 50%) → its top-right corner
-                  // sits at (+12, -12). Offset the X button's bottom-left
-                  // corner +24/-24 from there, with no shared pixels.
-                  // X button is 28px (size-7); position via its bottom-left.
-                  left: "calc(50% + 36px)",
-                  bottom: "calc(50% + 36px)",
+                  left: `calc(50% + ${-Math.sin((ind.angle * Math.PI) / 180) * TAIL_R + 36}px)`,
+                  top: `calc(50% + ${Math.cos((ind.angle * Math.PI) / 180) * TAIL_R - 64}px)`,
                   touchAction: "none",
                 }}
                 aria-label="Remove arrow"
