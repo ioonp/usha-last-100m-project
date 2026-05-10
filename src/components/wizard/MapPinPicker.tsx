@@ -175,7 +175,7 @@ export function MapPinPicker({
         )}
       </div>
 
-      <div ref={mapDivRef} className="w-full h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
+      <div ref={mapDivRef} className="w-full aspect-square md:aspect-auto md:h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
       {selected && lat != null && lng != null && (
         <div className="text-xs text-muted-foreground font-mono">{lat.toFixed(5)}, {lng.toFixed(5)}</div>
       )}

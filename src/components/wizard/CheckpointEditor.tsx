@@ -103,7 +103,7 @@ function PhotoCanvas({
   return (
     <div
       ref={ref}
-      className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-muted select-none"
+      className="relative w-full aspect-square md:aspect-[4/3] rounded-xl overflow-hidden bg-muted select-none"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
@@ -254,7 +254,7 @@ export function CheckpointEditor({
                   onChange={(next) => setIndicators(i, next)}
                 />
               ) : (
-                <label className="block w-full aspect-[4/3] rounded-xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
+                <label className="block w-full aspect-square md:aspect-[4/3] rounded-xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs gap-1">
                     <Upload className="size-5" />
                     {uploadingIdx === i ? "Uploading…" : "Upload photo"}
