@@ -21,13 +21,18 @@ export function CurvedArrow({
   // slightly translucent to reinforce depth.
   // Instagram-editorial: thin open V strokes, warm white, hand-annotated feel.
   const STROKE = color === "white" ? "#FFFDF8" : color;
+  // Warm coral by default, matching the editorial Instagram-sticker feel.
+  // Pass color="#F5C842" to switch to sandy gold.
+  const FILL_STROKE = color === "white" ? "#FF6B6B" : STROKE;
 
   // Each chevron defined by: cy (vertical center), w (half-width),
   // h (half-height of the V), opacity.
+  // Bottom chevron is at least 90px wide (w = 48 → full width 96px),
+  // each step up shrinks meaningfully and rises toward the top of the viewBox.
   const chevrons = [
-    { cy:  72, w: 48, h: 24, o: 1.0  }, // bottom — largest, closest
-    { cy:  10, w: 34, h: 18, o: 0.9  },
-    { cy: -50, w: 22, h: 12, o: 0.7  }, // top — smallest, farthest
+    { cy:  78, w: 48, h: 26, o: 1.0  }, // bottom — largest, closest (~96px wide)
+    { cy:   6, w: 32, h: 18, o: 0.9  }, // middle (~64px wide)
+    { cy: -60, w: 18, h: 11, o: 0.7  }, // top — smallest (~36px wide)
   ];
 
   const chevronPath = (cy: number, w: number, h: number) =>
@@ -53,16 +58,16 @@ export function CurvedArrow({
           <path
             d={chevronPath(c.cy, c.w, c.h)}
             fill="none"
-            stroke="rgba(0,0,0,0.55)"
-            strokeWidth={6}
+            stroke="rgba(0,0,0,0.45)"
+            strokeWidth={13}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
             d={chevronPath(c.cy, c.w, c.h)}
             fill="none"
-            stroke={STROKE}
-            strokeWidth={4}
+            stroke={FILL_STROKE}
+            strokeWidth={10}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
