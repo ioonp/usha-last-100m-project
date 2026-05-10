@@ -1,14 +1,17 @@
-Plan:
+Make the "Direction" and "Spot" buttons under each photo act as toggles:
 
-1. Edit `src/components/wizard/CheckpointEditor.tsx` in the `ind.type === "spot"` rendering branch.
-2. Remove the spot/point close button block only:
-   - the `<button aria-label="Remove spot">...<X />...</button>` inside the point dot container.
-3. Leave everything else unchanged:
-   - point drag behavior
-   - white dot styling and pulse
-   - label input
-   - arrow X button
-   - arrow drag/rotate controls and animations
+1. In `src/components/wizard/CheckpointEditor.tsx`, change `addIndicator(i, type)` into `toggleIndicator(i, type)`:
+   - If an indicator of that type already exists in `c.indicators`, remove it (filter it out).
+   - Otherwise, add it as today (default angle 45 for direction, empty label for spot).
 
-Technical detail:
-- The X that appears on top of the point is not the arrow overlay button; it is the `Remove spot` button currently positioned with `absolute -top-1 -right-1` inside the spot marker container. Removing that block will make the X no longer render on the point at all.
+2. Update both pill buttons in the JSX:
+   - Remove the `disabled={!!dir}` / `disabled={hasSpot}` props so they remain clickable when active.
+   - Keep the existing active styling (filled dark pill when present) so users see state.
+   - Update `aria-pressed` / `title` to reflect "Add" vs "Remove".
+   - Wire `onClick` to the new toggle function.
+
+3. No other changes:
+   - Arrow drag/rotate/animation, arrow X button, point dot, label input, and pulse all remain untouched.
+   - Indicator data shape and persistence unchanged.
+
+Result: tapping Spot once adds the dot, tapping it again removes it. Same for Direction. The on-canvas spot no longer needs its own X (already removed).
