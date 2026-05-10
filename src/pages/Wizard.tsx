@@ -225,7 +225,7 @@ export default function Wizard() {
               </div>
               <div>
                 <Label>Accent color</Label>
-                <div className="mt-1.5 flex items-center gap-3">
+                <div className="mt-1.5 flex items-center gap-3 flex-wrap">
                   <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)}
                     className="size-12 rounded-xl border border-border cursor-pointer" />
                   <Input value={accent} onChange={(e) => setAccent(e.target.value)} className="font-mono w-32" />
