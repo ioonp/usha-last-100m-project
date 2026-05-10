@@ -68,11 +68,11 @@ export function CurvedArrow({
           style={
             animate
               ? ({
-                  ["--base-o" as any]: c.o,
-                  animation: `curvedArrowPulse 1.8s ease-in-out infinite`,
+                  "--base-o": c.o,
+                  animation: "curvedArrowPulse 1.8s ease-in-out infinite",
                   // Bottom (i=0) leads, top (i=2) trails — staggered cascade
                   animationDelay: `${i * 0.25}s`,
-                } as React.CSSProperties)
+                } as any)
               : undefined
           }
         >
