@@ -239,7 +239,7 @@ export default function Wizard() {
           )}
 
           {step === 3 && (
-            <div className="space-y-6 max-w-lg w-full mx-auto">
+            <div className="space-y-6 max-w-lg w-full max-w-full min-w-0 mx-auto">
               {!published ? (
                 <>
                   <p className="text-muted-foreground">Ready to share? Publishing makes the page live and accessible at the URL below.</p>
@@ -249,11 +249,11 @@ export default function Wizard() {
                 </>
               ) : (
                 <>
-                  <div className="bg-accent-soft border border-accent/20 rounded-2xl p-5">
+                  <div className="bg-accent-soft border border-accent/20 rounded-2xl p-5 w-full max-w-full min-w-0 overflow-hidden">
                     <div className="eyebrow text-accent mb-1">Live</div>
                     <p className="font-display text-xl mb-3">Your wayfinding page is published.</p>
-                    <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 w-full overflow-hidden">
-                      <div className="text-sm font-mono flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis max-w-full">{shareUrl}</div>
+                    <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 w-full max-w-full min-w-0 overflow-hidden" style={{ width: "100%", overflow: "hidden" }}>
+                      <div className="text-sm font-mono flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis max-w-full" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{shareUrl}</div>
                       <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
                         <Copy className="size-3.5" />
                       </Button>
