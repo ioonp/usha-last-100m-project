@@ -141,21 +141,6 @@ function PhotoCanvas({
               >
                 <RotateCw className="size-3 text-foreground" />
               </button>
-              {/* Remove — anchored to the rotation handle's top-right corner */}
-              <button
-                type="button"
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
-                className="absolute size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                style={{
-                  left: `calc(50% + ${-Math.sin((ind.angle * Math.PI) / 180) * TAIL_R + 36}px)`,
-                  top: `calc(50% + ${Math.cos((ind.angle * Math.PI) / 180) * TAIL_R - 64}px)`,
-                  touchAction: "none",
-                }}
-                aria-label="Remove arrow"
-              >
-                <X className="size-3.5" />
-              </button>
             </div>
           ) : (
             <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
