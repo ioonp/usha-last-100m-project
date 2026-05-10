@@ -19,37 +19,19 @@ export function CurvedArrow({
   // Cascading open V chevrons receding toward the top, Google-Maps style:
   // white fill, blue stroke, soft drop shadow. The top (smallest) chevron is
   // slightly translucent to reinforce depth.
-  const BLUE = "#4285F4";
-  const fill = color === "white" ? "#FFFFFF" : color;
+  // Instagram-editorial: thin open V strokes, warm white, hand-annotated feel.
+  const STROKE = color === "white" ? "#FFFDF8" : color;
 
   // Each chevron defined by: cy (vertical center), w (half-width),
-  // h (half-height of the V), thickness, opacity.
+  // h (half-height of the V), opacity.
   const chevrons = [
-    { cy:  72, w: 46, h: 22, t: 14, o: 1.0  }, // bottom — largest, closest
-    { cy:  20, w: 34, h: 18, t: 12, o: 1.0  },
-    { cy: -28, w: 24, h: 14, t: 10, o: 0.95 },
-    { cy: -68, w: 16, h: 10, t:  8, o: 0.85 }, // top — smallest, farthest
+    { cy:  72, w: 48, h: 24, o: 1.0  }, // bottom — largest, closest
+    { cy:  10, w: 34, h: 18, o: 0.9  },
+    { cy: -50, w: 22, h: 12, o: 0.7  }, // top — smallest, farthest
   ];
 
-  // Build an open chevron (V shape, no filled body) as a closed band:
-  // outer V on top, inner V offset down by `t` to give it thickness.
-  const chevronPath = (cy: number, w: number, h: number, t: number) => {
-    const yTip   = cy - h;       // outer tip (top of V)
-    const yArms  = cy;           // outer arm tips (bottom of V)
-    const yTipI  = cy - h + t;   // inner tip
-    const yArmsI = cy + t;       // inner arm tips
-    // proportional inner half-width so the band stays even
-    const wi = w - t;
-    return [
-      `M ${-w} ${yArms}`,
-      `L 0 ${yTip}`,
-      `L ${w} ${yArms}`,
-      `L ${wi} ${yArmsI}`,
-      `L 0 ${yTipI}`,
-      `L ${-wi} ${yArmsI}`,
-      `Z`,
-    ].join(" ");
-  };
+  const chevronPath = (cy: number, w: number, h: number) =>
+    `M ${-w} ${cy} L 0 ${cy - h} L ${w} ${cy}`;
 
   return (
     <svg
@@ -60,7 +42,7 @@ export function CurvedArrow({
         transform: `rotate(${angle}deg)`,
         transformOrigin: "50% 50%",
         filter: withShadow
-          ? "drop-shadow(0 4px 4px rgba(0,0,0,0.35))"
+          ? "drop-shadow(0 1px 3px rgba(0,0,0,0.2))"
           : undefined,
         overflow: "visible",
       }}
@@ -69,10 +51,11 @@ export function CurvedArrow({
       {chevrons.map((c, i) => (
         <path
           key={i}
-          d={chevronPath(c.cy, c.w, c.h, c.t)}
-          fill={fill}
-          stroke={BLUE}
-          strokeWidth={3}
+          d={chevronPath(c.cy, c.w, c.h)}
+          fill="none"
+          stroke={STROKE}
+          strokeWidth={2.5}
+          strokeLinecap="round"
           strokeLinejoin="round"
           opacity={c.o}
         />
