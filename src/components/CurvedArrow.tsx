@@ -49,16 +49,24 @@ export function CurvedArrow({
       className={className}
     >
       {chevrons.map((c, i) => (
-        <path
-          key={i}
-          d={chevronPath(c.cy, c.w, c.h)}
-          fill="none"
-          stroke={STROKE}
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={c.o}
-        />
+        <g key={i} opacity={c.o}>
+          <path
+            d={chevronPath(c.cy, c.w, c.h)}
+            fill="none"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth={6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d={chevronPath(c.cy, c.w, c.h)}
+            fill="none"
+            stroke={STROKE}
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </g>
       ))}
     </svg>
   );
