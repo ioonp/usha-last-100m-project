@@ -166,14 +166,14 @@ export default function Wizard() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-20">
-        <div className="container mx-auto flex items-center justify-between py-4">
-          <Link to="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-smooth">
-            <ArrowLeft className="size-4" /> Dashboard
+        <div className="container mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:py-4">
+          <Link to="/dashboard" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-smooth shrink-0">
+            <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Dashboard</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {STEPS.map((label, i) => (
               <div key={i} className="flex items-center gap-2">
-                <div className={`size-7 rounded-full text-xs flex items-center justify-center font-medium transition-smooth ${
+                <div className={`size-6 sm:size-7 rounded-full text-xs flex items-center justify-center font-medium transition-smooth ${
                   i < step ? "bg-accent text-accent-foreground" : i === step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                 }`}>{i < step ? <Check className="size-3.5" /> : i + 1}</div>
                 <span className={`text-xs hidden md:inline ${i === step ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
@@ -183,10 +183,10 @@ export default function Wizard() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-10 grid lg:grid-cols-[1fr_320px] gap-12">
+      <main className="container mx-auto px-4 py-6 sm:py-10 grid lg:grid-cols-[1fr_320px] gap-8 lg:gap-12">
         <div>
           <div className="eyebrow text-muted-foreground mb-2">Step {step + 1} of 4</div>
-          <h1 className="font-display text-4xl mb-8">{STEPS[step]}</h1>
+          <h1 className="font-display text-2xl sm:text-4xl mb-6 sm:mb-8">{STEPS[step]}</h1>
 
           {step === 0 && (
             <div className="space-y-5">
@@ -239,11 +239,11 @@ export default function Wizard() {
           )}
 
           {step === 3 && (
-            <div className="space-y-6 max-w-lg">
+            <div className="space-y-6 max-w-lg w-full mx-auto">
               {!published ? (
                 <>
                   <p className="text-muted-foreground">Ready to share? Publishing makes the page live and accessible at the URL below.</p>
-                  <Button size="lg" onClick={publish} disabled={saving} className="rounded-full bg-accent text-accent-foreground h-12 px-8">
+                  <Button size="lg" onClick={publish} disabled={saving} className="rounded-full bg-accent text-accent-foreground h-12 px-8 w-full sm:w-auto">
                     {saving ? "Publishing…" : "Publish location"}
                   </Button>
                 </>
@@ -253,25 +253,25 @@ export default function Wizard() {
                     <div className="eyebrow text-accent mb-1">Live</div>
                     <p className="font-display text-xl mb-3">Your wayfinding page is published.</p>
                     <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4">
-                      <div className="text-sm font-mono truncate flex-1">{shareUrl}</div>
+                      <div className="text-sm font-mono truncate flex-1 min-w-0">{shareUrl}</div>
                       <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
                         <Copy className="size-3.5" />
                       </Button>
                     </div>
                   </div>
                   {qrDataUrl && (
-                    <div className="flex flex-col items-center bg-card border border-border rounded-2xl p-6">
-                      <img src={qrDataUrl} alt="QR code" className="w-48 h-48" />
+                    <div className="flex flex-col items-center bg-card border border-border rounded-2xl p-6 w-full">
+                      <img src={qrDataUrl} alt="QR code" className="w-40 h-40 sm:w-48 sm:h-48" />
                       <Button onClick={downloadQR} variant="outline" className="rounded-full mt-4">
                         <Download className="size-4 mr-2" /> Download PNG
                       </Button>
                     </div>
                   )}
-                  <div className="flex gap-3">
-                    <a href={shareUrl} target="_blank" rel="noreferrer" className="flex-1">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <a href={shareUrl} target="_blank" rel="noreferrer" className="flex-1 w-full">
                       <Button variant="outline" className="w-full rounded-full">Preview live page</Button>
                     </a>
-                    <Link to="/dashboard" className="flex-1">
+                    <Link to="/dashboard" className="flex-1 w-full">
                       <Button className="w-full rounded-full bg-primary text-primary-foreground">Done</Button>
                     </Link>
                   </div>
@@ -281,11 +281,11 @@ export default function Wizard() {
           )}
 
           {step < 3 && (
-            <div className="flex justify-between mt-10">
-              <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-8 sm:mt-10">
+              <Button variant="ghost" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0} className="w-full sm:w-auto">
                 <ArrowLeft className="size-4 mr-1" /> Back
               </Button>
-              <Button onClick={next} disabled={saving} className="rounded-full bg-primary text-primary-foreground px-6">
+              <Button onClick={next} disabled={saving} className="rounded-full bg-primary text-primary-foreground px-6 w-full sm:w-auto">
                 {saving ? "Saving…" : "Continue"} <ArrowRight className="size-4 ml-1" />
               </Button>
             </div>
