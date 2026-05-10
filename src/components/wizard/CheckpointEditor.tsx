@@ -146,8 +146,13 @@ function PhotoCanvas({
                 type="button"
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
-                className="absolute -top-2 -right-2 size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                style={{ touchAction: "none" }}
+                className="absolute size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                style={{
+                  left: "calc(50% + 20px)",
+                  top: "calc(50% - 20px)",
+                  transform: "translate(-50%, -50%)",
+                  touchAction: "none",
+                }}
                 aria-label="Remove arrow"
               >
                 <X className="size-3.5" />
