@@ -184,7 +184,7 @@ export default function Wizard() {
       </header>
 
       <main className="container mx-auto px-4 py-6 sm:py-10 grid lg:grid-cols-[1fr_320px] gap-8 lg:gap-12">
-        <div>
+        <div className="min-w-0 w-full overflow-hidden">
           <div className="eyebrow text-muted-foreground mb-2">Step {step + 1} of 4</div>
           <h1 className="font-display text-2xl sm:text-4xl mb-6 sm:mb-8">{STEPS[step]}</h1>
 
