@@ -11,9 +11,23 @@ export function CurvedArrow({
   className?: string;
   withShadow?: boolean;
 }) {
-  // viewBox: tip anchored at (0,0), tail at (0, 100). Default points up.
-  // S-curve via control point offset to the right of the path.
-  const d = "M 0 100 Q 45 50 0 0";
+  // viewBox keeps tip anchored at (0,0) and tail near (0, 100) so the
+  // editor's rotation math (atan2(-dx, dy)) keeps working unchanged.
+  // Shape = perspective-projected road-marking chevron:
+  //   - narrow at the tip (top, receding)
+  //   - wide at the base (bottom, close to viewer)
+  //   - inward notch at the bottom for that classic chevron look
+  const chevron =
+    "M 0 -8 " +        // tip (narrow, far)
+    "L 16 60 " +       // right shoulder (mid)
+    "L 42 100 " +      // right base outer (wide, near)
+    "L 22 100 " +      // right base inner
+    "L 0 55 " +        // bottom notch
+    "L -22 100 " +     // left base inner
+    "L -42 100 " +     // left base outer
+    "L -16 60 " +      // left shoulder (mid)
+    "Z";
+  const fill = color === "white" ? "#FFD60A" : color; // bright road-marking yellow by default
   return (
     <svg
       width={size}
@@ -22,40 +36,36 @@ export function CurvedArrow({
       style={{
         transform: `rotate(${angle}deg)`,
         transformOrigin: "50% 50%",
-        filter: withShadow ? "drop-shadow(0 2px 6px rgba(0,0,0,0.6))" : undefined,
+        filter: withShadow
+          ? "drop-shadow(0 6px 8px rgba(0,0,0,0.55)) drop-shadow(0 2px 2px rgba(0,0,0,0.45))"
+          : undefined,
         overflow: "visible",
       }}
       className={className}
     >
-      {/* Thicker tail segment for tapered feel */}
+      {/* Dark contact-shadow plate offset down-left to fake ground contact */}
       <path
-        d={d}
-        fill="none"
-        stroke={color}
-        strokeWidth="11"
-        strokeLinecap="round"
-        strokeDasharray="55 400"
-        strokeDashoffset="0"
+        d={chevron}
+        fill="rgba(0,0,0,0.45)"
+        transform="translate(3 6)"
       />
-      {/* Mid-weight overlay */}
+      {/* Outer dark stroke for legibility on any background */}
       <path
-        d={d}
-        fill="none"
-        stroke={color}
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeDasharray="95 400"
+        d={chevron}
+        fill={fill}
+        stroke="rgba(0,0,0,0.85)"
+        strokeWidth="3"
+        strokeLinejoin="round"
       />
-      {/* Full thin core */}
+      {/* Subtle highlight along the near edge to sell the painted-floor feel */}
       <path
-        d={d}
+        d="M -38 96 L -14 64 L 14 64 L 38 96"
         fill="none"
-        stroke={color}
-        strokeWidth="6"
+        stroke="rgba(255,255,255,0.55)"
+        strokeWidth="2"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {/* Filled arrowhead at tip, pointing up (-y) */}
-      <path d="M -14 6 L 0 -18 L 14 6 Z" fill={color} />
     </svg>
   );
 }
