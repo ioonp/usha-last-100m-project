@@ -148,8 +148,8 @@ function PhotoCanvas({
                 onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
                 className="absolute size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                 style={{
-                  left: `calc(50% + ${-Math.sin((ind.angle * Math.PI) / 180) * TAIL_R + 12}px)`,
-                  top: `calc(50% + ${Math.cos((ind.angle * Math.PI) / 180) * TAIL_R - 40}px)`,
+                  left: `calc(50% + ${-Math.sin((ind.angle * Math.PI) / 180) * TAIL_R + 36}px)`,
+                  top: `calc(50% + ${Math.cos((ind.angle * Math.PI) / 180) * TAIL_R - 64}px)`,
                   touchAction: "none",
                 }}
                 aria-label="Remove arrow"
@@ -169,7 +169,7 @@ function PhotoCanvas({
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity absolute left-full bottom-full size-5 rounded-full bg-background border border-border flex items-center justify-center shadow"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-1 -right-1 size-5 rounded-full bg-background border border-border flex items-center justify-center shadow"
                   aria-label="Remove spot"
                 >
                   <X className="size-3" />
