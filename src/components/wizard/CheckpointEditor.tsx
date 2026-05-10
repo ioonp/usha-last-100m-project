@@ -56,6 +56,7 @@ function PhotoCanvas({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ id: string; mode: "move" | "rotate"; moved: boolean } | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const update = (id: string, patch: Partial<Indicator>) =>
     onChange(indicators.map((i) => (i.id === id ? ({ ...i, ...patch } as Indicator) : i)));
@@ -65,6 +66,7 @@ function PhotoCanvas({
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     dragRef.current = { id, mode, moved: false };
+    setDraggingId(id);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -91,7 +93,7 @@ function PhotoCanvas({
     }
   };
 
-  const endDrag = () => { dragRef.current = null; };
+  const endDrag = () => { dragRef.current = null; setDraggingId(null); };
 
   const ARROW_SIZE = 120;
   // Tail offset in pixels from indicator center, before rotation: (0, +TAIL_R)
@@ -121,7 +123,7 @@ function PhotoCanvas({
                 onPointerDown={(e) => startDrag(e, ind.id, "move")}
                 title="Drag to move"
               >
-                <CurvedArrow angle={ind.angle} size={ARROW_SIZE} color="white" />
+                <CurvedArrow angle={ind.angle} size={ARROW_SIZE} color="white" animate={draggingId !== ind.id} />
               </div>
               {/* Rotation handle at tail */}
               <button
@@ -139,14 +141,16 @@ function PhotoCanvas({
               >
                 <RotateCw className="size-3 text-foreground" />
               </button>
-              {/* Remove */}
+              {/* Remove — top-right corner, well clear of rotation handle (which sits at the bottom tail) */}
               <button
                 type="button"
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-1 size-5 rounded-full bg-background border border-border flex items-center justify-center shadow"
+                className="absolute -top-2 -right-2 size-7 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                style={{ touchAction: "none" }}
                 aria-label="Remove arrow"
               >
-                <X className="size-3" />
+                <X className="size-3.5" />
               </button>
             </div>
           ) : (
