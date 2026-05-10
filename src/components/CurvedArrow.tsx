@@ -4,12 +4,14 @@ export function CurvedArrow({
   color = "white",
   className = "",
   withShadow = true,
+  animate = true,
 }: {
   angle?: number;
   size?: number;
   color?: string;
   className?: string;
   withShadow?: boolean;
+  animate?: boolean;
 }) {
   // viewBox keeps the tip-of-cascade anchored at (0, ~-100) and the tail
   // (largest chevron) near (0, +100). The editor's rotation math
@@ -53,8 +55,27 @@ export function CurvedArrow({
       }}
       className={className}
     >
+      <style>{`
+        @keyframes curvedArrowPulse {
+          0%, 100% { opacity: var(--base-o, 1); }
+          50% { opacity: calc(var(--base-o, 1) * 0.65); }
+        }
+      `}</style>
       {chevrons.map((c, i) => (
-        <g key={i} opacity={c.o}>
+        <g
+          key={i}
+          opacity={c.o}
+          style={
+            animate
+              ? ({
+                  ["--base-o" as any]: c.o,
+                  animation: `curvedArrowPulse 1.8s ease-in-out infinite`,
+                  // Bottom (i=0) leads, top (i=2) trails — staggered cascade
+                  animationDelay: `${i * 0.25}s`,
+                } as React.CSSProperties)
+              : undefined
+          }
+        >
           <path
             d={chevronPath(c.cy, c.w, c.h)}
             fill="none"
