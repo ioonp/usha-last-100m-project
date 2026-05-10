@@ -166,14 +166,6 @@ function PhotoCanvas({
               >
                 <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
                 <span className="relative block size-5 rounded-full bg-white border-2 border-foreground" />
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); remove(ind.id); }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-1 -right-1 size-5 rounded-full bg-background border border-border flex items-center justify-center shadow"
-                  aria-label="Remove spot"
-                >
-                  <X className="size-3" />
-                </button>
               </div>
               <input
                 type="text"

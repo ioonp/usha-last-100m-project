@@ -1,26 +1,14 @@
-## Add Google Maps API key as build secret
+Plan:
 
-The key needs to be added as a **build secret** (not a runtime secret) because it's prefixed with `VITE_` and gets baked into the frontend bundle at build time.
+1. Edit `src/components/wizard/CheckpointEditor.tsx` in the `ind.type === "spot"` rendering branch.
+2. Remove the spot/point close button block only:
+   - the `<button aria-label="Remove spot">...<X />...</button>` inside the point dot container.
+3. Leave everything else unchanged:
+   - point drag behavior
+   - white dot styling and pulse
+   - label input
+   - arrow X button
+   - arrow drag/rotate controls and animations
 
-### Step 1 — You add the build secret (manual)
-1. Open **Workspace Settings → Build Secrets**
-2. Add a new secret:
-   - Name: `VITE_GOOGLE_MAPS_API_KEY`
-   - Value: `AIzaSyAdCECOnMx58_QsCknysQfOaOrxpwP0xW8`
-3. Save
-
-I can't do this step for you — build secrets are workspace-level and must be entered by you.
-
-### Step 2 — I verify it works
-Once you confirm it's added, I'll:
-- Trigger a rebuild so Vite picks up the new env var
-- Open the wizard's Step 1 and confirm the interactive Google Map loads with a draggable pin (instead of the manual lat/lng fallback)
-- Confirm the Static Maps preview renders on the end-user `/find/:slug` page
-
-### Security note
-This key will be visible in the frontend bundle (unavoidable for client-side Google Maps). Lock it down in the Google Cloud Console:
-- **Application restriction:** HTTP referrers → add your Lovable preview domain (`*.lovable.app/*`) and any custom domain you'll publish to
-- **API restriction:** limit to **Maps JavaScript API** and **Maps Static API** only
-
-### No code changes needed
-`src/lib/maps.ts` and `src/components/wizard/MapPinPicker.tsx` already read `VITE_GOOGLE_MAPS_API_KEY` and switch from the manual-coordinate fallback to the live map automatically once the key is present.
+Technical detail:
+- The X that appears on top of the point is not the arrow overlay button; it is the `Remove spot` button currently positioned with `absolute -top-1 -right-1` inside the spot marker container. Removing that block will make the X no longer render on the point at all.
