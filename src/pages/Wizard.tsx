@@ -252,8 +252,8 @@ export default function Wizard() {
                   <div className="bg-accent-soft border border-accent/20 rounded-2xl p-5">
                     <div className="eyebrow text-accent mb-1">Live</div>
                     <p className="font-display text-xl mb-3">Your wayfinding page is published.</p>
-                    <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4">
-                      <div className="text-sm font-mono truncate flex-1 min-w-0">{shareUrl}</div>
+                    <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 w-full overflow-hidden">
+                      <div className="text-sm font-mono flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis max-w-full">{shareUrl}</div>
                       <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
                         <Copy className="size-3.5" />
                       </Button>
