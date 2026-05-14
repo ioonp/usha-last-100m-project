@@ -7,10 +7,11 @@ import { Search } from "lucide-react";
 type Suggestion = { place_id: string; main: string; secondary: string };
 
 export function MapPinPicker({
-  lat, lng, onChange,
+  lat, lng, address, onChange,
 }: {
   lat: number | null; lng: number | null;
-  onChange: (lat: number, lng: number) => void;
+  address?: string | null;
+  onChange: (lat: number, lng: number, address: string | null) => void;
 }) {
   const mapDivRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -19,6 +20,7 @@ export function MapPinPicker({
   const autocompleteServiceRef = useRef<any>(null);
   const placesServiceRef = useRef<any>(null);
   const sessionTokenRef = useRef<any>(null);
+  const geocoderRef = useRef<any>(null);
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -34,9 +36,19 @@ export function MapPinPicker({
       googleRef.current = g;
       autocompleteServiceRef.current = new g.maps.places.AutocompleteService();
       sessionTokenRef.current = new g.maps.places.AutocompleteSessionToken();
+      geocoderRef.current = new g.maps.Geocoder();
       setGoogleReady(true);
     });
   }, []);
+  const reverseGeocode = (la: number, ln: number) => {
+    const gc = geocoderRef.current;
+    if (!gc) { onChange(la, ln, null); return; }
+    gc.geocode({ location: { lat: la, lng: ln } }, (results: any[] | null, status: string) => {
+      const formatted = status === "OK" && results?.[0]?.formatted_address ? results[0].formatted_address : null;
+      onChange(la, ln, formatted);
+    });
+  };
+
 
   // Initialize map as soon as Google is ready. Default to Brandenburg Gate, Berlin
   // until the user picks a suggestion. Marker is only added after a selection.
@@ -61,7 +73,7 @@ export function MapPinPicker({
       });
       marker.addListener("dragend", () => {
         const p = marker.getPosition();
-        if (p) onChange(p.lat(), p.lng());
+        if (p) reverseGeocode(p.lat(), p.lng());
       });
       markerRef.current = marker;
     }
@@ -97,14 +109,15 @@ export function MapPinPicker({
     // Need a PlacesService — create with a throwaway div if map not yet up
     const svc = placesServiceRef.current ?? new g.maps.places.PlacesService(document.createElement("div"));
     svc.getDetails(
-      { placeId: s.place_id, fields: ["geometry"], sessionToken: sessionTokenRef.current },
+      { placeId: s.place_id, fields: ["geometry", "formatted_address"], sessionToken: sessionTokenRef.current },
       (place: any, status: string) => {
         if (status !== g.maps.places.PlacesServiceStatus.OK || !place?.geometry?.location) return;
         const la = place.geometry.location.lat();
         const ln = place.geometry.location.lng();
+        const formatted = place.formatted_address ?? null;
         // Refresh session token (billable session ends on details fetch)
         sessionTokenRef.current = new g.maps.places.AutocompleteSessionToken();
-        onChange(la, ln);
+        onChange(la, ln, formatted);
         setSelected(true);
         // Update map: recenter and create/move marker
         if (mapRef.current) {
@@ -117,7 +130,7 @@ export function MapPinPicker({
             });
             marker.addListener("dragend", () => {
               const p = marker.getPosition();
-              if (p) onChange(p.lat(), p.lng());
+              if (p) reverseGeocode(p.lat(), p.lng());
             });
             markerRef.current = marker;
           } else {
@@ -135,8 +148,8 @@ export function MapPinPicker({
           Google Maps API key missing. Enter coordinates manually.
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div><Label>Latitude</Label><Input type="number" step="any" value={lat ?? ""} onChange={(e) => onChange(parseFloat(e.target.value), lng ?? 0)} /></div>
-          <div><Label>Longitude</Label><Input type="number" step="any" value={lng ?? ""} onChange={(e) => onChange(lat ?? 0, parseFloat(e.target.value))} /></div>
+          <div><Label>Latitude</Label><Input type="number" step="any" value={lat ?? ""} onChange={(e) => onChange(parseFloat(e.target.value), lng ?? 0, address ?? null)} /></div>
+          <div><Label>Longitude</Label><Input type="number" step="any" value={lng ?? ""} onChange={(e) => onChange(lat ?? 0, parseFloat(e.target.value), address ?? null)} /></div>
         </div>
         {lat != null && lng != null && (
           <img src={staticMapUrl(lat, lng)} alt="Map preview" className="w-full rounded-xl border border-border" />
@@ -177,7 +190,9 @@ export function MapPinPicker({
 
       <div ref={mapDivRef} className="w-full aspect-square md:aspect-auto md:h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
       {selected && lat != null && lng != null && (
-        <div className="text-xs text-muted-foreground font-mono">{lat.toFixed(5)}, {lng.toFixed(5)}</div>
+        <div className="text-xs text-muted-foreground">
+          {address ? address : <span className="font-mono">{lat.toFixed(5)}, {lng.toFixed(5)}</span>}
+        </div>
       )}
     </div>
   );

@@ -35,6 +35,7 @@ export default function Wizard() {
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [startNote, setStartNote] = useState("");
+  const [startAddress, setStartAddress] = useState<string | null>(null);
   const [slug, setSlug] = useState<string>("");
   const [published, setPublished] = useState(false);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
@@ -56,6 +57,7 @@ export default function Wizard() {
         setLat(loc.start_lat);
         setLng(loc.start_lng);
         setStartNote(loc.start_note ?? "");
+        setStartAddress((loc as any).start_address ?? null);
         setSlug(loc.slug);
         setPublished(loc.published);
         setLocationId(loc.id);
@@ -88,6 +90,7 @@ export default function Wizard() {
         start_lat: lat,
         start_lng: lng,
         start_note: startNote || null,
+        start_address: startAddress || null,
         ...extra,
       };
       if (!lid) {
@@ -191,7 +194,7 @@ export default function Wizard() {
           {step === 0 && (
             <div className="space-y-5">
               <p className="text-muted-foreground">Drop a pin where the visitor's journey starts — usually a nearby landmark, transit stop, or street corner.</p>
-              <MapPinPicker lat={lat} lng={lng} onChange={(la, ln) => { setLat(la); setLng(ln); }} />
+              <MapPinPicker lat={lat} lng={lng} address={startAddress} onChange={(la, ln, addr) => { setLat(la); setLng(ln); setStartAddress(addr); }} />
               <div>
                 <Label>Starting note (optional)</Label>
                 <Textarea rows={2} value={startNote} onChange={(e) => setStartNote(e.target.value)}
