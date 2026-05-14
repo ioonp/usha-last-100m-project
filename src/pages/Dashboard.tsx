@@ -50,6 +50,19 @@ export default function Dashboard() {
     }
   };
 
+  const downloadQR = async (slug: string) => {
+    const url = `${window.location.origin}/find/${slug}`;
+    try {
+      const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2, color: { dark: "#1a1410", light: "#faf6f0" } });
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `${slug}-qr.png`;
+      a.click();
+    } catch {
+      toast.error("Couldn't generate QR code");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
