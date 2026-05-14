@@ -9,7 +9,7 @@ import { Phone, MapPin, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLef
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
   accent_color: string; welcome_message: string; start_lat: number | null;
-  start_lng: number | null; start_note: string | null;
+  start_lng: number | null; start_note: string | null; start_address: string | null;
 };
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
@@ -76,9 +76,10 @@ export default function Viewer() {
   if (step === -1) {
     if (showArrival) {
       const addressLine =
-        loc.start_lat != null && loc.start_lng != null
+        loc.start_address ||
+        (loc.start_lat != null && loc.start_lng != null
           ? `${loc.start_lat.toFixed(5)}, ${loc.start_lng.toFixed(5)}`
-          : "Entrance location";
+          : "Entrance location");
       return (
         <div className="relative min-h-[100dvh] w-full bg-background flex flex-col no-tap-highlight">
           {/* Top bar */}
