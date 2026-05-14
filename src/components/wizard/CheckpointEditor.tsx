@@ -149,8 +149,15 @@ function PhotoCanvas({
                 onPointerDown={(e) => startDrag(e, ind.id, "move")}
                 title="Drag to move"
               >
-                <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
-                <span className="relative block size-5 rounded-full bg-white border-2 border-foreground" />
+                <span
+                  className="block absolute inset-0 rounded-full animate-spot-pulse"
+                  style={{ backgroundColor: "#FF6B6B" }}
+                  aria-hidden
+                />
+                <span
+                  className="relative block size-5 rounded-full border-2"
+                  style={{ backgroundColor: "#FF6B6B", borderColor: "#FFFDF8" }}
+                />
               </div>
               <input
                 type="text"
