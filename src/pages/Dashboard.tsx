@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy } from "lucide-react";
+import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
+import QRCode from "qrcode";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
@@ -46,6 +47,19 @@ export default function Dashboard() {
       toast.success("Link copied");
     } catch {
       toast.error("Couldn't copy link");
+    }
+  };
+
+  const downloadQR = async (slug: string) => {
+    const url = `${window.location.origin}/find/${slug}`;
+    try {
+      const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 2, color: { dark: "#1a1410", light: "#faf6f0" } });
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `${slug}-qr.png`;
+      a.click();
+    } catch {
+      toast.error("Couldn't generate QR code");
     }
   };
 
@@ -128,6 +142,15 @@ export default function Dashboard() {
                         title="Copy link"
                       >
                         <Copy className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => downloadQR(l.slug)}
+                        title="Download QR"
+                      >
+                        <Download className="size-3.5" />
                       </Button>
                       <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer">
                         <Button variant="outline" size="sm" className="rounded-full" title="Open">
