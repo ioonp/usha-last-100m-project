@@ -10,6 +10,7 @@ type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null; start_address: string | null;
+  street_arrival_photo_url: string | null; street_arrival_caption: string | null;
 };
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
@@ -120,15 +121,15 @@ export default function Viewer() {
               </div>
             </div>
 
-            {/* Reference photo with caption */}
-            {loc.start_lat != null && loc.start_lng != null && (
-              <div className="relative rounded-2xl overflow-hidden border border-border mb-6 shadow-soft">
+            {/* Street arrival reference photo */}
+            {loc.street_arrival_photo_url ? (
+              <div className="relative rounded-2xl overflow-hidden border border-border mb-6 shadow-soft aspect-[4/3] bg-muted">
                 <img
-                  src={staticMapUrl(loc.start_lat, loc.start_lng, { width: 800, height: 480 })}
-                  alt="Street reference"
-                  className="w-full block"
+                  src={loc.street_arrival_photo_url}
+                  alt="Street arrival reference"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                {loc.start_note && (
+                {(loc.street_arrival_caption || loc.start_note) && (
                   <div
                     className="absolute inset-x-0 bottom-0 px-4 py-3 text-white text-[13px] leading-snug"
                     style={{
@@ -139,9 +140,13 @@ export default function Viewer() {
                     <div className="text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-0.5">
                       Look for
                     </div>
-                    {loc.start_note}
+                    {loc.street_arrival_caption || loc.start_note}
                   </div>
                 )}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-border mb-6 p-6 text-center text-sm text-muted-foreground bg-muted/30">
+                No street arrival photo yet.
               </div>
             )}
 
