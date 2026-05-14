@@ -1,29 +1,46 @@
-Mobile (<768px) layout pass. No functional/color/desktop changes.
 
-### 1. Square media on Step 1
-- `src/components/wizard/CheckpointEditor.tsx` `PhotoCanvas` outer div: change `aspect-[4/3]` → `aspect-square md:aspect-[4/3]`. Image already `object-cover`.
-- Same change on the empty-state upload `<label>` (currently `aspect-[4/3]`) → `aspect-square md:aspect-[4/3]`.
-- `src/components/wizard/MapPinPicker.tsx` map container: replace fixed `h-[320px]` with `aspect-square md:h-[320px] md:aspect-auto`. Static fallback `<img>` and dashboard logo unchanged.
+## Goal
 
-### 2. Wizard shell — `src/pages/Wizard.tsx`
-- Header step indicators: tighten on mobile so 4 dots fit at 360px. Change wrapper gap `gap-3` → `gap-1.5 sm:gap-3`, dot size `size-7` → `size-6 sm:size-7`, header padding `py-4` → `py-3 sm:py-4`, container `px-4`.
-- Main grid: change `px-4 py-10` → `px-4 py-6 sm:py-10`, keep `lg:grid-cols-[1fr_320px]`, reduce `gap-12` → `gap-8 lg:gap-12`.
-- H1: `text-4xl` → `text-2xl sm:text-4xl`. Eyebrow stays.
-- Step nav row at the bottom: make Continue full-width on mobile, Back compact. Wrap in `flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-8 sm:mt-10`; Continue button gets `w-full sm:w-auto`.
+Turn the visitor experience (`src/pages/Viewer.tsx`) into an Instagram Reels-like flow: each checkpoint is a full-screen, edge-to-edge photo, and the user swipes vertically to move between steps. No timeline/progress bar. The note sits as an overlay pinned to the bottom of the screen.
 
-### 3. Step 4 (Publish) — `src/pages/Wizard.tsx`
-- Container: `max-w-lg` stays; ensure `w-full` and centered on mobile via `mx-auto`.
-- Publish CTA: add `w-full sm:w-auto` so the initial Publish button is full-width on mobile.
-- Live URL pill: keep truncation but add `min-w-0` on the URL div so `truncate` actually works inside the flex row.
-- QR card: already centered; add `w-full` and on mobile let QR scale: `w-48 h-48` → `w-40 h-40 sm:w-48 sm:h-48`.
-- Bottom Preview/Done row: stack on mobile — `flex flex-col sm:flex-row gap-3`; each link `flex-1 w-full`. Buttons already `w-full`.
+## Changes
 
-### 4. Step 2 (Branding)
-- Wrapper `max-w-lg` keeps single column already. No structural change. Ensure color row wraps: add `flex-wrap` to the accent color flex container so the hex Input doesn't overflow on 320px.
+### 1. Full-screen reels container
+- Replace the current "photo + bottom card" split with a single full-bleed `100dvh` photo per checkpoint.
+- Stack slides vertically (welcome → checkpoint 1 … N → arrived) inside a snap-scroll container: `overflow-y-scroll snap-y snap-mandatory`, each slide `h-[100dvh] snap-start`.
+- Keep image as `object-cover` with a soft top + bottom gradient for legibility.
+- Direction arrows / spot indicators stay as today, rendered over the photo.
 
-### 5. CheckpointEditor controls
-- Button row already wraps; bump readability: pill text stays `text-xs`. The "Replace photo" link uses `ml-auto` — on small screens with wrapping that's fine. No change.
+### 2. Remove the timeline
+- Remove the "Step X of N" pill at the top.
+- No progress dots either — pure reels feel.
 
-### Out of scope
-- No changes to indicator interactions, arrow rendering, business logic, or color tokens.
-- Desktop layout (≥768/1024) preserved by keeping all current classes behind `sm:` / `md:` / `lg:` prefixes.
+### 3. Notes at the bottom
+- For each checkpoint slide, render a bottom overlay (absolute, `bottom-0`, safe-area padding) containing:
+  - The checkpoint `note` (larger, white text on subtle gradient/blur).
+  - Primary "I'm here ✓" button (kept, still uses accent color).
+  - Secondary "I can't find this" link (kept, opens existing help sheet).
+- No card/sheet chrome — it floats over the photo like a Reels caption + CTA.
+
+### 4. Welcome and arrived slides
+- Welcome stays as the first snap slide (logo, name, message, optional map, Start button). Start now scrolls to the next slide instead of changing a `step` state.
+- Arrived stays as the last snap slide (🎉 + "You made it!").
+
+### 5. Navigation behavior
+- Swipe (native scroll-snap) advances between slides.
+- "I'm here ✓" programmatically scrolls to the next slide (`scrollIntoView({ behavior: "smooth" })`).
+- Replace `step` state with refs per slide + an `IntersectionObserver` to know which checkpoint is active (used for view tracking and to pre-load the next image).
+- Keep the existing `increment_location_view` call on initial load.
+
+### 6. Out of scope
+- No data model, schema, or wizard/preview changes.
+- `MobilePreview.tsx` stays as is for now (can be aligned later if you want).
+- No new dependencies.
+
+## Technical notes
+
+- File touched: `src/pages/Viewer.tsx` only.
+- Container: `<div className="h-[100dvh] overflow-y-scroll snap-y snap-mandatory bg-black">`.
+- Each slide: `<section className="relative h-[100dvh] snap-start snap-always">`.
+- Bottom overlay: `absolute inset-x-0 bottom-0 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black/70 via-black/40 to-transparent text-white`.
+- Help sheet (`showHelp`) stays unchanged.
