@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CurvedArrow } from "@/components/CurvedArrow";
 import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirection } from "@/components/wizard/CheckpointEditor";
 import { staticMapUrl } from "@/lib/maps";
-import { Phone, MapPin, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight } from "lucide-react";
+import { Phone, MapPin, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft } from "lucide-react";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
@@ -34,6 +34,7 @@ export default function Viewer() {
   const [showHelp, setShowHelp] = useState(false);
   // -1 = landing, 0..total-1 = checkpoint, total = success
   const [step, setStep] = useState(-1);
+  const [showArrival, setShowArrival] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -73,6 +74,105 @@ export default function Viewer() {
 
   // ---------- LANDING ----------
   if (step === -1) {
+    if (showArrival) {
+      const addressLine =
+        loc.start_lat != null && loc.start_lng != null
+          ? `${loc.start_lat.toFixed(5)}, ${loc.start_lng.toFixed(5)}`
+          : "Entrance location";
+      return (
+        <div className="relative min-h-[100dvh] w-full bg-background flex flex-col no-tap-highlight">
+          {/* Top bar */}
+          <div
+            className="flex items-center px-4 pb-2"
+            style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+          >
+            <button
+              onClick={() => setShowArrival(false)}
+              aria-label="Back"
+              className="size-10 -ml-2 rounded-full flex items-center justify-center active:bg-muted transition-smooth"
+            >
+              <ChevronLeft className="size-6" />
+            </button>
+          </div>
+
+          <div className="flex-1 px-5 pb-6 max-w-md w-full mx-auto animate-fade-in-up">
+            <div className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: accent }}>
+              Step 1 — Confirm you've arrived
+            </div>
+            <h1 className="font-display text-3xl leading-tight mb-5 text-balance">
+              Do you see this on the street?
+            </h1>
+
+            {/* Address card */}
+            <div className="flex items-start gap-3 p-4 rounded-2xl border border-border bg-card mb-4 shadow-soft">
+              <div
+                className="size-9 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: accent + "20" }}
+              >
+                <MapPin className="size-4" style={{ color: accent }} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground mb-0.5">
+                  Entrance address
+                </div>
+                <div className="text-sm font-medium break-words">{addressLine}</div>
+              </div>
+            </div>
+
+            {/* Reference photo with caption */}
+            {loc.start_lat != null && loc.start_lng != null && (
+              <div className="relative rounded-2xl overflow-hidden border border-border mb-6 shadow-soft">
+                <img
+                  src={staticMapUrl(loc.start_lat, loc.start_lng, { width: 800, height: 480 })}
+                  alt="Street reference"
+                  className="w-full block"
+                />
+                {loc.start_note && (
+                  <div
+                    className="absolute inset-x-0 bottom-0 px-4 py-3 text-white text-[13px] leading-snug"
+                    style={{
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.85) 20%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0))",
+                    }}
+                  >
+                    <div className="text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-0.5">
+                      Look for
+                    </div>
+                    {loc.start_note}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="text-center text-base font-medium mb-4">
+              Are you standing in front of this building?
+            </div>
+
+            <div className="space-y-2.5">
+              <button
+                onClick={() => {
+                  setShowArrival(false);
+                  setStep(0);
+                }}
+                disabled={total === 0}
+                className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant disabled:opacity-50 active:scale-[0.98] transition-smooth"
+                style={{ backgroundColor: accent }}
+              >
+                Yes, I'm here
+              </button>
+              <button
+                onClick={() => setShowArrival(false)}
+                className="w-full rounded-full py-4 font-medium text-base border-2 active:scale-[0.98] transition-smooth"
+                style={{ borderColor: accent, color: accent }}
+              >
+                Not yet
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center bg-background no-tap-highlight"
@@ -95,7 +195,7 @@ export default function Viewer() {
           {loc.start_note && <p className="text-sm text-muted-foreground mb-6 italic">"{loc.start_note}"</p>}
 
           <button
-            onClick={() => setStep(0)}
+            onClick={() => setShowArrival(true)}
             disabled={total === 0}
             className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 active:scale-95 transition-smooth"
             style={{ backgroundColor: accent }}
@@ -127,7 +227,6 @@ export default function Viewer() {
   }
 
   // ---------- REEL CHECKPOINT ----------
-  const isFirst = step === 0;
   const DirIcon = DIR_ICON[cp!.arrow_direction] ?? ArrowUp;
 
   return (
@@ -174,7 +273,7 @@ export default function Viewer() {
         type="button"
         aria-label="Previous"
         onClick={goPrev}
-        disabled={isFirst}
+        disabled={step === 0}
         className="absolute left-0 top-12 bottom-36 z-20 disabled:opacity-40"
         style={{ width: "45%" }}
       />
@@ -208,21 +307,11 @@ export default function Viewer() {
           I can't find this
         </button>
 
-        {isFirst ? (
-          <button
-            onClick={goNext}
-            className="w-full rounded-full py-3.5 text-base font-semibold text-white shadow-elegant active:scale-[0.98] transition-smooth"
-            style={{ backgroundColor: accent }}
-          >
-            I'm here — start navigating
-          </button>
-        ) : (
-          <div className="flex items-center justify-center gap-2 text-white/50 text-[12px] py-2">
-            <ArrowLeft className="size-3.5" />
-            <span>tap sides to move</span>
-            <ArrowRight className="size-3.5" />
-          </div>
-        )}
+        <div className="flex items-center justify-center gap-2 text-white/50 text-[12px] py-2">
+          <ArrowLeft className="size-3.5" />
+          <span>tap sides to move</span>
+          <ArrowRight className="size-3.5" />
+        </div>
       </div>
 
       {/* Help sheet */}
