@@ -259,21 +259,6 @@ export default function Viewer() {
         })}
       </div>
 
-      {/* Center direction button (display-only) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <div
-          className="rounded-full flex items-center justify-center shadow-elegant"
-          style={{
-            width: 72,
-            height: 72,
-            backgroundColor: accent,
-            opacity: 0.85,
-          }}
-        >
-          <DirIcon className="size-8 text-white" />
-        </div>
-      </div>
-
       {/* Tap zones */}
       <button
         type="button"
