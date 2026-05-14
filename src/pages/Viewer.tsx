@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CurvedArrow } from "@/components/CurvedArrow";
 import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirection } from "@/components/wizard/CheckpointEditor";
 import { staticMapUrl } from "@/lib/maps";
-import { Phone, MapPin, X } from "lucide-react";
+import { Phone, MapPin, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight } from "lucide-react";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
@@ -19,17 +19,21 @@ const LEGACY_TO_ANGLE: Record<LegacyDirection, number> = {
   down: 180, "down-left": 225, left: 270, "up-left": 315,
 };
 
+const DIR_ICON: Record<LegacyDirection, React.ComponentType<{ className?: string }>> = {
+  up: ArrowUp, "up-right": ArrowUpRight, right: ArrowRight, "down-right": ArrowDownRight,
+  down: ArrowDown, "down-left": ArrowDownLeft, left: ArrowLeft, "up-left": ArrowUpLeft,
+};
+
+const ACCENT = "#c45a22";
+
 export default function Viewer() {
   const { slug } = useParams();
   const [loc, setLoc] = useState<Loc | null>(null);
   const [cps, setCps] = useState<CP[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
-  const slideRefs = useRef<Array<HTMLElement | null>>([]);
-
-  const scrollToSlide = (index: number) => {
-    slideRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  // -1 = landing, 0..total-1 = checkpoint, total = success
+  const [step, setStep] = useState(-1);
 
   useEffect(() => {
     if (!slug) return;
@@ -56,21 +60,22 @@ export default function Viewer() {
     </div>
   );
 
-  const accent = loc.accent_color;
+  const accent = loc.accent_color || ACCENT;
   const total = cps.length;
+  const cp = step >= 0 && step < total ? cps[step] : null;
 
-  // Slides: 0 = welcome, 1..total = checkpoints, total+1 = arrived
-  const totalSlides = total + 2;
+  const goNext = () => {
+    if (step < total) setStep(step + 1);
+  };
+  const goPrev = () => {
+    if (step > 0) setStep(step - 1);
+  };
 
-  return (
-    <div
-      className="h-[100dvh] w-full overflow-y-scroll snap-y snap-mandatory bg-black no-tap-highlight"
-      style={{ scrollbarWidth: "none" }}
-    >
-      {/* Welcome */}
-      <section
-        ref={(el) => (slideRefs.current[0] = el)}
-        className="relative h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center p-6 text-center"
+  // ---------- LANDING ----------
+  if (step === -1) {
+    return (
+      <div
+        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center bg-background no-tap-highlight"
         style={{ backgroundColor: accent + "12" }}
       >
         <div className="max-w-sm w-full animate-fade-in-up">
@@ -90,7 +95,7 @@ export default function Viewer() {
           {loc.start_note && <p className="text-sm text-muted-foreground mb-6 italic">"{loc.start_note}"</p>}
 
           <button
-            onClick={() => scrollToSlide(1)}
+            onClick={() => setStep(0)}
             disabled={total === 0}
             className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 active:scale-95 transition-smooth"
             style={{ backgroundColor: accent }}
@@ -98,93 +103,127 @@ export default function Viewer() {
             Start the walk →
           </button>
         </div>
-      </section>
+      </div>
+    );
+  }
 
-      {/* Checkpoints */}
-      {cps.map((cp, i) => {
-        const slideIndex = i + 1;
-        return (
-          <section
-            key={cp.id}
-            ref={(el) => (slideRefs.current[slideIndex] = el)}
-            className="relative h-[100dvh] w-full snap-start snap-always overflow-hidden bg-black"
-          >
-            <img src={cp.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 pointer-events-none" />
-
-            {cp.indicators && cp.indicators.length > 0 ? (
-              cp.indicators.map(normalizeIndicator).map((ind) => (
-                <div
-                  key={ind.id}
-                  className="absolute pointer-events-none"
-                  style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
-                >
-                  {ind.type === "direction" ? (
-                    <CurvedArrow angle={ind.angle} size={Math.min(160, window.innerWidth * 0.4)} color="white" />
-                  ) : (
-                    <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
-                      <div className="relative">
-                        <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
-                        <span className="relative block size-6 rounded-full bg-white border-2 border-foreground" />
-                      </div>
-                      {ind.label && (
-                        <span className="mt-1.5 px-2 py-0.5 text-xs font-medium text-foreground bg-white/95 rounded-md">
-                          {ind.label}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <CurvedArrow angle={LEGACY_TO_ANGLE[cp.arrow_direction] ?? 0} size={Math.min(240, window.innerWidth * 0.55)} color="white" />
-              </div>
-            )}
-
-            {/* Bottom overlay: note + actions */}
-            <div
-              className="absolute inset-x-0 bottom-0 px-5 pt-10 bg-gradient-to-t from-black/80 via-black/50 to-transparent text-white"
-              style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
-            >
-              {cp.note && (
-                <p className="text-base mb-4 text-balance leading-snug drop-shadow-md">{cp.note}</p>
-              )}
-              <div className="grid grid-cols-1 gap-2.5">
-                <button
-                  onClick={() => scrollToSlide(slideIndex + 1)}
-                  className="rounded-full py-4 text-base font-semibold text-white shadow-elegant active:scale-[0.98] transition-smooth"
-                  style={{ backgroundColor: accent }}
-                >
-                  I'm here ✓
-                </button>
-                <button
-                  onClick={() => setShowHelp(true)}
-                  className="rounded-full py-2.5 text-sm text-white/90 border border-white/30 backdrop-blur-sm active:bg-white/10 transition-smooth"
-                >
-                  I can't find this
-                </button>
-              </div>
-            </div>
-          </section>
-        );
-      })}
-
-      {/* Arrived */}
-      <section
-        ref={(el) => (slideRefs.current[totalSlides - 1] = el)}
-        className="relative h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center p-6 text-center"
+  // ---------- SUCCESS ----------
+  if (step >= total) {
+    return (
+      <div
+        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
         style={{ backgroundColor: accent + "20" }}
       >
         <div className="animate-scale-in">
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="font-display text-4xl mb-2">You made it!</h1>
           <p className="text-muted-foreground mb-8">Welcome to {loc.studio_name}.</p>
-          <button onClick={() => scrollToSlide(0)} className="text-sm text-muted-foreground underline">
+          <button onClick={() => setStep(-1)} className="text-sm text-muted-foreground underline">
             Start over
           </button>
         </div>
-      </section>
+      </div>
+    );
+  }
+
+  // ---------- REEL CHECKPOINT ----------
+  const isFirst = step === 0;
+  const DirIcon = DIR_ICON[cp!.arrow_direction] ?? ArrowUp;
+
+  return (
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
+      {/* Photo */}
+      <img src={cp!.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+
+      {/* Top progress dots */}
+      <div
+        className="absolute inset-x-0 top-0 z-20 flex gap-1.5 px-4 pb-2"
+        style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+      >
+        {cps.map((_, i) => {
+          const state = i < step ? "done" : i === step ? "current" : "future";
+          const bg =
+            state === "current" ? accent : state === "done" ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.25)";
+          return (
+            <span
+              key={i}
+              className="flex-1 h-1 rounded-full transition-colors"
+              style={{ backgroundColor: bg }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Center direction button (display-only) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+        <div
+          className="rounded-full flex items-center justify-center shadow-elegant"
+          style={{
+            width: 72,
+            height: 72,
+            backgroundColor: accent,
+            opacity: 0.85,
+          }}
+        >
+          <DirIcon className="size-8 text-white" />
+        </div>
+      </div>
+
+      {/* Tap zones */}
+      <button
+        type="button"
+        aria-label="Previous"
+        onClick={goPrev}
+        disabled={isFirst}
+        className="absolute left-0 top-12 bottom-36 z-20 disabled:opacity-40"
+        style={{ width: "45%" }}
+      />
+      <button
+        type="button"
+        aria-label="Next"
+        onClick={goNext}
+        className="absolute right-0 top-12 bottom-36 z-20"
+        style={{ width: "45%" }}
+      />
+
+      {/* Bottom info panel */}
+      <div
+        className="absolute inset-x-0 bottom-0 z-20 px-5 pt-16"
+        style={{
+          paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
+          background: "linear-gradient(to top, rgba(0,0,0,0.95) 30%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0))",
+        }}
+      >
+        <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: accent }}>
+          Step {step + 1} of {total}
+        </div>
+        <div className="text-white text-[17px] font-medium leading-snug mb-1.5 text-balance">
+          {cp!.note || "Keep going"}
+        </div>
+        {/* Optional secondary note line could go here if data model expands */}
+        <button
+          onClick={() => setShowHelp(true)}
+          className="text-[12px] text-white/60 underline underline-offset-2 mb-3"
+        >
+          I can't find this
+        </button>
+
+        {isFirst ? (
+          <button
+            onClick={goNext}
+            className="w-full rounded-full py-3.5 text-base font-semibold text-white shadow-elegant active:scale-[0.98] transition-smooth"
+            style={{ backgroundColor: accent }}
+          >
+            I'm here — start navigating
+          </button>
+        ) : (
+          <div className="flex items-center justify-center gap-2 text-white/50 text-[12px] py-2">
+            <ArrowLeft className="size-3.5" />
+            <span>tap sides to move</span>
+            <ArrowRight className="size-3.5" />
+          </div>
+        )}
+      </div>
 
       {/* Help sheet */}
       {showHelp && (
