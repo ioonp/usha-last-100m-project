@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CurvedArrow } from "@/components/CurvedArrow";
@@ -24,8 +24,12 @@ export default function Viewer() {
   const [loc, setLoc] = useState<Loc | null>(null);
   const [cps, setCps] = useState<CP[]>([]);
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState(-1); // -1 welcome, length = arrived
   const [showHelp, setShowHelp] = useState(false);
+  const slideRefs = useRef<Array<HTMLElement | null>>([]);
+
+  const scrollToSlide = (index: number) => {
+    slideRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -54,12 +58,21 @@ export default function Viewer() {
 
   const accent = loc.accent_color;
   const total = cps.length;
-  const cp = step >= 0 && step < total ? cps[step] : null;
 
-  // Welcome
-  if (step === -1) {
-    return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: accent + "12" }}>
+  // Slides: 0 = welcome, 1..total = checkpoints, total+1 = arrived
+  const totalSlides = total + 2;
+
+  return (
+    <div
+      className="h-[100dvh] w-full overflow-y-scroll snap-y snap-mandatory bg-black no-tap-highlight"
+      style={{ scrollbarWidth: "none" }}
+    >
+      {/* Welcome */}
+      <section
+        ref={(el) => (slideRefs.current[0] = el)}
+        className="relative h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center p-6 text-center"
+        style={{ backgroundColor: accent + "12" }}
+      >
         <div className="max-w-sm w-full animate-fade-in-up">
           {loc.logo_url ? (
             <img src={loc.logo_url} alt={loc.studio_name} className="size-20 rounded-full object-cover mx-auto mb-5 shadow-soft" />
@@ -76,88 +89,102 @@ export default function Viewer() {
           )}
           {loc.start_note && <p className="text-sm text-muted-foreground mb-6 italic">"{loc.start_note}"</p>}
 
-          <button onClick={() => setStep(0)} disabled={total === 0}
-            className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 no-tap-highlight active:scale-95 transition-smooth"
-            style={{ backgroundColor: accent }}>
+          <button
+            onClick={() => scrollToSlide(1)}
+            disabled={total === 0}
+            className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 active:scale-95 transition-smooth"
+            style={{ backgroundColor: accent }}
+          >
             Start the walk →
           </button>
         </div>
-      </div>
-    );
-  }
+      </section>
 
-  // Arrived
-  if (step >= total) {
-    return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: accent + "20" }}>
+      {/* Checkpoints */}
+      {cps.map((cp, i) => {
+        const slideIndex = i + 1;
+        return (
+          <section
+            key={cp.id}
+            ref={(el) => (slideRefs.current[slideIndex] = el)}
+            className="relative h-[100dvh] w-full snap-start snap-always overflow-hidden bg-black"
+          >
+            <img src={cp.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 pointer-events-none" />
+
+            {cp.indicators && cp.indicators.length > 0 ? (
+              cp.indicators.map(normalizeIndicator).map((ind) => (
+                <div
+                  key={ind.id}
+                  className="absolute pointer-events-none"
+                  style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
+                >
+                  {ind.type === "direction" ? (
+                    <CurvedArrow angle={ind.angle} size={Math.min(160, window.innerWidth * 0.4)} color="white" />
+                  ) : (
+                    <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
+                      <div className="relative">
+                        <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
+                        <span className="relative block size-6 rounded-full bg-white border-2 border-foreground" />
+                      </div>
+                      {ind.label && (
+                        <span className="mt-1.5 px-2 py-0.5 text-xs font-medium text-foreground bg-white/95 rounded-md">
+                          {ind.label}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <CurvedArrow angle={LEGACY_TO_ANGLE[cp.arrow_direction] ?? 0} size={Math.min(240, window.innerWidth * 0.55)} color="white" />
+              </div>
+            )}
+
+            {/* Bottom overlay: note + actions */}
+            <div
+              className="absolute inset-x-0 bottom-0 px-5 pt-10 bg-gradient-to-t from-black/80 via-black/50 to-transparent text-white"
+              style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
+            >
+              {cp.note && (
+                <p className="text-base mb-4 text-balance leading-snug drop-shadow-md">{cp.note}</p>
+              )}
+              <div className="grid grid-cols-1 gap-2.5">
+                <button
+                  onClick={() => scrollToSlide(slideIndex + 1)}
+                  className="rounded-full py-4 text-base font-semibold text-white shadow-elegant active:scale-[0.98] transition-smooth"
+                  style={{ backgroundColor: accent }}
+                >
+                  I'm here ✓
+                </button>
+                <button
+                  onClick={() => setShowHelp(true)}
+                  className="rounded-full py-2.5 text-sm text-white/90 border border-white/30 backdrop-blur-sm active:bg-white/10 transition-smooth"
+                >
+                  I can't find this
+                </button>
+              </div>
+            </div>
+          </section>
+        );
+      })}
+
+      {/* Arrived */}
+      <section
+        ref={(el) => (slideRefs.current[totalSlides - 1] = el)}
+        className="relative h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center p-6 text-center"
+        style={{ backgroundColor: accent + "20" }}
+      >
         <div className="animate-scale-in">
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="font-display text-4xl mb-2">You made it!</h1>
           <p className="text-muted-foreground mb-8">Welcome to {loc.studio_name}.</p>
-          <button onClick={() => setStep(-1)} className="text-sm text-muted-foreground underline">Start over</button>
-        </div>
-      </div>
-    );
-  }
-
-  // Checkpoint
-  return (
-    <div className="min-h-[100dvh] bg-black flex flex-col relative overflow-hidden no-tap-highlight">
-      {/* Step counter */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 text-xs eyebrow text-white/90 bg-black/40 backdrop-blur px-3 py-1.5 rounded-full">
-        Step {step + 1} of {total}
-      </div>
-
-      {/* Photo */}
-      <div className="flex-1 relative">
-        <img key={cp!.photo_url} src={cp!.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover animate-fade-in" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
-        {cp!.indicators && cp!.indicators.length > 0 ? (
-          cp!.indicators.map(normalizeIndicator).map((ind) => (
-            <div
-              key={ind.id}
-              className="absolute"
-              style={{ left: `${ind.x * 100}%`, top: `${ind.y * 100}%`, transform: "translate(-50%, -50%)" }}
-            >
-              {ind.type === "direction" ? (
-                <CurvedArrow angle={ind.angle} size={Math.min(160, window.innerWidth * 0.4)} color="white" />
-              ) : (
-                <div className="flex flex-col items-center" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}>
-                  <div className="relative">
-                    <span className="block absolute inset-0 rounded-full bg-white animate-spot-pulse" aria-hidden />
-                    <span className="relative block size-6 rounded-full bg-white border-2 border-foreground" />
-                  </div>
-                  {ind.label && (
-                    <span className="mt-1.5 px-2 py-0.5 text-xs font-medium text-foreground bg-white/95 rounded-md">
-                      {ind.label}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <CurvedArrow angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0} size={Math.min(240, window.innerWidth * 0.55)} color="white" />
-          </div>
-        )}
-      </div>
-
-      {/* Bottom sheet */}
-      <div className="bg-card rounded-t-3xl p-5 pb-8 shadow-[0_-10px_30px_rgba(0,0,0,0.3)] z-10 animate-fade-in-up">
-        {cp!.note && <p className="text-base text-foreground mb-4 text-center text-balance">{cp!.note}</p>}
-        <div className="grid grid-cols-1 gap-2.5">
-          <button onClick={() => setStep(step + 1)}
-            className="rounded-full py-4 text-base font-semibold text-white shadow-elegant active:scale-[0.98] transition-smooth"
-            style={{ backgroundColor: accent }}>
-            I'm here ✓
-          </button>
-          <button onClick={() => setShowHelp(true)}
-            className="rounded-full py-3 text-sm text-muted-foreground border border-border active:bg-muted transition-smooth">
-            I can't find this
+          <button onClick={() => scrollToSlide(0)} className="text-sm text-muted-foreground underline">
+            Start over
           </button>
         </div>
-      </div>
+      </section>
 
       {/* Help sheet */}
       {showHelp && (
