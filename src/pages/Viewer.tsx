@@ -233,12 +233,65 @@ export default function Viewer() {
   }
 
   // ---------- REEL CHECKPOINT ----------
-  const DirIcon = DIR_ICON[cp!.arrow_direction] ?? ArrowUp;
+  const rawIndicators = (cp!.indicators ?? []) as any[];
+  const indicators: Indicator[] = rawIndicators.map(normalizeIndicator);
+  const hasIndicators = indicators.length > 0;
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
       {/* Photo */}
       <img src={cp!.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+
+      {/* Indicators (arrows + spots) overlaid on the photo */}
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        {hasIndicators ? (
+          indicators.map((ind) => (
+            <div
+              key={ind.id}
+              className="absolute"
+              style={{
+                left: `${ind.x * 100}%`,
+                top: `${ind.y * 100}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              {ind.type === "direction" ? (
+                <CurvedArrow angle={ind.angle} size={140} color="white" />
+              ) : (
+                <div
+                  className="flex flex-col items-center"
+                  style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}
+                >
+                  <div className="relative">
+                    <span
+                      className="block absolute inset-0 rounded-full animate-spot-pulse"
+                      style={{ backgroundColor: accent }}
+                      aria-hidden
+                    />
+                    <span
+                      className="relative block size-5 rounded-full border-2"
+                      style={{ backgroundColor: accent, borderColor: "#FFFDF8" }}
+                    />
+                  </div>
+                  {ind.label && (
+                    <span className="mt-1.5 px-2 py-0.5 text-[11px] font-medium text-foreground bg-white/95 rounded-md">
+                      {ind.label}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <CurvedArrow
+              angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0}
+              size={160}
+              color="white"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Top progress dots */}
       <div
@@ -257,21 +310,6 @@ export default function Viewer() {
             />
           );
         })}
-      </div>
-
-      {/* Center direction button (display-only) */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-        <div
-          className="rounded-full flex items-center justify-center shadow-elegant"
-          style={{
-            width: 72,
-            height: 72,
-            backgroundColor: accent,
-            opacity: 0.85,
-          }}
-        >
-          <DirIcon className="size-8 text-white" />
-        </div>
       </div>
 
       {/* Tap zones */}
