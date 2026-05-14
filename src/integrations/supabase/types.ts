@@ -68,6 +68,7 @@ export type Database = {
           owner_id: string
           published: boolean
           slug: string
+          start_address: string | null
           start_lat: number | null
           start_lng: number | null
           start_note: string | null
@@ -85,6 +86,7 @@ export type Database = {
           owner_id: string
           published?: boolean
           slug: string
+          start_address?: string | null
           start_lat?: number | null
           start_lng?: number | null
           start_note?: string | null
@@ -102,6 +104,7 @@ export type Database = {
           owner_id?: string
           published?: boolean
           slug?: string
+          start_address?: string | null
           start_lat?: number | null
           start_lng?: number | null
           start_note?: string | null
