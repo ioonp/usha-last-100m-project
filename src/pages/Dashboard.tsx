@@ -143,6 +143,15 @@ export default function Dashboard() {
                       >
                         <Copy className="size-3.5" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => downloadQR(l.slug)}
+                        title="Download QR"
+                      >
+                        <Download className="size-3.5" />
+                      </Button>
                       <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer">
                         <Button variant="outline" size="sm" className="rounded-full" title="Open">
                           <ExternalLink className="size-3.5" />
