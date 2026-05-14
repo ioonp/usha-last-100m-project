@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore } from "lucide-react";
+import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 type Loc = {
@@ -38,6 +38,16 @@ export default function Dashboard() {
   };
 
   const visible = locations.filter((l) => (filter === "archived" ? l.archived : !l.archived));
+
+  const copyLink = async (slug: string) => {
+    const url = `${window.location.origin}/find/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied");
+    } catch {
+      toast.error("Couldn't copy link");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,9 +119,22 @@ export default function Dashboard() {
                     <Button variant="outline" size="sm" className="w-full rounded-full"><Pencil className="size-3.5 mr-1" /> Edit</Button>
                   </Link>
                   {l.published && (
-                    <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer">
-                      <Button variant="outline" size="sm" className="rounded-full"><ExternalLink className="size-3.5" /></Button>
-                    </a>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => copyLink(l.slug)}
+                        title="Copy link"
+                      >
+                        <Copy className="size-3.5" />
+                      </Button>
+                      <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer">
+                        <Button variant="outline" size="sm" className="rounded-full" title="Open">
+                          <ExternalLink className="size-3.5" />
+                        </Button>
+                      </a>
+                    </>
                   )}
                   <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setArchived(l.id, !l.archived)}>
                     {l.archived ? <ArchiveRestore className="size-3.5" /> : <Archive className="size-3.5" />}
