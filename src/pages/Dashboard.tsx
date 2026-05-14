@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy } from "lucide-react";
+import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
+import QRCode from "qrcode";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
