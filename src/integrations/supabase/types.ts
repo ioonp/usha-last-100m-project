@@ -72,6 +72,8 @@ export type Database = {
           start_lat: number | null
           start_lng: number | null
           start_note: string | null
+          street_arrival_caption: string | null
+          street_arrival_photo_url: string | null
           studio_name: string
           updated_at: string
           view_count: number
@@ -90,6 +92,8 @@ export type Database = {
           start_lat?: number | null
           start_lng?: number | null
           start_note?: string | null
+          street_arrival_caption?: string | null
+          street_arrival_photo_url?: string | null
           studio_name?: string
           updated_at?: string
           view_count?: number
@@ -108,6 +112,8 @@ export type Database = {
           start_lat?: number | null
           start_lng?: number | null
           start_note?: string | null
+          street_arrival_caption?: string | null
+          street_arrival_photo_url?: string | null
           studio_name?: string
           updated_at?: string
           view_count?: number
