@@ -123,15 +123,15 @@ export default function Viewer() {
               </div>
             </div>
 
-            {/* Street arrival reference photo */}
-            {loc.street_arrival_photo_url ? (
+            {/* Street arrival reference photo (first checkpoint) */}
+            {arrivalPhoto ? (
               <div className="relative rounded-2xl overflow-hidden border border-border mb-6 shadow-soft aspect-[4/3] bg-muted">
                 <img
-                  src={loc.street_arrival_photo_url}
+                  src={arrivalPhoto}
                   alt="Street arrival reference"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
-                {(loc.street_arrival_caption || loc.start_note) && (
+                {arrivalCaption && (
                   <div
                     className="absolute inset-x-0 bottom-0 px-4 py-3 text-white text-[13px] leading-snug"
                     style={{
@@ -142,7 +142,7 @@ export default function Viewer() {
                     <div className="text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-0.5">
                       Look for
                     </div>
-                    {loc.street_arrival_caption || loc.start_note}
+                    {arrivalCaption}
                   </div>
                 )}
               </div>
