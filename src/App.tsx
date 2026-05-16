@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Wizard from "./pages/Wizard.tsx";
 import Viewer from "./pages/Viewer.tsx";
 import Demo from "./pages/Demo.tsx";
+import Analytics from "./pages/Analytics.tsx";
+import AnalyticsLocation from "./pages/AnalyticsLocation.tsx";
 import { AuthProvider } from "@/lib/auth";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/wizard/:id" element={<Wizard />} />
             <Route path="/find/:slug" element={<Viewer />} />
             <Route path="/demo" element={<Demo />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/analytics/:id" element={<AnalyticsLocation />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

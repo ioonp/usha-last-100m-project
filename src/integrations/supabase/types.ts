@@ -121,6 +121,38 @@ export type Database = {
         }
         Relationships: []
       }
+      page_events: {
+        Row: {
+          checkpoint_index: number | null
+          created_at: string
+          event_type: string
+          id: string
+          location_id: string
+        }
+        Insert: {
+          checkpoint_index?: number | null
+          created_at?: string
+          event_type: string
+          id?: string
+          location_id: string
+        }
+        Update: {
+          checkpoint_index?: number | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          location_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_events_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
