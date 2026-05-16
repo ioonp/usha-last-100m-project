@@ -7,8 +7,8 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <header className="container mx-auto flex items-center justify-between py-6">
         <div className="flex items-center gap-2">
-          <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">L</div>
-          <span className="font-display text-lg">Last 100m</span>
+          <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">U</div>
+          <span className="font-display text-lg">Usha</span>
         </div>
         <nav className="flex items-center gap-2">
           <Link to="/auth"><Button variant="ghost" size="sm">Sign in</Button></Link>
@@ -75,7 +75,7 @@ const Index = () => {
       </main>
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        Last 100m · Photo wayfinding
+        Usha · Photo wayfinding
       </footer>
     </div>
   );

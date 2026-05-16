@@ -46,7 +46,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md animate-fade-in-up">
-        <Link to="/" className="eyebrow text-muted-foreground mb-6 inline-block">← Last 100m</Link>
+        <Link to="/" className="eyebrow text-muted-foreground mb-6 inline-block">← Usha</Link>
         <div className="bg-card border border-border rounded-3xl p-8 shadow-soft">
           <h1 className="font-display text-4xl mb-1">{mode === "signup" ? "Create account" : "Welcome back"}</h1>
           <p className="text-muted-foreground mb-6 text-sm">
