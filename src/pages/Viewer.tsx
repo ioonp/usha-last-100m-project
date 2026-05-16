@@ -10,7 +10,6 @@ type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null; start_address: string | null;
-  street_arrival_photo_url: string | null; street_arrival_caption: string | null;
 };
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
@@ -81,6 +80,9 @@ export default function Viewer() {
         (loc.start_lat != null && loc.start_lng != null
           ? `${loc.start_lat.toFixed(5)}, ${loc.start_lng.toFixed(5)}`
           : "Entrance location");
+      const firstCp = cps[0] ?? null;
+      const arrivalPhoto = firstCp?.photo_url ?? null;
+      const arrivalCaption = firstCp?.note || loc.start_note || null;
       return (
         <div className="relative min-h-[100dvh] w-full bg-background flex flex-col no-tap-highlight">
           {/* Top bar */}
