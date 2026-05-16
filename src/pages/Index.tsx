@@ -7,7 +7,7 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <header className="container mx-auto flex items-center justify-between py-6">
         <div className="flex items-center gap-2">
-          <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">L</div>
+          <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">U</div>
           <span className="font-display text-lg">Usha</span>
         </div>
         <nav className="flex items-center gap-2">
