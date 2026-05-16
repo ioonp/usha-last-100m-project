@@ -28,7 +28,7 @@ export default function Demo() {
         <button onClick={() => setStep(0)} className="w-full rounded-full py-4 text-white font-medium shadow-elegant" style={{ backgroundColor: accent }}>
           Start the walk →
         </button>
-        <Link to="/" className="block mt-6 text-xs text-muted-foreground underline">← Back to Last 100m</Link>
+        <Link to="/" className="block mt-6 text-xs text-muted-foreground underline">← Back to Usha</Link>
       </div>
     </div>
   );

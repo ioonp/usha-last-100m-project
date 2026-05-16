@@ -69,7 +69,7 @@ export default function Dashboard() {
         <div className="container mx-auto flex items-center justify-between py-4">
           <Link to="/" className="flex items-center gap-2">
             <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">L</div>
-            <span className="font-display text-lg">Last 100m</span>
+            <span className="font-display text-lg">Usha</span>
           </Link>
           <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
             <LogOut className="size-4 mr-1" /> Sign out
