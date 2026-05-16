@@ -160,8 +160,8 @@ export function MapPinPicker({
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+      <div className="relative p-1">
+        <Search className="size-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -171,7 +171,7 @@ export function MapPinPicker({
           className="pl-9 pr-3 h-12 rounded-xl text-xs sm:text-sm"
         />
         {open && suggestions.length > 0 && (
-          <div className="absolute z-30 mt-1 w-full bg-popover border border-border rounded-xl shadow-lg overflow-hidden">
+          <div className="absolute left-1 right-1 z-30 mt-1 bg-popover border border-border rounded-xl shadow-lg overflow-hidden">
             {suggestions.map((s) => (
               <button
                 key={s.place_id}
