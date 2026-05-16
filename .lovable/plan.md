@@ -1,46 +1,37 @@
-
 ## Goal
 
-Turn the visitor experience (`src/pages/Viewer.tsx`) into an Instagram Reels-like flow: each checkpoint is a full-screen, edge-to-edge photo, and the user swipes vertically to move between steps. No timeline/progress bar. The note sits as an overlay pinned to the bottom of the screen.
+Step 1 should only set the pin + address. The entrance/starting-point photo (currently uploaded in Step 1) moves to Step 2, where it becomes the always-present first checkpoint. The walker still sees this photo on the street arrival check screen AND as the first frame of the reel.
 
-## Changes
+## Step 1 — Start point (Wizard.tsx)
 
-### 1. Full-screen reels container
-- Replace the current "photo + bottom card" split with a single full-bleed `100dvh` photo per checkpoint.
-- Stack slides vertically (welcome → checkpoint 1 … N → arrived) inside a snap-scroll container: `overflow-y-scroll snap-y snap-mandatory`, each slide `h-[100dvh] snap-start`.
-- Keep image as `object-cover` with a soft top + bottom gradient for legibility.
-- Direction arrows / spot indicators stay as today, rendered over the photo.
+- Remove the "Street arrival photo" upload block and the "Photo caption" textarea.
+- Keep: map pin picker, address display, optional starting note.
+- Add an explicit callout above/below the pin telling the creator:
+  > "Next, in Step 2, you'll add the entrance photo as your first checkpoint — taken from the spot where Google Maps drops visitors, facing the building."
+- Drop the `arrivalPhoto`, `arrivalCaption`, `onArrivalPhotoUpload` state/handlers.
 
-### 2. Remove the timeline
-- Remove the "Step X of N" pill at the top.
-- No progress dots either — pure reels feel.
+## Step 2 — Checkpoints (CheckpointEditor.tsx)
 
-### 3. Notes at the bottom
-- For each checkpoint slide, render a bottom overlay (absolute, `bottom-0`, safe-area padding) containing:
-  - The checkpoint `note` (larger, white text on subtle gradient/blur).
-  - Primary "I'm here ✓" button (kept, still uses accent color).
-  - Secondary "I can't find this" link (kept, opens existing help sheet).
-- No card/sheet chrome — it floats over the photo like a Reels caption + CTA.
+- The first card is special-cased:
+  - Eyebrow reads "Starting point — building entrance" instead of "Step 1".
+  - Helper text under the photo slot: "Stand where Google Maps drops visitors. Photograph the entrance and any nearby landmarks (shops, signs). Walkers will see this both to confirm they're in the right place and as the first navigation step."
+  - Note placeholder becomes: "e.g. Look for the dark green gate between the pharmacy and the bakery." (this note doubles as the arrival caption).
+  - Cannot be deleted and cannot be moved (hide trash + up arrow; first-card down still allowed only if there are others below, but reorder must keep it at position 0 — simplest: disable both reorder buttons for index 0 and force new checkpoints to insert after it).
+- Subsequent cards keep current behavior, renumbered "Step 2", "Step 3"… in the eyebrow.
+- Auto-seed: if `checkpoints` is empty when Step 2 renders, prepend an empty starting-point card so the slot is always visible.
 
-### 4. Welcome and arrived slides
-- Welcome stays as the first snap slide (logo, name, message, optional map, Start button). Start now scrolls to the next slide instead of changing a `step` state.
-- Arrived stays as the last snap slide (🎉 + "You made it!").
+## Viewer (Viewer.tsx)
 
-### 5. Navigation behavior
-- Swipe (native scroll-snap) advances between slides.
-- "I'm here ✓" programmatically scrolls to the next slide (`scrollIntoView({ behavior: "smooth" })`).
-- Replace `step` state with refs per slide + an `IntersectionObserver` to know which checkpoint is active (used for view tracking and to pre-load the next image).
-- Keep the existing `increment_location_view` call on initial load.
+- Street arrival check screen no longer reads `loc.street_arrival_photo_url` / `loc.street_arrival_caption`. Instead, use `checkpoints[0].photo_url` and `checkpoints[0].note` for the reference image and caption overlay.
+- Reel navigation: leave unchanged — it already iterates all checkpoints starting at index 0, so the entrance photo is naturally the first reel frame.
 
-### 6. Out of scope
-- No data model, schema, or wizard/preview changes.
-- `MobilePreview.tsx` stays as is for now (can be aligned later if you want).
-- No new dependencies.
+## Data model
 
-## Technical notes
+- No migration. `street_arrival_photo_url` and `street_arrival_caption` columns stay in the DB but become unused; the Wizard stops writing to them. (Leaving them avoids touching old published locations; can be cleaned up later.)
+- For locations that were saved under the old flow and still have data in `street_arrival_photo_url` with no checkpoints, the Viewer fallback shows "no photo" — acceptable since the wizard always seeds a starting-point card now and the creator can re-publish.
 
-- File touched: `src/pages/Viewer.tsx` only.
-- Container: `<div className="h-[100dvh] overflow-y-scroll snap-y snap-mandatory bg-black">`.
-- Each slide: `<section className="relative h-[100dvh] snap-start snap-always">`.
-- Bottom overlay: `absolute inset-x-0 bottom-0 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-black/70 via-black/40 to-transparent text-white`.
-- Help sheet (`showHelp`) stays unchanged.
+## Files touched
+
+- `src/pages/Wizard.tsx` — remove arrival photo/caption UI + state; add Step 1 callout; stop sending those fields on save.
+- `src/components/wizard/CheckpointEditor.tsx` — special first-card treatment, undeletable/unmovable, auto-seed, copy changes.
+- `src/pages/Viewer.tsx` — street arrival screen sources image + caption from `checkpoints[0]`.

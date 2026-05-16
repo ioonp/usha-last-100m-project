@@ -5,7 +5,7 @@ import { uploadAsset } from "@/lib/upload";
 import { useAuth } from "@/lib/auth";
 import { CurvedArrow } from "@/components/CurvedArrow";
 import { ArrowDown, ArrowUp, Trash2, Upload, Plus, ArrowUp as ArrowUpIcon, Circle, X, RotateCw } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // Legacy 8-direction value kept for backward compat with old saved data
@@ -185,6 +185,13 @@ export function CheckpointEditor({
   const { user } = useAuth();
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
 
+  // Always keep a starting-point card at position 0.
+  useEffect(() => {
+    if (checkpoints.length === 0) {
+      onChange([{ position: 0, photo_url: "", arrow_direction: "up", note: "", indicators: [] }]);
+    }
+  }, [checkpoints.length, onChange]);
+
   const update = (i: number, patch: Partial<Checkpoint>) => {
     const next = checkpoints.map((c, idx) => (idx === i ? { ...c, ...patch } : c));
     onChange(next);
@@ -242,18 +249,30 @@ export function CheckpointEditor({
         const indicators = (c.indicators ?? []).map(normalizeIndicator);
         const dir = indicators.find((x) => x.type === "direction") as Extract<Indicator, { type: "direction" }> | undefined;
         const hasSpot = indicators.some((x) => x.type === "spot");
+        const isStart = i === 0;
         return (
           <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-fade-in-up">
             <div className="flex items-center justify-between mb-3">
-              <div className="eyebrow text-muted-foreground">Step {i + 1}</div>
+              <div className="eyebrow text-muted-foreground">
+                {isStart ? "Starting point — building entrance" : `Step ${i}`}
+              </div>
               <div className="flex gap-1">
-                <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}><ArrowUp className="size-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={i === checkpoints.length - 1}><ArrowDown className="size-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="size-4 text-destructive" /></Button>
+                {!isStart && (
+                  <>
+                    <Button size="icon" variant="ghost" onClick={() => move(i, -1)} disabled={i <= 1}><ArrowUp className="size-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => move(i, 1)} disabled={i === checkpoints.length - 1}><ArrowDown className="size-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => remove(i)}><Trash2 className="size-4 text-destructive" /></Button>
+                  </>
+                )}
               </div>
             </div>
 
             <div className="space-y-3">
+              {isStart && (
+                <p className="text-xs text-muted-foreground">
+                  Stand where Google Maps drops visitors. Photograph the entrance and any nearby landmarks (shops, signs). Walkers see this to confirm they're in the right place and as the first navigation step.
+                </p>
+              )}
               {c.photo_url ? (
                 <PhotoCanvas
                   photoUrl={c.photo_url}
@@ -264,7 +283,7 @@ export function CheckpointEditor({
                 <label className="block w-full aspect-square md:aspect-[4/3] rounded-xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs gap-1">
                     <Upload className="size-5" />
-                    {uploadingIdx === i ? "Uploading…" : "Upload photo"}
+                    {uploadingIdx === i ? "Uploading…" : isStart ? "Upload entrance photo" : "Upload photo"}
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(i, e.target.files[0])} />
                 </label>
@@ -312,12 +331,12 @@ export function CheckpointEditor({
               )}
 
               <div>
-                <Label className="text-xs">Note (optional)</Label>
+                <Label className="text-xs">{isStart ? "Landmark hint (shown to walkers)" : "Note (optional)"}</Label>
                 <Textarea
                   rows={2}
                   value={c.note ?? ""}
                   onChange={(e) => update(i, { note: e.target.value })}
-                  placeholder="e.g. Turn right at the blue door"
+                  placeholder={isStart ? "e.g. Look for the dark green gate between the pharmacy and the bakery." : "e.g. Turn right at the blue door"}
                   className="mt-1.5 resize-none"
                 />
               </div>

@@ -10,7 +10,6 @@ type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null; start_address: string | null;
-  street_arrival_photo_url: string | null; street_arrival_caption: string | null;
 };
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
@@ -81,6 +80,9 @@ export default function Viewer() {
         (loc.start_lat != null && loc.start_lng != null
           ? `${loc.start_lat.toFixed(5)}, ${loc.start_lng.toFixed(5)}`
           : "Entrance location");
+      const firstCp = cps[0] ?? null;
+      const arrivalPhoto = firstCp?.photo_url ?? null;
+      const arrivalCaption = firstCp?.note || loc.start_note || null;
       return (
         <div className="relative min-h-[100dvh] w-full bg-background flex flex-col no-tap-highlight">
           {/* Top bar */}
@@ -121,15 +123,15 @@ export default function Viewer() {
               </div>
             </div>
 
-            {/* Street arrival reference photo */}
-            {loc.street_arrival_photo_url ? (
+            {/* Street arrival reference photo (first checkpoint) */}
+            {arrivalPhoto ? (
               <div className="relative rounded-2xl overflow-hidden border border-border mb-6 shadow-soft aspect-[4/3] bg-muted">
                 <img
-                  src={loc.street_arrival_photo_url}
+                  src={arrivalPhoto}
                   alt="Street arrival reference"
                   className="absolute inset-0 w-full h-full object-cover"
                 />
-                {(loc.street_arrival_caption || loc.start_note) && (
+                {arrivalCaption && (
                   <div
                     className="absolute inset-x-0 bottom-0 px-4 py-3 text-white text-[13px] leading-snug"
                     style={{
@@ -140,7 +142,7 @@ export default function Viewer() {
                     <div className="text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-0.5">
                       Look for
                     </div>
-                    {loc.street_arrival_caption || loc.start_note}
+                    {arrivalCaption}
                   </div>
                 )}
               </div>
