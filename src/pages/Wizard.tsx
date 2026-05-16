@@ -36,8 +36,6 @@ export default function Wizard() {
   const [lng, setLng] = useState<number | null>(null);
   const [startNote, setStartNote] = useState("");
   const [startAddress, setStartAddress] = useState<string | null>(null);
-  const [arrivalPhoto, setArrivalPhoto] = useState<string | null>(null);
-  const [arrivalCaption, setArrivalCaption] = useState("");
   const [slug, setSlug] = useState<string>("");
   const [published, setPublished] = useState(false);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
@@ -60,8 +58,6 @@ export default function Wizard() {
         setLng(loc.start_lng);
         setStartNote(loc.start_note ?? "");
         setStartAddress((loc as any).start_address ?? null);
-        setArrivalPhoto((loc as any).street_arrival_photo_url ?? null);
-        setArrivalCaption((loc as any).street_arrival_caption ?? "");
         setSlug(loc.slug);
         setPublished(loc.published);
         setLocationId(loc.id);
@@ -95,8 +91,6 @@ export default function Wizard() {
         start_lng: lng,
         start_note: startNote || null,
         start_address: startAddress || null,
-        street_arrival_photo_url: arrivalPhoto || null,
-        street_arrival_caption: arrivalCaption || null,
         ...extra,
       };
       if (!lid) {
@@ -163,16 +157,6 @@ export default function Wizard() {
     }
   };
 
-  const onArrivalPhotoUpload = async (file: File) => {
-    if (!user) return;
-    try {
-      const url = await uploadAsset(file, user.id, "arrival");
-      setArrivalPhoto(url);
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  };
-
   const downloadQR = () => {
     const a = document.createElement("a");
     a.href = qrDataUrl;
@@ -212,31 +196,15 @@ export default function Wizard() {
               <p className="text-muted-foreground">Drop a pin where the visitor's journey starts — usually a nearby landmark, transit stop, or street corner.</p>
               <MapPinPicker lat={lat} lng={lng} address={startAddress} onChange={(la, ln, addr) => { setLat(la); setLng(ln); setStartAddress(addr); }} />
               <div>
-                <Label>Street arrival photo</Label>
-                <p className="text-xs text-muted-foreground mt-1 mb-2">
-                  Stand where Google Maps drops visitors and photograph the building entrance. They'll see this to confirm they're in the right spot.
-                </p>
-                <div className="flex items-start gap-4">
-                  {arrivalPhoto ? (
-                    <img src={arrivalPhoto} alt="" className="w-32 h-24 rounded-xl object-cover border border-border" />
-                  ) : (
-                    <div className="w-32 h-24 rounded-xl bg-muted border border-border flex items-center justify-center text-xs text-muted-foreground">No photo</div>
-                  )}
-                  <label className="cursor-pointer">
-                    <span className="text-sm text-accent hover:underline">{arrivalPhoto ? "Replace" : "Upload"}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onArrivalPhotoUpload(e.target.files[0])} />
-                  </label>
-                </div>
-              </div>
-              <div>
-                <Label>Photo caption (optional)</Label>
-                <Textarea rows={2} value={arrivalCaption} onChange={(e) => setArrivalCaption(e.target.value)}
-                  placeholder="e.g. Look for the dark green gate between the pharmacy and the bakery." className="mt-1.5" />
-              </div>
-              <div>
                 <Label>Starting note (optional)</Label>
                 <Textarea rows={2} value={startNote} onChange={(e) => setStartNote(e.target.value)}
                   placeholder="e.g. Exit the metro and face north" className="mt-1.5" />
+              </div>
+              <div className="rounded-2xl border border-accent/20 bg-accent-soft/60 p-4">
+                <div className="eyebrow text-accent mb-1">Next up</div>
+                <p className="text-sm text-foreground/80">
+                  In Step 2, your first checkpoint is the <strong>building entrance</strong> — a photo taken from the spot where Google Maps drops visitors, facing the entrance. Walkers see it both to confirm they're in the right place and as the first frame of the route.
+                </p>
               </div>
             </div>
           )}
