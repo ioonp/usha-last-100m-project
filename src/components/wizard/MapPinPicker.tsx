@@ -167,8 +167,8 @@ export function MapPinPicker({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => suggestions.length && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search your venue, transit stop, or street address to get started"
-          className="pl-9 h-12 rounded-xl"
+          placeholder="Search your venue, transit stop, or street corner"
+          className="pl-9 pr-3 h-12 rounded-xl text-xs sm:text-sm"
         />
         {open && suggestions.length > 0 && (
           <div className="absolute z-30 mt-1 w-full bg-popover border border-border rounded-xl shadow-lg overflow-hidden">
