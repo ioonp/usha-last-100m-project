@@ -5,6 +5,7 @@ import { CurvedArrow } from "@/components/CurvedArrow";
 import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirection } from "@/components/wizard/CheckpointEditor";
 import { staticMapUrl } from "@/lib/maps";
 import { Phone, MapPin, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft } from "lucide-react";
+import { trackEvent } from "@/lib/track";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
@@ -49,8 +50,19 @@ export default function Viewer() {
       (c || []).forEach((cp: any) => { const im = new Image(); im.src = cp.photo_url; });
       // increment view
       supabase.rpc("increment_location_view", { p_slug: slug });
+      trackEvent((l as Loc).id, "page_opened");
     })();
   }, [slug]);
+
+  // Track checkpoint views and completion as `step` changes.
+  useEffect(() => {
+    if (!loc) return;
+    if (step >= 0 && step < cps.length) {
+      trackEvent(loc.id, "checkpoint_viewed", step);
+    } else if (cps.length > 0 && step >= cps.length) {
+      trackEvent(loc.id, "completed");
+    }
+  }, [step, loc, cps.length]);
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
   if (!loc) return (
@@ -161,6 +173,7 @@ export default function Viewer() {
                 onClick={() => {
                   setShowArrival(false);
                   setStep(0);
+                  if (loc) trackEvent(loc.id, "arrival_confirmed");
                 }}
                 disabled={total === 0}
                 className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant disabled:opacity-50 active:scale-[0.98] transition-smooth"
