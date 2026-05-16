@@ -5,8 +5,7 @@ import { uploadAsset } from "@/lib/upload";
 import { useAuth } from "@/lib/auth";
 import { CurvedArrow } from "@/components/CurvedArrow";
 import { ArrowDown, ArrowUp, Trash2, Upload, Plus, ArrowUp as ArrowUpIcon, Circle, X, RotateCw } from "lucide-react";
-import { useRef, useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // Legacy 8-direction value kept for backward compat with old saved data
