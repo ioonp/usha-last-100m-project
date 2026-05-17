@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { GOOGLE_MAPS_KEY, loadGoogleMaps, staticMapUrl } from "@/lib/maps";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
+import { Search, CheckCircle2 } from "lucide-react";
 
 type Suggestion = { place_id: string; main: string; secondary: string };
 
@@ -27,6 +27,7 @@ export function MapPinPicker({
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<boolean>(lat != null && lng != null);
   const [googleReady, setGoogleReady] = useState(false);
+  const [pinAdjusted, setPinAdjusted] = useState(false);
 
   // Load Google Maps SDK once
   useEffect(() => {
@@ -73,7 +74,7 @@ export function MapPinPicker({
       });
       marker.addListener("dragend", () => {
         const p = marker.getPosition();
-        if (p) reverseGeocode(p.lat(), p.lng());
+        if (p) { setPinAdjusted(true); reverseGeocode(p.lat(), p.lng()); }
       });
       markerRef.current = marker;
     }
@@ -122,7 +123,7 @@ export function MapPinPicker({
         // Update map: recenter and create/move marker
         if (mapRef.current) {
           mapRef.current.setCenter({ lat: la, lng: ln });
-          mapRef.current.setZoom(17);
+          mapRef.current.setZoom(19);
           if (!markerRef.current) {
             const marker = new g.maps.Marker({
               position: { lat: la, lng: ln },
@@ -130,13 +131,14 @@ export function MapPinPicker({
             });
             marker.addListener("dragend", () => {
               const p = marker.getPosition();
-              if (p) reverseGeocode(p.lat(), p.lng());
+              if (p) { setPinAdjusted(true); reverseGeocode(p.lat(), p.lng()); }
             });
             markerRef.current = marker;
           } else {
             markerRef.current.setPosition({ lat: la, lng: ln });
           }
         }
+        setPinAdjusted(false);
       }
     );
   };
@@ -188,7 +190,22 @@ export function MapPinPicker({
         )}
       </div>
 
+      {selected && (
+        <div className="rounded-2xl border border-amber-300/60 bg-amber-50 p-4 text-amber-950">
+          <div className="font-semibold text-sm mb-1">📍 Position the pin at the entrance</div>
+          <p className="text-xs leading-relaxed">
+            Drag the red pin to mark exactly where visitors should arrive from the street — not the building center. This pin will be shown to visitors when they're lost, so precision matters!
+          </p>
+        </div>
+      )}
+
       <div ref={mapDivRef} className="w-full aspect-square md:aspect-auto md:h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
+      {pinAdjusted && (
+        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+          <CheckCircle2 className="size-4 shrink-0" />
+          <span>Pin positioned — visitors will be guided to this exact spot</span>
+        </div>
+      )}
       {selected && lat != null && lng != null && (
         <div className="text-xs text-muted-foreground">
           {address ? address : <span className="font-mono">{lat.toFixed(5)}, {lng.toFixed(5)}</span>}
