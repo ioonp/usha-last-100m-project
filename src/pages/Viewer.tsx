@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CurvedArrow } from "@/components/CurvedArrow";
 import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirection } from "@/components/wizard/CheckpointEditor";
 import { staticMapUrl } from "@/lib/maps";
-import { Phone, MapPin, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft } from "lucide-react";
+import { MapPin, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { trackEvent } from "@/lib/track";
 
 type Loc = {
@@ -32,7 +32,6 @@ export default function Viewer() {
   const [loc, setLoc] = useState<Loc | null>(null);
   const [cps, setCps] = useState<CP[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showHelp, setShowHelp] = useState(false);
   // -1 = landing, 0..total-1 = checkpoint, total = success
   const [step, setStep] = useState(-1);
   const [showArrival, setShowArrival] = useState(false);
@@ -82,6 +81,16 @@ export default function Viewer() {
   };
   const goPrev = () => {
     if (step > 0) setStep(step - 1);
+  };
+
+  const openMaps = () => {
+    if (loc?.start_lat == null || loc?.start_lng == null) return;
+    const { start_lat: lat, start_lng: lng } = loc;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const url = isIOS
+      ? `maps://maps.apple.com/?q=${lat},${lng}`
+      : `https://maps.google.com/?q=${lat},${lng}`;
+    window.location.href = url;
   };
 
   // ---------- LANDING ----------
@@ -298,7 +307,7 @@ export default function Viewer() {
             </div>
           ))
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-x-0 flex items-center justify-center" style={{ top: "38%" }}>
             <CurvedArrow
               angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0}
               size={160}
@@ -308,26 +317,27 @@ export default function Viewer() {
         )}
       </div>
 
-      {/* Top progress dots */}
+      {/* Top progress pills */}
       <div
-        className="absolute inset-x-0 top-0 z-20 flex gap-1.5 px-4 pb-2"
+        className="absolute inset-x-0 top-0 z-20 flex justify-center gap-2 px-4 pb-2"
         style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
       >
         {cps.map((_, i) => {
           const state = i < step ? "done" : i === step ? "current" : "future";
           const bg =
             state === "current" ? accent : state === "done" ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.25)";
+          const width = state === "current" ? "3rem" : "2rem";
           return (
             <span
               key={i}
-              className="flex-1 h-1 rounded-full transition-colors"
-              style={{ backgroundColor: bg }}
+              className="h-1 rounded-full transition-all"
+              style={{ backgroundColor: bg, width }}
             />
           );
         })}
       </div>
 
-      {/* Tap zones */}
+      {/* Tap zones (invisible, full-height thumb targets) */}
       <button
         type="button"
         aria-label="Previous"
@@ -344,60 +354,51 @@ export default function Viewer() {
         style={{ width: "45%" }}
       />
 
+      {/* Visible edge navigation buttons */}
+      {step > 0 && (
+        <button
+          type="button"
+          aria-label="Previous step"
+          onClick={goPrev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 size-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center active:scale-95 transition-smooth"
+        >
+          <ChevronLeft className="size-6 text-foreground" />
+        </button>
+      )}
+      <button
+        type="button"
+        aria-label="Next step"
+        onClick={goNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 size-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center active:scale-95 transition-smooth"
+      >
+        <ChevronRight className="size-6 text-foreground" />
+      </button>
+
       {/* Bottom info panel */}
       <div
-        className="absolute inset-x-0 bottom-0 z-20 px-5 pt-16"
+        className="absolute inset-x-0 bottom-0 z-20 px-5 pt-10"
         style={{
           paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
-          background: "linear-gradient(to top, rgba(0,0,0,0.95) 30%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0))",
+          background: "linear-gradient(to top, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0))",
         }}
       >
         <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: accent }}>
           Step {step + 1} of {total}
         </div>
-        <div className="text-white text-[17px] font-medium leading-snug mb-1.5 text-balance">
+        <div className="text-white text-[17px] font-medium leading-snug mb-3 text-balance">
           {cp!.note || "Keep going"}
         </div>
-        {/* Optional secondary note line could go here if data model expands */}
-        <button
-          onClick={() => setShowHelp(true)}
-          className="text-[12px] text-white/60 underline underline-offset-2 mb-3"
-        >
-          I can't find this
-        </button>
-
-        <div className="flex items-center justify-center gap-2 text-white/50 text-[12px] py-2">
-          <ArrowLeft className="size-3.5" />
-          <span>tap sides to move</span>
-          <ArrowRight className="size-3.5" />
-        </div>
+        {loc.start_lat != null && loc.start_lng != null && (
+          <button
+            onClick={openMaps}
+            className="inline-flex items-center gap-1.5 text-white text-[13px] font-medium active:scale-95 transition-smooth"
+          >
+            <MapPin className="size-4" />
+            <span className="underline underline-offset-2">Show me on map</span>
+            <span className="text-white/60 text-[11px] ml-1">Opens in Maps app</span>
+          </button>
+        )}
       </div>
-
-      {/* Help sheet */}
-      {showHelp && (
-        <div className="fixed inset-0 bg-black/60 z-30 flex items-end animate-fade-in" onClick={() => setShowHelp(false)}>
-          <div className="bg-card w-full rounded-t-3xl p-6 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-2xl">Need a hand?</h2>
-              <button onClick={() => setShowHelp(false)} className="size-8 rounded-full bg-muted flex items-center justify-center"><X className="size-4" /></button>
-            </div>
-            <p className="text-muted-foreground text-sm mb-4">Reach out to {loc.studio_name} directly:</p>
-            <div className="space-y-2">
-              {loc.start_lat != null && loc.start_lng != null && (
-                <a href={`https://maps.google.com/?q=${loc.start_lat},${loc.start_lng}`} target="_blank" rel="noreferrer"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-border active:bg-muted transition-smooth">
-                  <MapPin className="size-5" style={{ color: accent }} />
-                  <div className="text-sm font-medium">Open in maps</div>
-                </a>
-              )}
-              <a href="tel:" className="flex items-center gap-3 p-4 rounded-2xl border border-border active:bg-muted transition-smooth">
-                <Phone className="size-5" style={{ color: accent }} />
-                <div className="text-sm font-medium">Call the studio</div>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
