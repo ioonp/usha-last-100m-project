@@ -30,7 +30,7 @@ export type Checkpoint = {
   indicators?: Indicator[];
 };
 
-const uid = () => Math.random().toString(36).slice(2, 10);
+export const uid = () => Math.random().toString(36).slice(2, 10);
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 // Normalize indicators read from DB (may have only legacy `direction` field)
@@ -45,7 +45,7 @@ export function normalizeIndicator(ind: any): Indicator {
   return ind as Indicator;
 }
 
-function PhotoCanvas({
+export function PhotoCanvas({
   photoUrl,
   indicators,
   onChange,
