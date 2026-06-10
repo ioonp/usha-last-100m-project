@@ -83,7 +83,7 @@ export default function Dashboard() {
             <div className="eyebrow text-muted-foreground mb-2">Your locations</div>
             <h1 className="font-display text-4xl md:text-5xl">Wayfinding pages</h1>
           </div>
-          <Link to="/wizard/new">
+          <Link to="/capture/new">
             <Button size="lg" className="rounded-full bg-primary text-primary-foreground h-12 px-6">
               <Plus className="size-4 mr-1" /> New location
             </Button>
@@ -105,7 +105,7 @@ export default function Dashboard() {
           <div className="border border-dashed border-border rounded-3xl p-16 text-center">
             <p className="font-display text-2xl mb-2">No locations yet</p>
             <p className="text-muted-foreground mb-6">Create your first photo path.</p>
-            <Link to="/wizard/new"><Button className="rounded-full">Get started</Button></Link>
+            <Link to="/capture/new"><Button className="rounded-full">Get started</Button></Link>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -129,7 +129,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Link to={`/wizard/${l.id}`} className="flex-1">
+                  <Link to={`/capture/${l.id}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full rounded-full"><Pencil className="size-3.5 mr-1" /> Edit</Button>
                   </Link>
                   {l.published && (
