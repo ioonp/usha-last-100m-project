@@ -9,6 +9,7 @@ import AuthPage from "./pages/Auth.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Wizard from "./pages/Wizard.tsx";
+import Capture from "./pages/Capture.tsx";
 import Viewer from "./pages/Viewer.tsx";
 import Demo from "./pages/Demo.tsx";
 import Analytics from "./pages/Analytics.tsx";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/wizard/:id" element={<Wizard />} />
+            <Route path="/capture/:id" element={<Capture />} />
             <Route path="/find/:slug" element={<Viewer />} />
             <Route path="/demo" element={<Demo />} />
             <Route path="/analytics" element={<Analytics />} />
