@@ -1,46 +1,79 @@
+# On-Location Capture Flow
 
-## Scope
+Replace the existing 4-step desktop wizard with a single mobile-first flow the creator runs **while physically walking the route**. Wired to the real backend so we can publish and usability-test end-to-end.
 
-All changes are in `src/pages/Viewer.tsx` (the end-user walking experience). No DB, no wizard changes.
+## The Flow
 
-## Changes
+```text
+Dashboard
+   │  [+ New location]
+   ▼
+┌─────────────────────────────────────────┐
+│ 1. STARTING POINT                       │
+│  • "Use my location" → request GPS      │
+│  • Show map w/ pin at device coords     │
+│  • User can drag pin to fine-tune       │
+│  • Optional starting note               │
+│  [Confirm starting point]               │
+├─────────────────────────────────────────┤
+│ 2. CHECKPOINTS (loop, one at a time)    │
+│  • Big camera button → native camera    │
+│  • Photo preview                        │
+│  • Drag arrow on top of photo           │
+│  • Optional note                        │
+│  • [Save & add next]  [Finish route]    │
+│  Sidebar: thumbnail strip of captured   │
+│  checkpoints, tap to edit/delete/reorder│
+├─────────────────────────────────────────┤
+│ 3. BRANDING (quick, optional)           │
+│  • Studio name (prefilled from profile) │
+│  • Logo, accent color, welcome message  │
+│  • "Skip for now" allowed               │
+├─────────────────────────────────────────┤
+│ 4. PUBLISH                              │
+│  • Share URL + QR + copy button         │
+└─────────────────────────────────────────┘
+```
 
-### 1. "I can't find this" → open Maps app directly
-- Replace the inline "I can't find this" underline button (and remove the help bottom sheet) with a single button labeled **📍 Show me on map** plus subtext "Opens in Maps app".
-- On click: use `loc.start_lat` / `loc.start_lng` (entrance pin saved in Step 1) and deep-link:
-  - iOS (`/iPad|iPhone|iPod/.test(navigator.userAgent)`): `maps://maps.apple.com/?q={lat},{lng}`
-  - Otherwise: `https://maps.google.com/?q={lat},{lng}`
-- If coordinates are missing, fall back to disabling the button.
-- Keep `trackEvent` (add a `help_opened`-style call if useful) — no new event types unless trivial.
-- Remove the help sheet ("Need a hand?" / Call the studio) since it's no longer reachable.
+The route is **persisted continuously** — each confirmed checkpoint is saved immediately, so if the creator's phone dies mid-walk they can resume from the dashboard.
 
-### 2. Arrow positioning
-- Verify behavior: arrows are already saved with `x` / `y` as 0–1 fractions in `indicators` (jsonb) and rendered with `left: x*100%`, `top: y*100%`. This already works for checkpoints created with the indicator editor.
-- The "centered arrow" only appears as a **legacy fallback** when a checkpoint has no `indicators` (old data using only `arrow_direction`). Keep that fallback but render it higher (e.g. `top: 38%`) so the bottom gradient doesn't cover it.
-- No data-model change required. If the user is seeing arrows always centered on new checkpoints, that's a separate bug we'd need to repro — flagged but not changed here.
+## Key UX Decisions
 
-### 3. Remove bottom "tap sides to move" + add edge buttons
-- Delete the "tap sides to move" row at the bottom.
-- Keep the existing invisible left/right tap zones (good for thumb reach), but add **visible 48px circular buttons**:
-  - Left button: `absolute left-4 top-1/2 -translate-y-1/2`, hidden when `step === 0`.
-  - Right button: `absolute right-4 top-1/2 -translate-y-1/2`, always shown until last step (advances; on last checkpoint it advances to success).
-  - Style: `bg-white/90`, `shadow-lg`, `ChevronLeft`/`ChevronRight` icons from lucide.
-- Ensure buttons sit at `z-30` above the gradient.
+- **Mobile-first layout.** Single column, large tap targets, sticky bottom action bar. Still usable on desktop (with the existing map picker) but optimized for a phone held one-handed outdoors.
+- **GPS with confirm-on-map.** On Step 1, request `navigator.geolocation`, drop the pin at the device coords, show it on the existing Google map, allow drag to nudge before confirming. Handle denied/unavailable gracefully (fall back to current map picker behavior).
+- **Camera-native capture.** `<input type="file" accept="image/*" capture="environment">` to open the phone camera directly. Compress via existing `lib/upload.ts`.
+- **Inline arrow editor** after each shot — reuse `CheckpointEditor`'s arrow drag logic in a single-checkpoint, full-screen variant.
+- **Resume support.** If a draft `location` row exists (unpublished, owned by user), the dashboard shows "Continue capturing" instead of "New location".
 
-### 4. Progress bar enhancement
-- Replace the equal-width flex bars with fixed-width pills:
-  - Active step: `w-12 h-1 rounded-full` filled with `accent`.
-  - Completed: `w-8 h-1 bg-white`.
-  - Upcoming: `w-8 h-1 bg-white/30`.
-- Center the row (`justify-center gap-2`), keep safe-area top padding.
+## Implementation
 
-### 5. Gradient / arrow overlap
-- Reduce bottom gradient height (e.g. `pt-10` instead of `pt-16`) so creator-placed arrows near the bottom of the photo aren't obscured. Indicators already render above; this just makes the gradient less aggressive.
+Files touched:
 
-## Files touched
-- `src/pages/Viewer.tsx` only.
+- **`src/pages/Capture.tsx`** (new) — replaces `Wizard.tsx` as the primary flow. Routed at `/capture/:id` (id can be `new`).
+- **`src/components/capture/GeoStartStep.tsx`** (new) — GPS request + map confirmation. Wraps existing `MapPinPicker`.
+- **`src/components/capture/CheckpointCaptureStep.tsx`** (new) — camera input, photo preview, arrow drag, note field, thumbnail strip.
+- **`src/components/capture/BrandingStep.tsx`** (new) — slim version of current Step 3.
+- **`src/components/capture/PublishStep.tsx`** (new) — share URL + QR (extracted from current Wizard).
+- **`src/components/wizard/CheckpointEditor.tsx`** — extract the single-checkpoint arrow editor into a reusable subcomponent used by both old wizard and new capture step.
+- **`src/pages/Dashboard.tsx`** — replace "Open wizard" CTA with "New location" routing to `/capture/new`; surface in-progress drafts as "Continue capturing".
+- **`src/App.tsx`** — add `/capture/:id` route. **Keep** `/wizard/:id` for now as a hidden fallback (not linked in UI) so existing drafts still open; remove in a follow-up after testing.
 
-## Out of scope
-- Wizard / creator side (Step 2 already saves arrow x/y/angle correctly).
-- Any DB migration or schema change.
-- Analytics event additions beyond what already exists.
+No schema changes — the existing `locations` + `checkpoints` tables already support the data (`start_lat`, `start_lng`, `start_address`, `start_note`, per-checkpoint `photo_url`, `arrow_direction`, `note`, `indicators`, `position`, `published`). Continuous save just calls the same `upsert` logic per step.
+
+Persistence model: create the `locations` row on Step 1 confirm (`published=false`), then insert each checkpoint as it's saved (instead of the wizard's current delete-and-reinsert-all-at-end pattern). This unlocks the resume flow.
+
+Geolocation: `navigator.geolocation.getCurrentPosition` with `{ enableHighAccuracy: true, timeout: 10000 }`. Permission-denied state shows "Pick on map instead" CTA.
+
+Camera: file input with `capture="environment"`; preview the captured `File` via `URL.createObjectURL` before upload so the arrow can be placed before the network round-trip.
+
+## What we're *not* changing
+
+- Visual design system, viewer page, analytics, auth.
+- Database schema.
+- The arrow overlay rendering logic in the viewer.
+
+## Out of scope (next iterations)
+
+- Auto-capture GPS per checkpoint (could enable later for "nearest checkpoint" hints).
+- Offline queue if the creator loses signal mid-walk.
+- Reordering checkpoints via drag (tap-to-edit/delete only for v1).
