@@ -190,15 +190,6 @@ export function MapPinPicker({
         )}
       </div>
 
-      {selected && (
-        <div className="rounded-2xl border border-amber-300/60 bg-amber-50 p-4 text-amber-950">
-          <div className="font-semibold text-sm mb-1">📍 Position the pin at the entrance</div>
-          <p className="text-xs leading-relaxed">
-            Drag the red pin to mark exactly where visitors should arrive from the street — not the building center. This pin will be shown to visitors when they're lost, so precision matters!
-          </p>
-        </div>
-      )}
-
       <div ref={mapDivRef} className="w-full aspect-square md:aspect-auto md:h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
       {pinAdjusted && (
         <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3">

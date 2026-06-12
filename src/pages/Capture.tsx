@@ -23,6 +23,8 @@ import {
   Camera,
   Check,
   Copy,
+  Crosshair,
+  DoorOpen,
   Download,
   Loader2,
   MapPin,
@@ -35,9 +37,85 @@ import {
 import QRCode from "qrcode";
 
 type Step = 0 | 1 | 2 | 3;
-const STEPS = ["Starting point", "Checkpoints", "Branding", "Publish"];
+const STEPS = ["Street Entrance", "Checkpoints", "Branding", "Publish"];
 
 type LocalCheckpoint = Checkpoint & { id?: string };
+
+// Visual "handoff" explainer shown at the top of the Street Entrance step.
+// Three connected beats: Google Maps → (you, highlighted) → Usha. Low-text,
+// mobile-first, theme tokens only.
+function HandoffStrip() {
+  const stages = [
+    {
+      icon: MapPin,
+      title: "Google Maps",
+      body: "Brings visitors to the street.",
+      highlight: false,
+    },
+    {
+      icon: Crosshair,
+      title: "You mark this spot",
+      body: "Stand where Maps drops people off. Usha starts guiding from here.",
+      highlight: true,
+    },
+    {
+      icon: DoorOpen,
+      title: "Usha",
+      body: "Walks them to the door.",
+      highlight: false,
+    },
+  ];
+
+  return (
+    <ol className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5">
+      {stages.map((s, i) => {
+        const Icon = s.icon;
+        const last = i === stages.length - 1;
+        return (
+          <li
+            key={i}
+            className="relative flex gap-3.5 pb-4 last:pb-0"
+            aria-current={s.highlight ? "step" : undefined}
+          >
+            {!last && (
+              <span
+                aria-hidden
+                className="absolute left-[1.125rem] top-9 bottom-1 w-px -translate-x-1/2 bg-border"
+              />
+            )}
+            <span
+              aria-hidden
+              className={`relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border ${
+                s.highlight
+                  ? "border-transparent bg-primary text-primary-foreground shadow-soft"
+                  : "border-border bg-muted text-muted-foreground"
+              }`}
+            >
+              <Icon className="size-4" />
+            </span>
+            <div className="min-w-0 pt-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`text-sm font-medium ${
+                    s.highlight ? "text-foreground" : "text-foreground/80"
+                  }`}
+                >
+                  {s.title}
+                </span>
+                {s.highlight && (
+                  <span className="inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-foreground">
+                    I'll take it from here
+                  </span>
+                )}
+              </div>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{s.body}</p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function Capture() {
   const { id } = useParams();
@@ -57,7 +135,7 @@ export default function Capture() {
   const [welcome, setWelcome] = useState("Welcome! Follow the photos to find us.");
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
-  const [startNote, setStartNote] = useState("");
+  const [entranceNote, setEntranceNote] = useState("");
   const [startAddress, setStartAddress] = useState<string | null>(null);
   const [slug, setSlug] = useState("");
   const [published, setPublished] = useState(false);
@@ -83,7 +161,7 @@ export default function Capture() {
         setWelcome(loc.welcome_message);
         setLat(loc.start_lat);
         setLng(loc.start_lng);
-        setStartNote(loc.start_note ?? "");
+        setEntranceNote(loc.start_note ?? "");
         setStartAddress((loc as any).start_address ?? null);
         setSlug(loc.slug);
         setPublished(loc.published);
@@ -96,7 +174,7 @@ export default function Capture() {
         .eq("location_id", id!)
         .order("position");
       if (cps) setCheckpoints(cps as any);
-      // If user already has a starting point, jump them into the checkpoint step.
+      // If user already has a Street Entrance, jump them into the checkpoint step.
       if (loc?.start_lat != null) setStep(loc.published ? 3 : 1);
       setLoading(false);
     })();
@@ -127,7 +205,7 @@ export default function Capture() {
       welcome_message: welcome,
       start_lat: lat,
       start_lng: lng,
-      start_note: startNote || null,
+      start_note: entranceNote || null,
       start_address: startAddress || null,
       slug: makeSlug(studioName),
     };
@@ -152,7 +230,7 @@ export default function Capture() {
         welcome_message: welcome,
         start_lat: lat,
         start_lng: lng,
-        start_note: startNote || null,
+        start_note: entranceNote || null,
         start_address: startAddress || null,
         ...extra,
       })
@@ -228,9 +306,9 @@ export default function Capture() {
     );
   };
 
-  const confirmStart = async () => {
+  const confirmStreetEntrance = async () => {
     if (lat == null || lng == null) {
-      toast.error("Set a starting point first");
+      toast.error("Mark your Street Entrance first");
       return;
     }
     setSaving(true);
@@ -365,38 +443,42 @@ export default function Capture() {
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         <div className="eyebrow text-muted-foreground mb-2">Step {step + 1} of 4</div>
-        <h1 className="font-display text-2xl sm:text-4xl mb-6">{STEPS[step]}</h1>
+        <h1 className="font-display text-2xl sm:text-4xl mb-6">
+          {step === 0 ? "Where Usha takes over" : STEPS[step]}
+        </h1>
 
         {step === 0 && (
           <div className="space-y-5">
-            <p className="text-muted-foreground">
-              Stand at the spot where visitors should begin — usually a nearby landmark, transit
-              stop, or street corner. Tap below to drop a pin using your phone's GPS, then nudge
-              it on the map if needed.
-            </p>
+            <HandoffStrip />
 
             {geoState !== "ok" && geoState !== "manual" && (
-              <Button
-                onClick={requestGeo}
-                disabled={geoState === "loading"}
-                size="lg"
-                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground text-base"
-              >
-                {geoState === "loading" ? (
-                  <>
-                    <Loader2 className="size-5 mr-2 animate-spin" /> Getting your location…
-                  </>
-                ) : (
-                  <>
-                    <MapPin className="size-5 mr-2" /> I'm at the starting point — use my location
-                  </>
-                )}
-              </Button>
+              <div className="space-y-2.5">
+                <Button
+                  onClick={requestGeo}
+                  disabled={geoState === "loading"}
+                  size="lg"
+                  className="w-full h-14 rounded-2xl bg-primary text-primary-foreground text-base"
+                >
+                  {geoState === "loading" ? (
+                    <>
+                      <Loader2 className="size-5 mr-2 animate-spin motion-reduce:animate-none" />{" "}
+                      Getting your location…
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="size-5 mr-2" /> Use my location
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Your exact spot here fixes Google's directions for every visitor.
+                </p>
+              </div>
             )}
 
             {geoState === "denied" && (
               <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
-                Location permission was blocked. Enable it in your browser settings, or pick the
+                Location permission was blocked. Enable it in your browser settings, or set the
                 spot manually on the map below.
               </div>
             )}
@@ -414,11 +496,11 @@ export default function Capture() {
                   }}
                 />
                 <div>
-                  <Label>Starting note (optional)</Label>
+                  <Label>Entrance note (optional)</Label>
                   <Textarea
                     rows={2}
-                    value={startNote}
-                    onChange={(e) => setStartNote(e.target.value)}
+                    value={entranceNote}
+                    onChange={(e) => setEntranceNote(e.target.value)}
                     placeholder="e.g. Exit the metro and face north"
                     className="mt-1.5"
                   />
@@ -429,21 +511,20 @@ export default function Capture() {
             {geoState !== "ok" && geoState !== "manual" && (
               <button
                 onClick={() => setGeoState("manual")}
-                className="text-sm text-accent hover:underline w-full text-center"
+                className="text-sm text-accent hover:underline w-full text-center rounded-md py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                Or pick the spot on a map instead
+                Set on the map instead
               </button>
             )}
 
             {lat != null && lng != null && (
               <Button
-                onClick={confirmStart}
+                onClick={confirmStreetEntrance}
                 disabled={saving}
                 size="lg"
                 className="w-full rounded-full bg-primary text-primary-foreground h-12"
               >
-                {saving ? "Saving…" : "Confirm starting point"}{" "}
-                <ArrowRight className="size-4 ml-1" />
+                {saving ? "Saving…" : "This is the spot"} <ArrowRight className="size-4 ml-1" />
               </Button>
             )}
           </div>
