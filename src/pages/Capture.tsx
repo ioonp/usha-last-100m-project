@@ -197,9 +197,11 @@ export default function Capture() {
     })();
   }, [id, isNew, user]);
 
-  // Read the real geolocation permission state up front so we only show the
-  // "blocked in settings" message when it's actually denied — never before the
-  // user has been asked ("prompt" and "granted" both stay on the happy path).
+  // Keep the UI in sync with the live geolocation permission so it reflects
+  // changes (e.g. the user enables location in settings) WITHOUT a reload.
+  // We both subscribe to the PermissionStatus "change" event and re-query when
+  // the tab regains focus/visibility — the common case where the user leaves to
+  // flip a browser/OS setting and comes back (where "change" may not fire).
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.permissions?.query) return;
     let status: PermissionStatus | null = null;
@@ -213,21 +215,39 @@ export default function Capture() {
       });
     };
 
-    navigator.permissions
-      .query({ name: "geolocation" as PermissionName })
-      .then((s) => {
-        if (cancelled) return;
-        status = s;
-        apply(s.state);
-        s.onchange = () => apply(s.state);
-      })
-      .catch(() => {
-        /* Permissions API unsupported — fall back to button-driven prompt */
-      });
+    // change handler reads the freshest status object held in `status`
+    const onChange = () => {
+      if (status) apply(status.state);
+    };
+
+    const recheck = () => {
+      navigator.permissions
+        .query({ name: "geolocation" as PermissionName })
+        .then((s) => {
+          if (cancelled) return;
+          if (status) status.removeEventListener("change", onChange);
+          status = s;
+          status.addEventListener("change", onChange);
+          apply(s.state);
+        })
+        .catch(() => {
+          /* Permissions API unsupported — fall back to button-driven prompt */
+        });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") recheck();
+    };
+
+    recheck();
+    window.addEventListener("focus", recheck);
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       cancelled = true;
-      if (status) status.onchange = null;
+      if (status) status.removeEventListener("change", onChange);
+      window.removeEventListener("focus", recheck);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
@@ -501,35 +521,9 @@ export default function Capture() {
           <div className="space-y-6">
             <HandoffStrip />
 
-            {(geoState === "idle" ||
-              geoState === "loading" ||
-              geoState === "denied" ||
-              geoState === "error") && (
+            {/* prompt / granted (happy path) — active request button, no error */}
+            {(geoState === "idle" || geoState === "loading") && (
               <div className="space-y-2.5">
-                {/* Blocked: the only state that points at browser settings */}
-                {geoState === "denied" && (
-                  <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <MapPinOff
-                      className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
-                      aria-hidden
-                    />
-                    <span>
-                      Location access is blocked in your browser — enable it in settings, or set
-                      the spot on the map.
-                    </span>
-                  </p>
-                )}
-                {/* Transient failure (unavailable / timeout): offer a retry */}
-                {geoState === "error" && (
-                  <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <AlertCircle
-                      className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
-                      aria-hidden
-                    />
-                    <span>Couldn't get your location — try again, or set it on the map.</span>
-                  </p>
-                )}
-
                 <Button
                   onClick={requestGeo}
                   disabled={geoState === "loading"}
@@ -544,19 +538,48 @@ export default function Capture() {
                     </>
                   ) : (
                     <>
-                      <MapPin className="size-5 mr-2" />{" "}
-                      {geoState === "error" ? "Try again" : "Use my location"}
+                      <MapPin className="size-5 mr-2" /> Use my location
                     </>
                   )}
                 </Button>
-
-                {/* Helper line only on the normal (non-error) path */}
-                {(geoState === "idle" || geoState === "loading") && (
-                  <p className="text-xs text-muted-foreground">
-                    Your exact spot here fixes Google's directions for every visitor.
-                  </p>
-                )}
+                <p className="text-xs text-muted-foreground">
+                  Your exact spot here fixes Google's directions for every visitor.
+                </p>
               </div>
+            )}
+
+            {/* transient failure (unavailable / timeout) — retry is valid here */}
+            {geoState === "error" && (
+              <div className="space-y-2.5">
+                <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <AlertCircle
+                    className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
+                    aria-hidden
+                  />
+                  <span>Couldn't get your location — try again, or set it on the map.</span>
+                </p>
+                <Button
+                  onClick={requestGeo}
+                  size="lg"
+                  variant="outline"
+                  className="w-full h-12 rounded-full text-base"
+                >
+                  <MapPin className="size-5 mr-2" /> Try again
+                </Button>
+              </div>
+            )}
+
+            {/* blocked — compact notice only; no active request button (it would
+                just fail). The user re-enables in settings and the listener /
+                focus re-check flips this back to the happy path automatically. */}
+            {geoState === "denied" && (
+              <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                <MapPinOff className="size-3.5 shrink-0 mt-0.5 text-destructive/70" aria-hidden />
+                <span>
+                  Location access is blocked in your browser — turn it on in settings and come
+                  back, or set the spot on the map below.
+                </span>
+              </p>
             )}
 
             {(geoState === "ok" || geoState === "manual" || (lat != null && lng != null)) && (
