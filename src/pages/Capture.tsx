@@ -152,11 +152,12 @@ export default function Capture() {
   const [checkpoints, setCheckpoints] = useState<LocalCheckpoint[]>([]);
   const [editingIdx, setEditingIdx] = useState<number | null>(null); // index within checkpoints currently being captured/edited
   const [qrDataUrl, setQrDataUrl] = useState("");
-  // idle  = permission "prompt"/"granted", not yet requested (happy path, show button)
+  // idle  = default/neutral — button visible, no message (regardless of permissions.query)
   // loading = waiting on getCurrentPosition (native dialog may be open)
   // ok     = coords captured
-  // denied = permission blocked (PERMISSION_DENIED) — only state that shows "enable in settings"
-  // error  = POSITION_UNAVAILABLE / TIMEOUT — transient, offer retry
+  // denied = a getCurrentPosition tap returned code 1 PERMISSION_DENIED (site blocked) —
+  //          the ONLY proof of a site block; shows the browser-settings message
+  // error  = getCurrentPosition code 2 POSITION_UNAVAILABLE / 3 TIMEOUT (device GPS off/unavailable)
   // manual = user opted to set it on the map instead
   const [geoState, setGeoState] =
     useState<"idle" | "loading" | "ok" | "denied" | "error" | "manual">("idle");
@@ -196,59 +197,14 @@ export default function Capture() {
     })();
   }, [id, isNew, user]);
 
-  // Keep the UI in sync with the live geolocation permission so it reflects
-  // changes (e.g. the user enables location in settings) WITHOUT a reload.
-  // We both subscribe to the PermissionStatus "change" event and re-query when
-  // the tab regains focus/visibility — the common case where the user leaves to
-  // flip a browser/OS setting and comes back (where "change" may not fire).
-  useEffect(() => {
-    if (typeof navigator === "undefined" || !navigator.permissions?.query) return;
-    let status: PermissionStatus | null = null;
-    let cancelled = false;
-
-    const apply = (state: PermissionState) => {
-      setGeoState((prev) => {
-        // never override an in-progress request or an already-resolved choice
-        if (prev === "ok" || prev === "manual" || prev === "loading") return prev;
-        return state === "denied" ? "denied" : "idle";
-      });
-    };
-
-    // change handler reads the freshest status object held in `status`
-    const onChange = () => {
-      if (status) apply(status.state);
-    };
-
-    const recheck = () => {
-      navigator.permissions
-        .query({ name: "geolocation" as PermissionName })
-        .then((s) => {
-          if (cancelled) return;
-          if (status) status.removeEventListener("change", onChange);
-          status = s;
-          status.addEventListener("change", onChange);
-          apply(s.state);
-        })
-        .catch(() => {
-          /* Permissions API unsupported — fall back to button-driven prompt */
-        });
-    };
-
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") recheck();
-    };
-
-    recheck();
-    window.addEventListener("focus", recheck);
-    document.addEventListener("visibilitychange", onVisibility);
-
-    return () => {
-      cancelled = true;
-      if (status) status.removeEventListener("change", onChange);
-      window.removeEventListener("focus", recheck);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, []);
+  // NOTE: we deliberately do NOT use navigator.permissions.query to drive the
+  // button or the "blocked" message. On Android, when device (OS-level) GPS is
+  // off, permissions.query reports "denied" even though the SITE isn't blocked —
+  // which previously hid the button up-front and showed a false "blocked in
+  // browser" message, never reaching the getCurrentPosition error-code branch.
+  // Button visibility and any blocked/off message are decided ONLY by the actual
+  // getCurrentPosition() error code after a tap (see requestGeo). The button
+  // stays visible, so the user can fix the OS/browser setting and just tap again.
 
   const shareUrl = useMemo(() => (slug ? `${window.location.origin}/find/${slug}` : ""), [slug]);
 
@@ -523,9 +479,41 @@ export default function Capture() {
           <div className="space-y-6">
             <HandoffStrip />
 
-            {/* prompt / granted (happy path) — active request button, no error */}
-            {(geoState === "idle" || geoState === "loading") && (
+            {/* Button stays visible in every pre-positioned state. Any message is
+                driven ONLY by the actual getCurrentPosition error code after a tap
+                (denied = site blocked; error = device GPS off/unavailable) — never
+                by permissions.query, so an OS-level GPS-off isn't misread as a
+                site block. The user fixes the setting and taps the same button. */}
+            {(geoState === "idle" ||
+              geoState === "loading" ||
+              geoState === "denied" ||
+              geoState === "error") && (
               <div className="space-y-2.5">
+                {geoState === "denied" && (
+                  <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <MapPinOff
+                      className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
+                      aria-hidden
+                    />
+                    <span>
+                      Location is blocked for this site. Enable it in your browser settings, then
+                      tap again.
+                    </span>
+                  </p>
+                )}
+                {geoState === "error" && (
+                  <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <MapPinOff
+                      className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
+                      aria-hidden
+                    />
+                    <span>
+                      Location is turned off on your phone. Turn it on in your device settings, then
+                      tap “Use my location” again.
+                    </span>
+                  </p>
+                )}
+
                 <Button
                   onClick={requestGeo}
                   disabled={geoState === "loading"}
@@ -544,49 +532,14 @@ export default function Capture() {
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-muted-foreground">
-                  Your exact spot here fixes Google's directions for every visitor.
-                </p>
-              </div>
-            )}
 
-            {/* device GPS off / unavailable (POSITION_UNAVAILABLE | TIMEOUT) — the
-                site isn't blocked, so keep the button: the user turns on phone
-                location themselves, then taps to re-attempt getCurrentPosition. */}
-            {geoState === "error" && (
-              <div className="space-y-2.5">
-                <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <MapPinOff
-                    className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
-                    aria-hidden
-                  />
-                  <span>
-                    Location is turned off on your phone. Turn it on in your device settings, then
-                    tap “Use my location” again.
-                  </span>
-                </p>
-                <Button
-                  onClick={requestGeo}
-                  size="lg"
-                  variant="outline"
-                  className="w-full h-12 rounded-full text-base"
-                >
-                  <MapPin className="size-5 mr-2" /> Use my location
-                </Button>
+                {/* helper line only on the neutral/happy path */}
+                {(geoState === "idle" || geoState === "loading") && (
+                  <p className="text-xs text-muted-foreground">
+                    Your exact spot here fixes Google's directions for every visitor.
+                  </p>
+                )}
               </div>
-            )}
-
-            {/* blocked — compact notice only; no active request button (it would
-                just fail). The user re-enables in settings and the listener /
-                focus re-check flips this back to the happy path automatically. */}
-            {geoState === "denied" && (
-              <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                <MapPinOff className="size-3.5 shrink-0 mt-0.5 text-destructive/70" aria-hidden />
-                <span>
-                  Location access is blocked in your browser — turn it on in settings and come
-                  back, or set the spot on the map below.
-                </span>
-              </p>
             )}
 
             {(geoState === "ok" || geoState === "manual" || (lat != null && lng != null)) && (
