@@ -6,11 +6,20 @@ import { Search, CheckCircle2 } from "lucide-react";
 
 type Suggestion = { place_id: string; main: string; secondary: string };
 
-// Street-level zoom for pin placement: shows the surrounding block and streets
-// (not a single building roof). Used both on init and after GPS/search.
-const STREET_ZOOM = 17;
+// Street-level zoom for pin placement: high enough that building footprints
+// render clearly so the Creator can place the pin against the building edge,
+// without dropping onto a single rooftop. Used on init and after GPS/search.
+const STREET_ZOOM = 18;
 // Wider view for the empty placeholder, before any location is chosen.
 const OVERVIEW_ZOOM = 15;
+
+// Keep building/POI/man-made geometry visible so footprints render with their
+// default outlines (no feature is hidden — Creators align the pin to a building
+// edge). Labels are left at their defaults.
+const MAP_STYLES = [
+  { featureType: "poi", elementType: "geometry", stylers: [{ visibility: "on" }] },
+  { featureType: "landscape.man_made", elementType: "geometry", stylers: [{ visibility: "on" }] },
+];
 
 export function MapPinPicker({
   lat, lng, address, onChange,
@@ -86,6 +95,7 @@ export function MapPinPicker({
       disableDefaultUI: true,
       zoomControl: true,
       gestureHandling: "greedy",
+      styles: MAP_STYLES,
     });
     mapRef.current = map;
     placesServiceRef.current = new g.maps.places.PlacesService(map);
