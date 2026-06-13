@@ -220,7 +220,7 @@ export function MapPinPicker({
       {pinAdjusted && (
         <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
           <CheckCircle2 className="size-4 shrink-0" />
-          <span>Pin positioned — visitors will be guided to this exact spot</span>
+          <span>Pin positioned — Usha starts guiding visitors from here</span>
         </div>
       )}
       {selected && lat != null && lng != null && (
