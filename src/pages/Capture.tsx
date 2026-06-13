@@ -23,11 +23,12 @@ import {
   Camera,
   Check,
   Copy,
-  Crosshair,
   DoorOpen,
   Download,
+  Hand,
   Loader2,
   MapPin,
+  MapPinOff,
   Pencil,
   Plus,
   Trash2,
@@ -41,75 +42,83 @@ const STEPS = ["Street Entrance", "Checkpoints", "Branding", "Publish"];
 
 type LocalCheckpoint = Checkpoint & { id?: string };
 
-// Visual "handoff" explainer shown at the top of the Street Entrance step.
-// Three connected beats: Google Maps → (you, highlighted) → Usha. Low-text,
-// mobile-first, theme tokens only.
+// Visual "handoff" explainer — the hero of the Street Entrance step. Three
+// connected beats (Google Maps → you → Usha) with the high-contrast "I'll take
+// it from here" pill sitting on the line at the handoff point between stage 1
+// and stage 2. Sits open on the page; mobile-first, theme tokens only.
 function HandoffStrip() {
   const stages = [
     {
       icon: MapPin,
       title: "Google Maps",
       body: "Brings visitors to the street.",
+      sub: "It's reliable up to the address — then it drops them and stops.",
       highlight: false,
     },
     {
-      icon: Crosshair,
+      icon: Hand,
       title: "You mark this spot",
       body: "Stand where Maps drops people off. Usha starts guiding from here.",
+      sub: null,
       highlight: true,
     },
     {
       icon: DoorOpen,
       title: "Usha",
-      body: "Walks them to the door.",
+      body: "Walks them through the courtyard to the door.",
+      sub: "Photo by photo, arrow by arrow — the part Maps can't show.",
       highlight: false,
     },
   ];
 
   return (
-    <ol className="rounded-2xl border border-border bg-card/50 p-4 sm:p-5">
+    <ol className="relative">
       {stages.map((s, i) => {
         const Icon = s.icon;
         const last = i === stages.length - 1;
+        const isHandoff = i === 0; // the connector below stage 1 is the handoff
         return (
           <li
             key={i}
-            className="relative flex gap-3.5 pb-4 last:pb-0"
+            className={`relative flex gap-4 ${last ? "pb-0" : isHandoff ? "pb-10" : "pb-7"}`}
             aria-current={s.highlight ? "step" : undefined}
           >
+            {/* connecting line from this node down to the next */}
             {!last && (
               <span
                 aria-hidden
-                className="absolute left-[1.125rem] top-9 bottom-1 w-px -translate-x-1/2 bg-border"
+                className="absolute left-[1.375rem] top-11 bottom-0 w-px -translate-x-1/2 bg-border"
               />
             )}
             <span
               aria-hidden
-              className={`relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border ${
+              className={`relative z-10 flex size-11 shrink-0 items-center justify-center rounded-full border ${
                 s.highlight
                   ? "border-transparent bg-primary text-primary-foreground shadow-soft"
                   : "border-border bg-muted text-muted-foreground"
               }`}
             >
-              <Icon className="size-4" />
+              <Icon className="size-5" />
             </span>
-            <div className="min-w-0 pt-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`text-sm font-medium ${
-                    s.highlight ? "text-foreground" : "text-foreground/80"
-                  }`}
-                >
-                  {s.title}
-                </span>
-                {s.highlight && (
-                  <span className="inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-foreground">
-                    I'll take it from here
-                  </span>
-                )}
-              </div>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{s.body}</p>
+            <div className="min-w-0 pt-1.5">
+              <p
+                className={`text-sm font-semibold ${
+                  s.highlight ? "text-foreground" : "text-foreground/90"
+                }`}
+              >
+                {s.title}
+              </p>
+              <p className="mt-1 text-sm leading-snug text-foreground/70">{s.body}</p>
+              {s.sub && (
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.sub}</p>
+              )}
             </div>
+            {/* handoff pill — high-contrast ink, threaded onto the line */}
+            {isHandoff && (
+              <span className="absolute bottom-3 left-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground shadow-soft">
+                <Hand className="size-3" aria-hidden /> I'll take it from here
+              </span>
+            )}
           </li>
         );
       })}
@@ -448,16 +457,17 @@ export default function Capture() {
         </h1>
 
         {step === 0 && (
-          <div className="space-y-5">
+          <div className="space-y-6">
             <HandoffStrip />
 
-            {geoState !== "ok" && geoState !== "manual" && (
+            {(geoState === "idle" || geoState === "loading") && (
               <div className="space-y-2.5">
                 <Button
                   onClick={requestGeo}
                   disabled={geoState === "loading"}
                   size="lg"
-                  className="w-full h-14 rounded-2xl bg-primary text-primary-foreground text-base"
+                  variant="outline"
+                  className="w-full h-12 rounded-full text-base"
                 >
                   {geoState === "loading" ? (
                     <>
@@ -477,10 +487,10 @@ export default function Capture() {
             )}
 
             {geoState === "denied" && (
-              <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
-                Location permission was blocked. Enable it in your browser settings, or set the
-                spot manually on the map below.
-              </div>
+              <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                <MapPinOff className="size-3.5 shrink-0 mt-0.5 text-destructive/70" aria-hidden />
+                <span>Location access is blocked in your browser — enable it in settings, or set the spot on the map.</span>
+              </p>
             )}
 
             {(geoState === "ok" || geoState === "manual" || (lat != null && lng != null)) && (
