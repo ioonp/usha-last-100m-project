@@ -18,6 +18,7 @@ import { uploadAsset } from "@/lib/upload";
 import { makeSlug } from "@/lib/slug";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   Camera,
@@ -152,7 +153,14 @@ export default function Capture() {
   const [checkpoints, setCheckpoints] = useState<LocalCheckpoint[]>([]);
   const [editingIdx, setEditingIdx] = useState<number | null>(null); // index within checkpoints currently being captured/edited
   const [qrDataUrl, setQrDataUrl] = useState("");
-  const [geoState, setGeoState] = useState<"idle" | "loading" | "ok" | "denied" | "manual">("idle");
+  // idle  = permission "prompt"/"granted", not yet requested (happy path, show button)
+  // loading = waiting on getCurrentPosition (native dialog may be open)
+  // ok     = coords captured
+  // denied = permission blocked (PERMISSION_DENIED) — only state that shows "enable in settings"
+  // error  = POSITION_UNAVAILABLE / TIMEOUT — transient, offer retry
+  // manual = user opted to set it on the map instead
+  const [geoState, setGeoState] =
+    useState<"idle" | "loading" | "ok" | "denied" | "error" | "manual">("idle");
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -188,6 +196,40 @@ export default function Capture() {
       setLoading(false);
     })();
   }, [id, isNew, user]);
+
+  // Read the real geolocation permission state up front so we only show the
+  // "blocked in settings" message when it's actually denied — never before the
+  // user has been asked ("prompt" and "granted" both stay on the happy path).
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.permissions?.query) return;
+    let status: PermissionStatus | null = null;
+    let cancelled = false;
+
+    const apply = (state: PermissionState) => {
+      setGeoState((prev) => {
+        // never override an in-progress request or an already-resolved choice
+        if (prev === "ok" || prev === "manual" || prev === "loading") return prev;
+        return state === "denied" ? "denied" : "idle";
+      });
+    };
+
+    navigator.permissions
+      .query({ name: "geolocation" as PermissionName })
+      .then((s) => {
+        if (cancelled) return;
+        status = s;
+        apply(s.state);
+        s.onchange = () => apply(s.state);
+      })
+      .catch(() => {
+        /* Permissions API unsupported — fall back to button-driven prompt */
+      });
+
+    return () => {
+      cancelled = true;
+      if (status) status.onchange = null;
+    };
+  }, []);
 
   const shareUrl = useMemo(() => (slug ? `${window.location.origin}/find/${slug}` : ""), [slug]);
 
@@ -307,9 +349,8 @@ export default function Capture() {
         setGeoState("ok");
       },
       (err) => {
-        if (err.code === err.PERMISSION_DENIED) setGeoState("denied");
-        else setGeoState("manual");
-        toast.error("Couldn't read your location — you can pick it on the map.");
+        // PERMISSION_DENIED -> blocked (settings); otherwise transient -> retry
+        setGeoState(err.code === err.PERMISSION_DENIED ? "denied" : "error");
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
@@ -460,8 +501,35 @@ export default function Capture() {
           <div className="space-y-6">
             <HandoffStrip />
 
-            {(geoState === "idle" || geoState === "loading") && (
+            {(geoState === "idle" ||
+              geoState === "loading" ||
+              geoState === "denied" ||
+              geoState === "error") && (
               <div className="space-y-2.5">
+                {/* Blocked: the only state that points at browser settings */}
+                {geoState === "denied" && (
+                  <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <MapPinOff
+                      className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
+                      aria-hidden
+                    />
+                    <span>
+                      Location access is blocked in your browser — enable it in settings, or set
+                      the spot on the map.
+                    </span>
+                  </p>
+                )}
+                {/* Transient failure (unavailable / timeout): offer a retry */}
+                {geoState === "error" && (
+                  <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <AlertCircle
+                      className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
+                      aria-hidden
+                    />
+                    <span>Couldn't get your location — try again, or set it on the map.</span>
+                  </p>
+                )}
+
                 <Button
                   onClick={requestGeo}
                   disabled={geoState === "loading"}
@@ -476,21 +544,19 @@ export default function Capture() {
                     </>
                   ) : (
                     <>
-                      <MapPin className="size-5 mr-2" /> Use my location
+                      <MapPin className="size-5 mr-2" />{" "}
+                      {geoState === "error" ? "Try again" : "Use my location"}
                     </>
                   )}
                 </Button>
-                <p className="text-xs text-muted-foreground">
-                  Your exact spot here fixes Google's directions for every visitor.
-                </p>
-              </div>
-            )}
 
-            {geoState === "denied" && (
-              <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                <MapPinOff className="size-3.5 shrink-0 mt-0.5 text-destructive/70" aria-hidden />
-                <span>Location access is blocked in your browser — enable it in settings, or set the spot on the map.</span>
-              </p>
+                {/* Helper line only on the normal (non-error) path */}
+                {(geoState === "idle" || geoState === "loading") && (
+                  <p className="text-xs text-muted-foreground">
+                    Your exact spot here fixes Google's directions for every visitor.
+                  </p>
+                )}
+              </div>
             )}
 
             {(geoState === "ok" || geoState === "manual" || (lat != null && lng != null)) && (
