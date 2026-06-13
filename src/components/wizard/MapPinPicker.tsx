@@ -6,6 +6,12 @@ import { Search, CheckCircle2 } from "lucide-react";
 
 type Suggestion = { place_id: string; main: string; secondary: string };
 
+// Street-level zoom for pin placement: shows the surrounding block and streets
+// (not a single building roof). Used both on init and after GPS/search.
+const STREET_ZOOM = 17;
+// Wider view for the empty placeholder, before any location is chosen.
+const OVERVIEW_ZOOM = 15;
+
 export function MapPinPicker({
   lat, lng, address, onChange,
 }: {
@@ -50,6 +56,21 @@ export function MapPinPicker({
     });
   };
 
+  // Wire a draggable marker: the lat/lng readout tracks live while dragging,
+  // and the address resolves once the pin settles (geocode only on dragend).
+  const wireMarker = (marker: any) => {
+    marker.addListener("drag", () => {
+      const p = marker.getPosition();
+      if (!p) return;
+      setPinAdjusted(true);
+      onChange(p.lat(), p.lng(), null); // live coords, skip geocoding mid-drag
+    });
+    marker.addListener("dragend", () => {
+      const p = marker.getPosition();
+      if (p) reverseGeocode(p.lat(), p.lng());
+    });
+  };
+
 
   // Initialize map as soon as Google is ready. Default to Brandenburg Gate, Berlin
   // until the user picks a suggestion. Marker is only added after a selection.
@@ -61,9 +82,10 @@ export function MapPinPicker({
     const initLng = hasInitial ? (lng as number) : 13.37769;
     const map = new g.maps.Map(mapDivRef.current, {
       center: { lat: initLat, lng: initLng },
-      zoom: hasInitial ? 17 : 15,
+      zoom: hasInitial ? STREET_ZOOM : OVERVIEW_ZOOM,
       disableDefaultUI: true,
       zoomControl: true,
+      gestureHandling: "greedy",
     });
     mapRef.current = map;
     placesServiceRef.current = new g.maps.places.PlacesService(map);
@@ -72,10 +94,7 @@ export function MapPinPicker({
         position: { lat: initLat, lng: initLng },
         map, draggable: true,
       });
-      marker.addListener("dragend", () => {
-        const p = marker.getPosition();
-        if (p) { setPinAdjusted(true); reverseGeocode(p.lat(), p.lng()); }
-      });
+      wireMarker(marker);
       markerRef.current = marker;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,16 +142,13 @@ export function MapPinPicker({
         // Update map: recenter and create/move marker
         if (mapRef.current) {
           mapRef.current.setCenter({ lat: la, lng: ln });
-          mapRef.current.setZoom(19);
+          mapRef.current.setZoom(STREET_ZOOM);
           if (!markerRef.current) {
             const marker = new g.maps.Marker({
               position: { lat: la, lng: ln },
               map: mapRef.current, draggable: true,
             });
-            marker.addListener("dragend", () => {
-              const p = marker.getPosition();
-              if (p) { setPinAdjusted(true); reverseGeocode(p.lat(), p.lng()); }
-            });
+            wireMarker(marker);
             markerRef.current = marker;
           } else {
             markerRef.current.setPosition({ lat: la, lng: ln });
