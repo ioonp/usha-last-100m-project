@@ -18,7 +18,6 @@ import { uploadAsset } from "@/lib/upload";
 import { makeSlug } from "@/lib/slug";
 import { toast } from "sonner";
 import {
-  AlertCircle,
   ArrowLeft,
   ArrowRight,
   Camera,
@@ -369,9 +368,12 @@ export default function Capture() {
         setGeoState("ok");
       },
       (err) => {
-        // PERMISSION_DENIED -> blocked (settings); otherwise transient -> retry
+        // PERMISSION_DENIED (1) -> the site is blocked; fix is browser settings.
+        // POSITION_UNAVAILABLE (2) / TIMEOUT (3) -> device GPS is off/unavailable;
+        // fix is the phone's location toggle, then tap the button again.
         setGeoState(err.code === err.PERMISSION_DENIED ? "denied" : "error");
       },
+      // ~10s timeout so a missing GPS signal surfaces as TIMEOUT, not a hang
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   };
@@ -548,15 +550,20 @@ export default function Capture() {
               </div>
             )}
 
-            {/* transient failure (unavailable / timeout) — retry is valid here */}
+            {/* device GPS off / unavailable (POSITION_UNAVAILABLE | TIMEOUT) — the
+                site isn't blocked, so keep the button: the user turns on phone
+                location themselves, then taps to re-attempt getCurrentPosition. */}
             {geoState === "error" && (
               <div className="space-y-2.5">
                 <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <AlertCircle
+                  <MapPinOff
                     className="size-3.5 shrink-0 mt-0.5 text-destructive/70"
                     aria-hidden
                   />
-                  <span>Couldn't get your location — try again, or set it on the map.</span>
+                  <span>
+                    Location is turned off on your phone. Turn it on in your device settings, then
+                    tap “Use my location” again.
+                  </span>
                 </p>
                 <Button
                   onClick={requestGeo}
@@ -564,7 +571,7 @@ export default function Capture() {
                   variant="outline"
                   className="w-full h-12 rounded-full text-base"
                 >
-                  <MapPin className="size-5 mr-2" /> Try again
+                  <MapPin className="size-5 mr-2" /> Use my location
                 </Button>
               </div>
             )}
