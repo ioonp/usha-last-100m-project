@@ -591,19 +591,18 @@ export default function Capture() {
 
         {step === 1 && (
           <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Walk the route. At each turn or landmark, snap a photo and place an arrow showing
-              where to go next.
-            </p>
+            {checkpoints.length > 0 && (
+              <p className="text-muted-foreground">
+                Walk the route. At each turn or landmark, snap a photo and place an arrow showing
+                where to go next.
+              </p>
+            )}
 
             {checkpoints.length === 0 ? (
               <div className="border border-dashed border-border rounded-2xl p-8 text-center">
                 <Camera className="size-8 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground mb-1">Start at the street entrance</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Your first checkpoint should be a photo of the main entrance you pinned on the map
-                  — where Google Maps drops people off.
-                </p>
+                <p className="text-sm text-muted-foreground mb-1">Start at the entrance</p>
+                <p className="text-sm text-muted-foreground mb-4">Snap the door you pinned on the map.</p>
                 <Button
                   onClick={startNewCheckpoint}
                   size="lg"
