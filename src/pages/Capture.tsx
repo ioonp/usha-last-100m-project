@@ -599,13 +599,17 @@ export default function Capture() {
             {checkpoints.length === 0 ? (
               <div className="border border-dashed border-border rounded-2xl p-8 text-center">
                 <Camera className="size-8 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground mb-4">No checkpoints yet</p>
+                <p className="text-sm text-muted-foreground mb-1">Start at the street entrance</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Your first checkpoint should be a photo of the main entrance you pinned on the map
+                  — where Google Maps drops people off.
+                </p>
                 <Button
                   onClick={startNewCheckpoint}
                   size="lg"
                   className="rounded-full bg-primary text-primary-foreground h-12 px-6"
                 >
-                  <Camera className="size-4 mr-2" /> Capture first checkpoint
+                  <Camera className="size-4 mr-2" /> Capture street entrance
                 </Button>
               </div>
             ) : (
