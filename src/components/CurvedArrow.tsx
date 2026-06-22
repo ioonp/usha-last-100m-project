@@ -1,44 +1,40 @@
+import {
+  ARROW_CORAL,
+  CHEVRON_OPACITIES,
+  CHEVRON_STROKE_WIDTH,
+  CHEVRON_HALF_WIDTH,
+  CHEVRON_ARM_DROP,
+  CHEVRON_SPACING,
+  CHEVRON_BASE_CY,
+  CHEVRON_LINECAP,
+  CHEVRON_LINEJOIN,
+} from "@/lib/arrowGlyph";
+
 export function CurvedArrow({
   angle = 0,
   size = 120,
-  color = "white",
   className = "",
-  withShadow = true,
   animate = true,
 }: {
   angle?: number;
   size?: number;
+  /** Accepted for call-site compatibility; the flat glyph is always coral. */
   color?: string;
   className?: string;
+  /** Accepted for call-site compatibility; the flat glyph has no shadow. */
   withShadow?: boolean;
   animate?: boolean;
 }) {
-  // viewBox keeps the tip-of-cascade anchored at (0, ~-100) and the tail
-  // (largest chevron) near (0, +100). The editor's rotation math
-  // (atan2(-dx, dy)) on the tail handle keeps working unchanged because the
-  // bottom-most chevron sits at the bottom of the viewBox.
-  //
-  // Cascading open V chevrons receding toward the top, Google-Maps style:
-  // white fill, blue stroke, soft drop shadow. The top (smallest) chevron is
-  // slightly translucent to reinforce depth.
-  // Instagram-editorial: thin open V strokes, warm white, hand-annotated feel.
-  const STROKE = color === "white" ? "#FFFDF8" : color;
-  // Warm coral by default, matching the editorial Instagram-sticker feel.
-  // Pass color="#F5C842" to switch to sandy gold.
-  const FILL_STROKE = color === "white" ? "#FF6B6B" : STROKE;
-
-  // Each chevron defined by: cy (vertical center), w (half-width),
-  // h (half-height of the V), opacity.
-  // Bottom chevron is at least 90px wide (w = 48 → full width 96px),
-  // each step up shrinks meaningfully and rises toward the top of the viewBox.
-  const chevrons = [
-    { cy:  78, w: 48, h: 26, o: 1.0  }, // bottom — largest, closest (~96px wide)
-    { cy:   6, w: 32, h: 18, o: 0.9  }, // middle (~64px wide)
-    { cy: -60, w: 18, h: 11, o: 0.7  }, // top — smallest (~36px wide)
-  ];
-
-  const chevronPath = (cy: number, w: number, h: number) =>
-    `M ${-w} ${cy} L 0 ${cy - h} L ${w} ${cy}`;
+  // Skewed stack of evenly spaced, equal-width chevrons pointing toward the
+  // heading. At angle 0 the stack points "up" (each V's tip toward -y) and the
+  // base chevron sits at the bottom, nearest the anchor. The SVG transform
+  // below rotates the whole group rigidly around the viewBox centre (0,0) —
+  // the same pivot the editor's drag/rotate handles already rely on, so
+  // placement, dragging and rotation are unchanged.
+  const w = CHEVRON_HALF_WIDTH;
+  const h = CHEVRON_ARM_DROP;
+  // One chevron: arms at (±w, cy), tip above them at (0, cy - h).
+  const chevronPath = (cy: number) => `M ${-w} ${cy} L 0 ${cy - h} L ${w} ${cy}`;
 
   return (
     <svg
@@ -48,9 +44,6 @@ export function CurvedArrow({
       style={{
         transform: `rotate(${angle}deg)`,
         transformOrigin: "50% 50%",
-        filter: withShadow
-          ? "drop-shadow(0 1px 3px rgba(0,0,0,0.2))"
-          : undefined,
         overflow: "visible",
       }}
       className={className}
@@ -61,39 +54,35 @@ export function CurvedArrow({
           50% { opacity: calc(var(--base-o, 1) * 0.65); }
         }
       `}</style>
-      {chevrons.map((c, i) => (
-        <g
-          key={i}
-          opacity={c.o}
-          style={
-            animate
-              ? ({
-                  "--base-o": c.o,
-                  animation: "curvedArrowPulse 1.8s ease-in-out infinite",
-                  // Bottom (i=0) leads, top (i=2) trails — staggered cascade
-                  animationDelay: `${i * 0.25}s`,
-                } as any)
-              : undefined
-          }
-        >
-          <path
-            d={chevronPath(c.cy, c.w, c.h)}
-            fill="none"
-            stroke="rgba(0,0,0,0.45)"
-            strokeWidth={13}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d={chevronPath(c.cy, c.w, c.h)}
-            fill="none"
-            stroke={FILL_STROKE}
-            strokeWidth={10}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </g>
-      ))}
+      {CHEVRON_OPACITIES.map((o, i) => {
+        // i = 0 is the base (bottom, fully opaque); higher i steps toward the
+        // tip (up the axis and fainter).
+        const cy = CHEVRON_BASE_CY - i * CHEVRON_SPACING;
+        return (
+          <g
+            key={i}
+            opacity={o}
+            style={
+              animate
+                ? ({
+                    "--base-o": o,
+                    animation: "curvedArrowPulse 1.8s ease-in-out infinite",
+                    animationDelay: `${i * 0.25}s`,
+                  } as any)
+                : undefined
+            }
+          >
+            <path
+              d={chevronPath(cy)}
+              fill="none"
+              stroke={ARROW_CORAL}
+              strokeWidth={CHEVRON_STROKE_WIDTH}
+              strokeLinecap={CHEVRON_LINECAP}
+              strokeLinejoin={CHEVRON_LINEJOIN}
+            />
+          </g>
+        );
+      })}
     </svg>
   );
 }
