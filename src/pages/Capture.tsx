@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MapPinPicker } from "@/components/wizard/MapPinPicker";
 import {
   PhotoCanvas,
+  WALKER_FRAME_ASPECT,
   normalizeIndicator,
   uid,
   type Checkpoint,
@@ -918,7 +919,7 @@ function CheckpointCaptureView({
         )}
 
         {!checkpoint.photo_url ? (
-          <label className="block w-full aspect-square rounded-2xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
+          <label className={`block w-full max-w-[300px] mx-auto ${WALKER_FRAME_ASPECT} rounded-2xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth`}>
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
               {uploading ? (
                 <>
