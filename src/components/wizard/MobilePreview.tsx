@@ -1,21 +1,11 @@
 import { CurvedArrow } from "@/components/CurvedArrow";
-import { normalizeIndicator, type Checkpoint, type Indicator, type LegacyDirection } from "./CheckpointEditor";
+import { normalizeIndicator, type Checkpoint, type Indicator } from "./CheckpointEditor";
 import { useState } from "react";
 
-const LEGACY_TO_ANGLE: Record<LegacyDirection, number> = {
-  up: 0, "up-right": 45, right: 90, "down-right": 135,
-  down: 180, "down-left": 225, left: 270, "up-left": 315,
-};
-
-function PreviewIndicators({ indicators, fallbackDir }: { indicators: Indicator[]; fallbackDir: LegacyDirection }) {
+// Render only the indicators this checkpoint explicitly saved — an empty list
+// shows no arrow, matching the Walker view (no legacy arrow_direction fallback).
+function PreviewIndicators({ indicators }: { indicators: Indicator[] }) {
   const list = (indicators ?? []).map(normalizeIndicator);
-  if (!list || list.length === 0) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center">
-        <CurvedArrow angle={LEGACY_TO_ANGLE[fallbackDir] ?? 0} size={120} color="white" />
-      </div>
-    );
-  }
   return (
     <>
       {list.map((ind) => (
@@ -90,7 +80,7 @@ export function MobilePreview({
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">No photo</div>
                   )}
-                  <PreviewIndicators indicators={cp.indicators ?? []} fallbackDir={cp.arrow_direction} />
+                  <PreviewIndicators indicators={cp.indicators ?? []} />
                 </div>
                 <div className="bg-card p-3 border-t border-border">
                   {cp.note && <p className="text-xs mb-2">{cp.note}</p>}

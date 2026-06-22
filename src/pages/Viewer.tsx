@@ -15,11 +15,6 @@ type Loc = {
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
 
-const LEGACY_TO_ANGLE: Record<LegacyDirection, number> = {
-  up: 0, "up-right": 45, right: 90, "down-right": 135,
-  down: 180, "down-left": 225, left: 270, "up-left": 315,
-};
-
 const DIR_ICON: Record<LegacyDirection, React.ComponentType<{ className?: string }>> = {
   up: ArrowUp, "up-right": ArrowUpRight, right: ArrowRight, "down-right": ArrowDownRight,
   down: ArrowDown, "down-left": ArrowDownLeft, left: ArrowLeft, "up-left": ArrowUpLeft,
@@ -257,9 +252,10 @@ export default function Viewer() {
   }
 
   // ---------- REEL CHECKPOINT ----------
+  // Arrows/spots are strictly per-checkpoint: render only what this checkpoint
+  // explicitly saved. An empty list is a valid empty state — no fallback arrow.
   const rawIndicators = (cp!.indicators ?? []) as any[];
   const indicators: Indicator[] = rawIndicators.map(normalizeIndicator);
-  const hasIndicators = indicators.length > 0;
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
@@ -276,8 +272,7 @@ export default function Viewer() {
 
           {/* Indicators (arrows + spots) overlaid on the photo */}
           <div className="absolute inset-0 z-10 pointer-events-none">
-            {hasIndicators ? (
-              indicators.map((ind) => (
+            {indicators.map((ind) => (
                 <div
                   key={ind.id}
                   className="absolute"
@@ -313,16 +308,7 @@ export default function Viewer() {
                     </div>
                   )}
                 </div>
-              ))
-            ) : (
-              <div className="absolute inset-x-0 flex items-center justify-center" style={{ top: "38%" }}>
-                <CurvedArrow
-                  angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0}
-                  size={160}
-                  color="white"
-                />
-              </div>
-            )}
+              ))}
           </div>
         </div>
       </div>
