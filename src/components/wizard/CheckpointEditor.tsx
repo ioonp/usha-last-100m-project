@@ -33,12 +33,9 @@ export type Checkpoint = {
 export const uid = () => Math.random().toString(36).slice(2, 10);
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
-// Walkers see each checkpoint photo full-screen in a portrait phone viewport
-// (Viewer.tsx: h-[100dvh] w-full, object-cover). Creators must annotate on the
-// exact same frame so the normalized x/y they store maps 1:1 to the Walker's
-// pixels. Single source of truth for that portrait ratio — also used by the
-// in-wizard phone preview (MobilePreview.tsx).
-export const WALKER_FRAME_ASPECT = "aspect-[9/19.5]";
+// Captured-photo frame caps its height to the viewport so the whole image stays
+// visible without scrolling, leaving room for the header + the controls below.
+const PHOTO_MAX_H = "max-h-[70dvh]";
 
 // Normalize indicators read from DB (may have only legacy `direction` field)
 export function normalizeIndicator(ind: any): Indicator {
@@ -110,12 +107,17 @@ export function PhotoCanvas({
   return (
     <div
       ref={ref}
-      className={`relative w-full max-w-[300px] mx-auto ${WALKER_FRAME_ASPECT} rounded-xl overflow-hidden bg-muted select-none`}
+      className="relative mx-auto w-fit max-w-full rounded-xl overflow-hidden bg-muted select-none"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
-      <img src={photoUrl} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" draggable={false} />
+      <img
+        src={photoUrl}
+        alt=""
+        className={`block w-auto max-w-full ${PHOTO_MAX_H} object-contain pointer-events-none`}
+        draggable={false}
+      />
       {indicators.map((ind) => (
         <div
           key={ind.id}
@@ -287,7 +289,7 @@ export function CheckpointEditor({
                   onChange={(next) => setIndicators(i, next)}
                 />
               ) : (
-                <label className={`block w-full max-w-[300px] mx-auto ${WALKER_FRAME_ASPECT} rounded-xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth`}>
+                <label className="block w-full aspect-square md:aspect-[4/3] rounded-xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs gap-1">
                     <Upload className="size-5" />
                     {uploadingIdx === i ? "Uploading…" : isStart ? "Upload entrance photo" : "Upload photo"}
