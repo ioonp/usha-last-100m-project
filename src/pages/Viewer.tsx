@@ -263,58 +263,68 @@ export default function Viewer() {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
-      {/* Photo */}
-      <img src={cp!.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      {/* Photo + indicators — fitted to the photo's true aspect ratio and centered,
+          so the frame matches the creator editor and normalized coordinates map 1:1.
+          Letterboxes against the black backdrop (object-contain) instead of cropping. */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative">
+          <img
+            src={cp!.photo_url}
+            alt=""
+            className="block max-h-[100dvh] max-w-[100vw] object-contain"
+          />
 
-      {/* Indicators (arrows + spots) overlaid on the photo */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {hasIndicators ? (
-          indicators.map((ind) => (
-            <div
-              key={ind.id}
-              className="absolute"
-              style={{
-                left: `${ind.x * 100}%`,
-                top: `${ind.y * 100}%`,
-                transform: "translate(-50%, -50%)",
-              }}
-            >
-              {ind.type === "direction" ? (
-                <CurvedArrow angle={ind.angle} size={140} color="white" />
-              ) : (
+          {/* Indicators (arrows + spots) overlaid on the photo */}
+          <div className="absolute inset-0 z-10 pointer-events-none">
+            {hasIndicators ? (
+              indicators.map((ind) => (
                 <div
-                  className="flex flex-col items-center"
-                  style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}
+                  key={ind.id}
+                  className="absolute"
+                  style={{
+                    left: `${ind.x * 100}%`,
+                    top: `${ind.y * 100}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
                 >
-                  <div className="relative">
-                    <span
-                      className="block absolute inset-0 rounded-full animate-spot-pulse"
-                      style={{ backgroundColor: accent }}
-                      aria-hidden
-                    />
-                    <span
-                      className="relative block size-5 rounded-full border-2"
-                      style={{ backgroundColor: accent, borderColor: "#FFFDF8" }}
-                    />
-                  </div>
-                  {ind.label && (
-                    <span className="mt-1.5 px-2 py-0.5 text-[11px] font-medium text-foreground bg-white/95 rounded-md">
-                      {ind.label}
-                    </span>
+                  {ind.type === "direction" ? (
+                    <CurvedArrow angle={ind.angle} size={140} color="white" />
+                  ) : (
+                    <div
+                      className="flex flex-col items-center"
+                      style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}
+                    >
+                      <div className="relative">
+                        <span
+                          className="block absolute inset-0 rounded-full animate-spot-pulse"
+                          style={{ backgroundColor: accent }}
+                          aria-hidden
+                        />
+                        <span
+                          className="relative block size-5 rounded-full border-2"
+                          style={{ backgroundColor: accent, borderColor: "#FFFDF8" }}
+                        />
+                      </div>
+                      {ind.label && (
+                        <span className="mt-1.5 px-2 py-0.5 text-[11px] font-medium text-foreground bg-white/95 rounded-md">
+                          {ind.label}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="absolute inset-x-0 flex items-center justify-center" style={{ top: "38%" }}>
-            <CurvedArrow
-              angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0}
-              size={160}
-              color="white"
-            />
+              ))
+            ) : (
+              <div className="absolute inset-x-0 flex items-center justify-center" style={{ top: "38%" }}>
+                <CurvedArrow
+                  angle={LEGACY_TO_ANGLE[cp!.arrow_direction] ?? 0}
+                  size={160}
+                  color="white"
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Top progress pills */}
