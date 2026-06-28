@@ -888,7 +888,7 @@ function CheckpointCaptureView({
     const base = { id: uid(), x: 0.5, y: 0.5 };
     const next: Indicator =
       type === "direction"
-        ? { ...base, type: "direction", angle: 45 }
+        ? { ...base, type: "direction", angle: 0 }
         : { ...base, type: "spot", label: "" };
     onChange({ indicators: [...indicators, next] });
   };
