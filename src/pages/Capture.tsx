@@ -903,7 +903,7 @@ function CheckpointCaptureView({
           >
             <ArrowLeft className="size-4" /> Back
           </button>
-          <div className="text-xs text-muted-foreground">
+          <div className="step-eyebrow">
             {isStart ? "Starting point" : `Step ${index + 1}`} of {total}
           </div>
         </div>
@@ -918,7 +918,7 @@ function CheckpointCaptureView({
         )}
 
         {!checkpoint.photo_url ? (
-          <label className="block w-full aspect-square rounded-2xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
+          <label className="block w-full aspect-square rounded-card border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
               {uploading ? (
                 <>
@@ -927,7 +927,9 @@ function CheckpointCaptureView({
                 </>
               ) : (
                 <>
-                  <Camera className="size-10" />
+                  <div className="flex items-center justify-center size-16 rounded-input bg-accent-soft text-accent mb-1">
+                    <Camera className="size-8" />
+                  </div>
                   <span className="text-sm font-medium">Take photo</span>
                   <span className="text-xs">Tap to open camera</span>
                 </>

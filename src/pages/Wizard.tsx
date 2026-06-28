@@ -188,7 +188,7 @@ export default function Wizard() {
 
       <main className="container mx-auto px-4 py-6 sm:py-10 grid lg:grid-cols-[1fr_320px] gap-8 lg:gap-12">
         <div className="min-w-0 w-full overflow-hidden">
-          <div className="eyebrow text-muted-foreground mb-2">Step {step + 1} of 4</div>
+          <div className="step-eyebrow mb-2">Step {step + 1} of 4</div>
           <h1 className="font-display text-2xl sm:text-4xl mb-6 sm:mb-8">{STEPS[step]}</h1>
 
           {step === 0 && (
@@ -200,8 +200,8 @@ export default function Wizard() {
                 <Textarea rows={2} value={startNote} onChange={(e) => setStartNote(e.target.value)}
                   placeholder="e.g. Exit the metro and face north" className="mt-1.5" />
               </div>
-              <div className="rounded-2xl border border-accent/20 bg-accent-soft/60 p-4">
-                <div className="eyebrow text-accent mb-1">Next up</div>
+              <div className="rounded-card border border-accent/20 bg-accent-soft/60 p-4">
+                <div className="step-eyebrow mb-1">Next up</div>
                 <p className="text-sm text-foreground/80">
                   In Step 2, your first checkpoint is the <strong>building entrance</strong> — a photo taken from the spot where Google Maps drops visitors, facing the entrance. Walkers see it both to confirm they're in the right place and as the first frame of the route.
                 </p>
@@ -236,7 +236,7 @@ export default function Wizard() {
                 <Label>Accent color</Label>
                 <div className="mt-1.5 flex items-center gap-3 flex-wrap">
                   <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)}
-                    className="size-12 rounded-xl border border-border cursor-pointer" />
+                    className="size-12 rounded-input border border-border cursor-pointer" />
                   <Input value={accent} onChange={(e) => setAccent(e.target.value)} className="font-mono w-32" />
                 </div>
               </div>
@@ -252,16 +252,16 @@ export default function Wizard() {
               {!published ? (
                 <>
                   <p className="text-muted-foreground">Ready to share? Publishing makes the page live and accessible at the URL below.</p>
-                  <Button size="lg" onClick={publish} disabled={saving} className="rounded-full bg-accent text-accent-foreground h-12 px-8 w-full sm:w-auto">
+                  <Button size="lg" onClick={publish} disabled={saving} className="rounded-full bg-primary text-primary-foreground h-12 px-8 w-full sm:w-auto">
                     {saving ? "Publishing…" : "Publish location"}
                   </Button>
                 </>
               ) : (
                 <>
-                  <div className="bg-accent-soft border border-accent/20 rounded-2xl p-5 w-full max-w-full min-w-0 overflow-hidden">
-                    <div className="eyebrow text-accent mb-1">Live</div>
+                  <div className="bg-success-soft border border-success/20 rounded-card p-5 w-full max-w-full min-w-0 overflow-hidden">
+                    <span className="step-eyebrow inline-block rounded-full bg-accent-soft px-2.5 py-1 mb-3">Live</span>
                     <p className="font-display text-xl mb-3">Your wayfinding page is published.</p>
-                    <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 w-full max-w-full min-w-0 overflow-hidden" style={{ width: "100%", overflow: "hidden" }}>
+                    <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 shadow-input w-full max-w-full min-w-0 overflow-hidden" style={{ width: "100%", overflow: "hidden" }}>
                       <div className="text-sm font-mono flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis max-w-full" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{shareUrl}</div>
                       <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
                         <Copy className="size-3.5" />
@@ -269,7 +269,7 @@ export default function Wizard() {
                     </div>
                   </div>
                   {qrDataUrl && (
-                    <div className="flex flex-col items-center bg-card border border-border rounded-2xl p-6 w-full">
+                    <div className="flex flex-col items-center bg-card border border-border rounded-card shadow-card p-6 w-full">
                       <img src={qrDataUrl} alt="QR code" className="w-40 h-40 sm:w-48 sm:h-48" />
                       <Button onClick={downloadQR} variant="outline" className="rounded-full mt-4">
                         <Download className="size-4 mr-2" /> Download PNG
