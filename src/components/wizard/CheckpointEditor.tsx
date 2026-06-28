@@ -260,7 +260,7 @@ export function CheckpointEditor({
         const hasSpot = indicators.some((x) => x.type === "spot");
         const isStart = i === 0;
         return (
-          <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-fade-in-up">
+          <div key={i} className="bg-card border border-border rounded-card shadow-card p-4 animate-fade-in-up">
             <div className="flex items-center justify-between mb-3">
               <div className="eyebrow text-muted-foreground">
                 {isStart ? "Starting point — building entrance" : `Step ${i}`}
@@ -289,9 +289,11 @@ export function CheckpointEditor({
                   onChange={(next) => setIndicators(i, next)}
                 />
               ) : (
-                <label className="block w-full aspect-square md:aspect-[4/3] rounded-xl border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
-                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs gap-1">
-                    <Upload className="size-5" />
+                <label className="block w-full aspect-square md:aspect-[4/3] rounded-card border-2 border-dashed border-border overflow-hidden cursor-pointer relative bg-muted hover:border-accent transition-smooth">
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs gap-2">
+                    <div className="flex items-center justify-center size-12 rounded-input bg-accent-soft text-accent">
+                      <Upload className="size-5" />
+                    </div>
                     {uploadingIdx === i ? "Uploading…" : isStart ? "Upload entrance photo" : "Upload photo"}
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && onUpload(i, e.target.files[0])} />
