@@ -11,6 +11,7 @@ import { CheckpointEditor, type Checkpoint } from "@/components/wizard/Checkpoin
 import { MobilePreview } from "@/components/wizard/MobilePreview";
 import { uploadAsset } from "@/lib/upload";
 import { makeSlug } from "@/lib/slug";
+import { publishStrings } from "@/lib/strings";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Check, Copy, Download } from "lucide-react";
 import QRCode from "qrcode";
@@ -30,7 +31,7 @@ export default function Wizard() {
 
   const [studioName, setStudioName] = useState("My Studio");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [accent, setAccent] = useState("#b45309");
+  const [accent, setAccent] = useState("#C9542B");
   const [welcome, setWelcome] = useState("Welcome! Follow the photos to find us.");
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -252,6 +253,20 @@ export default function Wizard() {
               {!published ? (
                 <>
                   <p className="text-muted-foreground">Ready to share? Publishing makes the page live and accessible at the URL below.</p>
+                  <div className="bg-card border border-border rounded-card shadow-card p-5 space-y-3">
+                    <div className="step-eyebrow">{publishStrings.summaryEyebrow}</div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">{publishStrings.studioLabel}</div>
+                      <div className="font-display text-lg truncate">{studioName}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">{publishStrings.linkLabel}</div>
+                      <div className="text-sm font-mono text-foreground/80 truncate">{shareUrl}</div>
+                    </div>
+                    <div className="text-sm text-foreground/80">
+                      {publishStrings.contents(Math.max(0, checkpoints.filter((c) => c.photo_url).length - 1))}
+                    </div>
+                  </div>
                   <Button size="lg" onClick={publish} disabled={saving} className="rounded-full bg-primary text-primary-foreground h-12 px-8 w-full sm:w-auto">
                     {saving ? "Publishing…" : "Publish location"}
                   </Button>
@@ -271,7 +286,7 @@ export default function Wizard() {
                   {qrDataUrl && (
                     <div className="flex flex-col items-center bg-card border border-border rounded-card shadow-card p-6 w-full">
                       <img src={qrDataUrl} alt="QR code" className="w-40 h-40 sm:w-48 sm:h-48" />
-                      <Button onClick={downloadQR} variant="outline" className="rounded-full mt-4">
+                      <Button onClick={downloadQR} variant="ghost" className="rounded-full mt-4 border border-border text-foreground hover:bg-muted hover:text-foreground">
                         <Download className="size-4 mr-2" /> Download PNG
                       </Button>
                     </div>

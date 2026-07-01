@@ -115,7 +115,9 @@ export default function Dashboard() {
                   {l.logo_url ? (
                     <img src={l.logo_url} alt="" className="size-10 rounded-full object-cover" />
                   ) : (
-                    <div className="size-10 rounded-full" style={{ backgroundColor: l.accent_color }} />
+                    <div className="size-10 rounded-full flex items-center justify-center font-display font-bold text-white" style={{ backgroundColor: l.accent_color }}>
+                      {l.studio_name?.trim().charAt(0).toUpperCase() || "?"}
+                    </div>
                   )}
                   <div className="min-w-0">
                     <div className="font-display text-lg truncate">{l.studio_name}</div>
@@ -124,11 +126,11 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-5">
                   <span className="flex items-center gap-1"><Eye className="size-3.5" /> {l.view_count}</span>
-                  <span className={`text-xs eyebrow ${l.published ? "text-accent" : "text-muted-foreground"}`}>
+                  <span className={`text-xs eyebrow ${l.published ? "text-success" : "text-muted-foreground"}`}>
                     {l.published ? "Live" : "Draft"}
                   </span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <Link to={`/capture/${l.id}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full rounded-full"><Pencil className="size-3.5 mr-1" /> Edit</Button>
                   </Link>
@@ -137,7 +139,7 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-full"
+                        className="rounded-full size-9 shrink-0 p-0"
                         onClick={() => copyLink(l.slug)}
                         title="Copy link"
                       >
@@ -146,20 +148,20 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="rounded-full"
+                        className="rounded-full size-9 shrink-0 p-0"
                         onClick={() => downloadQR(l.slug)}
                         title="Download QR"
                       >
                         <Download className="size-3.5" />
                       </Button>
-                      <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer">
-                        <Button variant="outline" size="sm" className="rounded-full" title="Open">
+                      <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer" className="shrink-0">
+                        <Button variant="outline" size="sm" className="rounded-full size-9 shrink-0 p-0" title="Open">
                           <ExternalLink className="size-3.5" />
                         </Button>
                       </a>
                     </>
                   )}
-                  <Button variant="ghost" size="sm" className="rounded-full" onClick={() => setArchived(l.id, !l.archived)}>
+                  <Button variant="ghost" size="sm" className="rounded-full size-9 shrink-0 p-0" onClick={() => setArchived(l.id, !l.archived)}>
                     {l.archived ? <ArchiveRestore className="size-3.5" /> : <Archive className="size-3.5" />}
                   </Button>
                 </div>
