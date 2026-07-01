@@ -1,4 +1,5 @@
 import { CurvedArrow } from "@/components/CurvedArrow";
+import { locationStrings } from "@/lib/strings";
 import { normalizeIndicator, type Checkpoint, type Indicator } from "./CheckpointEditor";
 import { useState } from "react";
 
@@ -60,7 +61,7 @@ export function MobilePreview({
                 ) : (
                   <div className="size-16 rounded-full mb-3" style={{ backgroundColor: accent }} />
                 )}
-                <div className="font-display text-xl mb-2">{studioName || "Your studio"}</div>
+                <div className="font-display text-xl mb-2">{studioName || locationStrings.previewFallback}</div>
                 <p className="text-xs text-muted-foreground mb-5">{welcome}</p>
                 <button onClick={() => setStep(0)} disabled={total === 0}
                   className="rounded-full px-6 py-2 text-xs font-medium text-white disabled:opacity-50"

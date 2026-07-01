@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { locationStrings } from "@/lib/strings";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function AuthPage() {
@@ -85,8 +86,8 @@ export default function AuthPage() {
           <form onSubmit={submit} className="space-y-4">
             {mode === "signup" && (
               <div className="space-y-1.5">
-                <Label>Studio name</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Sunlight Studio" required />
+                <Label>{locationStrings.nameLabel}</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={locationStrings.namePlaceholder} required />
               </div>
             )}
             <div className="space-y-1.5">
