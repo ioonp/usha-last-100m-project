@@ -11,7 +11,7 @@ import { CheckpointEditor, type Checkpoint } from "@/components/wizard/Checkpoin
 import { MobilePreview } from "@/components/wizard/MobilePreview";
 import { uploadAsset } from "@/lib/upload";
 import { makeSlug } from "@/lib/slug";
-import { publishStrings } from "@/lib/strings";
+import { locationStrings, publishStrings } from "@/lib/strings";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Check, Copy, Download } from "lucide-react";
 import QRCode from "qrcode";
@@ -29,7 +29,7 @@ export default function Wizard() {
   const [saving, setSaving] = useState(false);
   const [locationId, setLocationId] = useState<string | null>(isNew ? null : id ?? null);
 
-  const [studioName, setStudioName] = useState("My Studio");
+  const [studioName, setStudioName] = useState(locationStrings.defaultName);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [accent, setAccent] = useState("#C9542B");
   const [welcome, setWelcome] = useState("Welcome! Follow the photos to find us.");
@@ -220,8 +220,8 @@ export default function Wizard() {
           {step === 2 && (
             <div className="space-y-5 max-w-lg">
               <div>
-                <Label>Studio name</Label>
-                <Input value={studioName} onChange={(e) => setStudioName(e.target.value)} className="mt-1.5" />
+                <Label>{locationStrings.nameLabel}</Label>
+                <Input value={studioName} onChange={(e) => setStudioName(e.target.value)} placeholder={locationStrings.namePlaceholder} className="mt-1.5" />
               </div>
               <div>
                 <Label>Logo</Label>

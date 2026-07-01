@@ -16,6 +16,7 @@ import {
 } from "@/components/wizard/CheckpointEditor";
 import { uploadAsset } from "@/lib/upload";
 import { makeSlug } from "@/lib/slug";
+import { locationStrings } from "@/lib/strings";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -138,9 +139,9 @@ export default function Capture() {
   const [locationId, setLocationId] = useState<string | null>(isNew ? null : id ?? null);
 
   // location fields
-  const [studioName, setStudioName] = useState("My Studio");
+  const [studioName, setStudioName] = useState(locationStrings.defaultName);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [accent, setAccent] = useState("#b45309");
+  const [accent, setAccent] = useState("#C9542B");
   const [welcome, setWelcome] = useState("Welcome! Follow the photos to find us.");
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
@@ -690,10 +691,11 @@ export default function Capture() {
               A few finishing touches. You can skip this and edit later.
             </p>
             <div>
-              <Label>Studio name</Label>
+              <Label>{locationStrings.nameLabel}</Label>
               <Input
                 value={studioName}
                 onChange={(e) => setStudioName(e.target.value)}
+                placeholder={locationStrings.namePlaceholder}
                 className="mt-1.5"
               />
             </div>
