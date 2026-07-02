@@ -6,6 +6,7 @@ import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirec
 import { staticMapUrl } from "@/lib/maps";
 import { MapPin, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { trackEvent } from "@/lib/track";
+import { walkerStrings } from "@/lib/strings";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
@@ -30,6 +31,8 @@ export default function Viewer() {
   // -1 = landing, 0..total-1 = checkpoint, total = success
   const [step, setStep] = useState(-1);
   const [showArrival, setShowArrival] = useState(false);
+  // Shared stuck/help + venue-contact fallback sheet (arrival, checkpoints, success).
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -74,8 +77,11 @@ export default function Viewer() {
   const goNext = () => {
     if (step < total) setStep(step + 1);
   };
+  // Back is available on every checkpoint; from the first it returns to the
+  // welcome/arrival screen so the control is consistent across the reel.
   const goPrev = () => {
     if (step > 0) setStep(step - 1);
+    else if (step === 0) setStep(-1);
   };
 
   const openMaps = () => {
@@ -88,14 +94,76 @@ export default function Viewer() {
     window.location.href = url;
   };
 
+  const hasCoords = loc.start_lat != null && loc.start_lng != null;
+  const addressLine =
+    loc.start_address ||
+    (hasCoords ? `${loc.start_lat!.toFixed(5)}, ${loc.start_lng!.toFixed(5)}` : "Entrance location");
+
+  // Shared stuck/help + venue-contact fallback. Surfaces the venue details that
+  // exist and defers to the existing map handler (openMaps) — it does not change
+  // routing, Supabase, or the map component. Rendered into the arrival,
+  // checkpoint, and success branches below.
+  const helpSheet = helpOpen ? (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label={walkerStrings.help.title}
+    >
+      <button
+        type="button"
+        aria-label={walkerStrings.help.dismiss}
+        onClick={() => setHelpOpen(false)}
+        className="absolute inset-0 bg-black/60"
+      />
+      <div className="relative w-full max-w-md bg-[#111110] text-white rounded-t-3xl px-5 pt-3 shadow-2xl animate-fade-in-up"
+        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/25" />
+        <h2 className="font-display text-2xl mb-1.5">{walkerStrings.help.title}</h2>
+        <p className="text-white/70 text-sm leading-snug mb-5">{walkerStrings.help.body}</p>
+
+        <div className="rounded-2xl bg-white/[0.06] border border-white/10 p-4 mb-4">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1">
+            {walkerStrings.help.venueLabel}
+          </div>
+          <div className="text-base font-semibold mb-1">{loc.studio_name}</div>
+          <div className="text-sm text-white/70 break-words">{addressLine}</div>
+          {loc.start_note && (
+            <div className="mt-2 text-sm text-white/60">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-white/40 mr-1">
+                {walkerStrings.help.lookForLabel}
+              </span>
+              {loc.start_note}
+            </div>
+          )}
+        </div>
+
+        {hasCoords && (
+          <button
+            type="button"
+            onClick={openMaps}
+            className="w-full rounded-full py-4 mb-2.5 font-semibold text-white text-base inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-smooth"
+            style={{ backgroundColor: accent }}
+          >
+            <MapPin className="size-4" />
+            {walkerStrings.help.openMaps}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setHelpOpen(false)}
+          className="w-full rounded-full py-3.5 font-medium text-base border border-white/25 text-white active:scale-[0.98] transition-smooth"
+        >
+          {walkerStrings.help.dismiss}
+        </button>
+      </div>
+    </div>
+  ) : null;
+
   // ---------- LANDING ----------
   if (step === -1) {
     if (showArrival) {
-      const addressLine =
-        loc.start_address ||
-        (loc.start_lat != null && loc.start_lng != null
-          ? `${loc.start_lat.toFixed(5)}, ${loc.start_lng.toFixed(5)}`
-          : "Entrance location");
       const firstCp = cps[0] ?? null;
       const arrivalPhoto = firstCp?.photo_url ?? null;
       const arrivalCaption = firstCp?.note || loc.start_note || null;
@@ -186,14 +254,15 @@ export default function Viewer() {
                 Yes, I'm here
               </button>
               <button
-                onClick={() => setShowArrival(false)}
+                onClick={() => setHelpOpen(true)}
                 className="w-full rounded-full py-4 font-medium text-base border-2 active:scale-[0.98] transition-smooth"
                 style={{ borderColor: accent, color: accent }}
               >
-                Not yet
+                {walkerStrings.arrivalNotYet}
               </button>
             </div>
           </div>
+          {helpSheet}
         </div>
       );
     }
@@ -210,7 +279,13 @@ export default function Viewer() {
             <div className="size-20 rounded-full mx-auto mb-5" style={{ backgroundColor: accent }} />
           )}
           <h1 className="font-display text-4xl mb-3">{loc.studio_name}</h1>
-          <p className="text-muted-foreground mb-8 text-balance">{loc.welcome_message}</p>
+          <p className="text-muted-foreground mb-4 text-balance">{loc.welcome_message}</p>
+
+          {total > 0 && (
+            <p className="text-[13px] font-semibold uppercase tracking-wider mb-6" style={{ color: accent }}>
+              {walkerStrings.guidePrimer(total)}
+            </p>
+          )}
 
           {loc.start_lat != null && loc.start_lng != null && (
             <div className="rounded-2xl overflow-hidden border border-border mb-3 shadow-soft">
@@ -239,14 +314,25 @@ export default function Viewer() {
         className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
         style={{ backgroundColor: accent + "20" }}
       >
-        <div className="animate-scale-in">
+        <div className="animate-scale-in w-full max-w-sm">
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="font-display text-4xl mb-2">You made it!</h1>
           <p className="text-muted-foreground mb-8">Welcome to {loc.studio_name}.</p>
-          <button onClick={() => setStep(-1)} className="text-sm text-muted-foreground underline">
-            Start over
+          <button
+            onClick={() => setHelpOpen(true)}
+            className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant active:scale-[0.98] transition-smooth"
+            style={{ backgroundColor: accent }}
+          >
+            {walkerStrings.successContact}
+          </button>
+          <button
+            onClick={() => setStep(-1)}
+            className="mt-5 text-xs text-muted-foreground underline"
+          >
+            {walkerStrings.startOver}
           </button>
         </div>
+        {helpSheet}
       </div>
     );
   }
@@ -256,6 +342,15 @@ export default function Viewer() {
   // explicitly saved. An empty list is a valid empty state — no fallback arrow.
   const rawIndicators = (cp!.indicators ?? []) as any[];
   const indicators: Indicator[] = rawIndicators.map(normalizeIndicator);
+
+  const isLast = step === total - 1;
+  // One-line text caption sourced from the checkpoint's existing annotation
+  // (the first labelled spot indicator) — an accessibility layer and a backup
+  // when the photo alone is ambiguous.
+  const spotWithLabel = indicators.find(
+    (i): i is Extract<Indicator, { type: "spot" }> => i.type === "spot" && i.label.trim() !== "",
+  );
+  const annotationCaption = spotWithLabel?.label.trim() ?? null;
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
@@ -338,8 +433,7 @@ export default function Viewer() {
         type="button"
         aria-label="Previous"
         onClick={goPrev}
-        disabled={step === 0}
-        className="absolute left-0 top-12 bottom-36 z-20 disabled:opacity-40"
+        className="absolute left-0 top-12 bottom-36 z-20"
         style={{ width: "45%" }}
       />
       <button
@@ -350,17 +444,16 @@ export default function Viewer() {
         style={{ width: "45%" }}
       />
 
-      {/* Visible edge navigation buttons */}
-      {step > 0 && (
-        <button
-          type="button"
-          aria-label="Previous step"
-          onClick={goPrev}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 size-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center active:scale-95 transition-smooth"
-        >
-          <ChevronLeft className="size-6 text-foreground" />
-        </button>
-      )}
+      {/* Visible edge navigation buttons — back is shown on every checkpoint
+          (including the first and last) for a consistent control. */}
+      <button
+        type="button"
+        aria-label="Previous step"
+        onClick={goPrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 size-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center active:scale-95 transition-smooth"
+      >
+        <ChevronLeft className="size-6 text-foreground" />
+      </button>
       <button
         type="button"
         aria-label="Next step"
@@ -379,22 +472,36 @@ export default function Viewer() {
         }}
       >
         <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: accent }}>
-          Step {step + 1} of {total}
+          {walkerStrings.checkpointCounter(step + 1, total)}
         </div>
-        <div className="text-white text-[17px] font-medium leading-snug mb-3 text-balance">
-          {cp!.note || "Keep going"}
+        <div
+          className={`text-white text-[17px] font-medium leading-snug text-balance ${annotationCaption ? "mb-1.5" : "mb-3"}`}
+        >
+          {cp!.note || (isLast ? walkerStrings.almostThere : walkerStrings.keepGoing)}
         </div>
-        {loc.start_lat != null && loc.start_lng != null && (
-          <button
-            onClick={openMaps}
-            className="inline-flex items-center gap-1.5 text-white text-[13px] font-medium active:scale-95 transition-smooth"
-          >
-            <MapPin className="size-4" />
-            <span className="underline underline-offset-2">Show me on map</span>
-            <span className="text-white/60 text-[11px] ml-1">Opens in Maps app</span>
-          </button>
+        {annotationCaption && (
+          <div className="text-white/70 text-[13px] leading-snug mb-3 text-balance">{annotationCaption}</div>
         )}
+        <div className="flex flex-col items-start gap-2">
+          {loc.start_lat != null && loc.start_lng != null && (
+            <button
+              onClick={openMaps}
+              className="inline-flex items-center gap-1.5 text-white text-[13px] font-medium active:scale-95 transition-smooth"
+            >
+              <MapPin className="size-4" />
+              <span className="underline underline-offset-2">Show me on map</span>
+              <span className="text-white/60 text-[11px] ml-1">Opens in Maps app</span>
+            </button>
+          )}
+          <button
+            onClick={() => setHelpOpen(true)}
+            className="text-white/60 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
+          >
+            {walkerStrings.doesntMatch}
+          </button>
+        </div>
       </div>
+      {helpSheet}
     </div>
   );
 }
