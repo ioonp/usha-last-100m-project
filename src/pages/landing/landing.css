@@ -1,0 +1,119 @@
+/*
+ * Scoped animations for the marketing landing page ("/"). Every class is
+ * prefixed usha-landing- so nothing here leaks into shared components, and
+ * everything collapses to its final visible state under
+ * prefers-reduced-motion.
+ */
+
+.usha-landing-draw {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+}
+.usha-landing-trail.usha-landing-go .usha-landing-draw {
+  animation: usha-landing-draw 1.4s ease forwards;
+}
+.usha-landing-trail.usha-landing-go .usha-landing-draw-d2 {
+  animation-delay: 0.3s;
+}
+.usha-landing-trail.usha-landing-go .usha-landing-draw-d3 {
+  animation-delay: 0.6s;
+}
+@keyframes usha-landing-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.usha-landing-cpdot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.usha-landing-trail.usha-landing-go .usha-landing-cpdot {
+  animation: usha-landing-pop 0.4s ease forwards;
+}
+.usha-landing-trail.usha-landing-go .usha-landing-cp1 {
+  animation-delay: 0.5s;
+}
+.usha-landing-trail.usha-landing-go .usha-landing-cp2 {
+  animation-delay: 0.9s;
+}
+.usha-landing-trail.usha-landing-go .usha-landing-cp3 {
+  animation-delay: 1.3s;
+}
+@keyframes usha-landing-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.usha-landing-txt {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.usha-landing-texts.usha-landing-go .usha-landing-txt {
+  animation: usha-landing-rise 0.5s ease forwards;
+}
+.usha-landing-texts.usha-landing-go .usha-landing-txt:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.usha-landing-texts.usha-landing-go .usha-landing-txt:nth-child(3) {
+  animation-delay: 1s;
+}
+.usha-landing-texts.usha-landing-go .usha-landing-txt:nth-child(4) {
+  animation-delay: 1.5s;
+}
+@keyframes usha-landing-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.usha-landing-card {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.usha-landing-cards.usha-landing-go .usha-landing-card {
+  animation: usha-landing-rise 0.6s ease forwards;
+}
+.usha-landing-cards.usha-landing-go .usha-landing-card:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.usha-landing-cards.usha-landing-go .usha-landing-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.usha-landing-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+.usha-landing-reveal.usha-landing-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .usha-landing-draw,
+  .usha-landing-cpdot,
+  .usha-landing-txt,
+  .usha-landing-card,
+  .usha-landing-reveal {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
