@@ -28,104 +28,45 @@ export const publishStrings = {
     `Street Entrance + ${checkpoints} ${checkpoints === 1 ? "checkpoint" : "checkpoints"}`,
 };
 
-// Copy for the public marketing landing page ("/"). All visible strings for
-// that page live here so they can be tuned or localised without touching
-// component markup.
-export const landingStrings = {
-  nav: {
-    signIn: "Sign in",
-    buildOne: "Build one now",
-  },
-  hero: {
-    eyebrow: "Wayfinding for the last 100 meters",
-    headlinePrefix: "Find your way to the",
-    /** Words rotated through the headline's clay-colored slot, in order. */
-    rotatingWords: ["studio", "venue", "gallery", "clinic", "courtyard", "door"],
-    subhead:
-      "Maps gets people to the street. Then it quits — right where the courtyard, the back gate, and the hidden door begin.",
-    ctaPrimary: "Build one now",
-    ctaSecondary: "See a demo",
-    reassurance: "No app to download — visitors just tap a link.",
-    map: {
-      ariaLabel:
-        "A map where the Google Maps route stops at the street, leaving the real door hidden in a courtyard beyond reach.",
-      courtyardLabel: "HINTERHOF",
-      gapLabel: "the last 100m →",
-      legendMapsStop: "Where Maps stops",
-      legendActualDoor: "The actual door",
-    },
-  },
-  turn: {
-    eyebrow: "Where Usha takes over",
-    heading: "Pick up exactly where the map gives up.",
-    lead: "You lay down a short trail of photos — each one a checkpoint with an arrow pointing to the next. Your visitor just follows the pictures, straight through the gap to your door.",
-    steps: [
-      {
-        title: "Start where Maps drops them",
-        desc: "Set the street pin — the spot everyone gets stuck.",
-      },
-      {
-        title: "Drop photo checkpoints",
-        desc: "Snap the turns. Add an arrow. That's a checkpoint.",
-      },
-      {
-        title: "They reach the door",
-        desc: "No more “I’m outside, where are you?” — they just arrive.",
-      },
-    ],
-    map: {
-      ariaLabel:
-        "The same map, now with a trail of photo checkpoints bridging the gap from the street to the courtyard door.",
-      courtyardLabel: "HINTERHOF",
-      legendCheckpoint: "Photo checkpoint",
-      legendDoorReached: "Door reached",
-    },
-  },
-  recognition: {
-    eyebrow: "You know this conversation",
-    heading: "The texts you’re tired of sending.",
-    lead: "Every venue with a hidden door has this thread on repeat.",
-    thread: [
-      { from: "them" as const, text: "I’m outside? I don’t see it 😅" },
-      { from: "you" as const, text: "which entrance are you at?" },
-      { from: "them" as const, text: "there’s no sign… is it the courtyard?" },
-      { from: "you" as const, text: "stay there, I’ll come get you" },
-    ],
-    afterPrefix: "Usha replaces the whole thread with ",
-    afterHighlight: "one link",
-    afterSuffix: ".",
-  },
-  how: {
-    eyebrow: "Three steps, about three minutes",
-    heading: "Build a guide from your phone.",
-    lead: "Walk the route once, photographing as you go. Share the link. Done.",
-    cards: [
-      {
-        number: "01",
-        title: "Drop a starting pin",
-        desc: "Mark where Maps leaves people off — the street door your guide begins from.",
-      },
-      {
-        number: "02",
-        title: "Add photo checkpoints",
-        desc: "Photograph each turn and point an arrow the right way. One photo per decision.",
-      },
-      {
-        number: "03",
-        title: "Share a QR or link",
-        desc: "Print it, stick it by the street, drop it in your booking email. Visitors just follow.",
-      },
-    ],
-  },
-  cta: {
-    eyebrow: "For studios, venues, clinics, and event hosts",
-    heading: "Make one for your door.",
-    body: "If people get lost finding you, fix it before your next booking. Building a guide takes about three minutes.",
-    ctaPrimary: "Build one now",
-    ctaSecondary: "See a demo first",
-    note: "No account needed to try · No app for your visitors",
-  },
-  footer: {
-    tagline: "Photo wayfinding for the last 100 meters · Berlin",
+// Walker-facing copy for the public guide-following experience (the
+// /find/:slug Viewer). Wayfinding-signage tone: short, high-contrast,
+// unambiguous. Kept here rather than inline so Walker copy stays tunable in one
+// place and reads correctly at ~390px.
+export const walkerStrings = {
+  /** Welcome-screen primer between the subtitle and the map preview: guide
+   *  length plus a rough time. Photo count is derived from the live checkpoint
+   *  count; the duration is a static estimate until real timing data exists. */
+  guidePrimer: (photoCount: number) =>
+    `${photoCount} ${photoCount === 1 ? "photo" : "photos"} · about 90 seconds from the street`,
+
+  /** Per-checkpoint step counter, e.g. "Checkpoint 1 of 3". */
+  checkpointCounter: (current: number, total: number) =>
+    `Checkpoint ${current} of ${total}`,
+  /** Headline fallback for a mid-route checkpoint with no saved note. */
+  keepGoing: "Keep going",
+  /** Headline fallback for the final checkpoint — signals near-arrival. */
+  almostThere: "Almost there",
+  /** Low-emphasis checkpoint link that opens the stuck/help fallback. */
+  doesntMatch: "This doesn't match — help",
+
+  /** Relabelled arrival "Not yet" action — opens the map/contact fallback. */
+  arrivalNotYet: "Not yet — show me the map",
+
+  /** Success-screen primary action — opens the venue contact fallback. */
+  successContact: "Still can't find the door? Contact us",
+  /** Success-screen demoted secondary link. */
+  startOver: "Start over",
+
+  /** Shared stuck/help + venue-contact fallback sheet, reached from the arrival
+   *  "Not yet" action, each checkpoint's "doesn't match" link, and the success
+   *  screen. Surfaces the venue details that exist plus the existing map
+   *  handler; there is no phone/email column to expose. */
+  help: {
+    title: "Can't find the door?",
+    body: "Open the map to get your bearings, or head back to the street entrance and follow the photos from there.",
+    venueLabel: "Venue",
+    lookForLabel: "Look for",
+    openMaps: "Open in Maps",
+    dismiss: "Close",
   },
 };
