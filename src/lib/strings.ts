@@ -28,6 +28,13 @@ export const publishStrings = {
     `Street Entrance + ${checkpoints} ${checkpoints === 1 ? "checkpoint" : "checkpoints"}`,
 };
 
+export const landingStrings = {
+  nav: {
+    signIn: "Sign in",
+    buildOne: "Build one",
+  },
+};
+
 // Walker-facing copy for the public guide-following experience (the
 // /find/:slug Viewer). Wayfinding-signage tone: short, high-contrast,
 // unambiguous. Kept here rather than inline so Walker copy stays tunable in one
