@@ -12,6 +12,7 @@ import { MobilePreview } from "@/components/wizard/MobilePreview";
 import { uploadAsset } from "@/lib/upload";
 import { makeSlug } from "@/lib/slug";
 import { locationStrings, publishStrings } from "@/lib/strings";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Check, Copy, Download } from "lucide-react";
 import QRCode from "qrcode";
@@ -41,6 +42,11 @@ export default function Wizard() {
   const [published, setPublished] = useState(false);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+
+  // Fire once when the guide-creation wizard opens.
+  useEffect(() => {
+    trackEvent(EVENTS.WIZARD_STARTED);
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -140,12 +146,17 @@ export default function Wizard() {
       const ok = await persist();
       if (!ok) return;
     }
+    // Step 0 validation above has passed, so the street-entrance pin is set.
+    if (step === 0) trackEvent(EVENTS.STREET_ENTRANCE_SET);
     setStep((s) => Math.min(s + 1, 3));
   };
 
   const publish = async () => {
     const ok = await persist({ published: true });
-    if (ok) toast.success("Published! Share away.");
+    if (ok) {
+      trackEvent(EVENTS.GUIDE_PUBLISHED);
+      toast.success("Published! Share away.");
+    }
   };
 
   const onLogoUpload = async (file: File) => {
@@ -278,7 +289,7 @@ export default function Wizard() {
                     <p className="font-display text-xl mb-3">Your wayfinding page is published.</p>
                     <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 shadow-input w-full max-w-full min-w-0 overflow-hidden" style={{ width: "100%", overflow: "hidden" }}>
                       <div className="text-sm font-mono flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis max-w-full" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{shareUrl}</div>
-                      <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied"); }}>
+                      <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); trackEvent(EVENTS.FINDME_LINK_COPIED); toast.success("Copied"); }}>
                         <Copy className="size-3.5" />
                       </Button>
                     </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
@@ -44,6 +45,7 @@ export default function Dashboard() {
     const url = `${window.location.origin}/find/${slug}`;
     try {
       await navigator.clipboard.writeText(url);
+      trackEvent(EVENTS.FINDME_LINK_COPIED);
       toast.success("Link copied");
     } catch {
       toast.error("Couldn't copy link");
