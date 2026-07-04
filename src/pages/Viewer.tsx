@@ -6,6 +6,9 @@ import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirec
 import { staticMapUrl } from "@/lib/maps";
 import { MapPin, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { trackEvent } from "@/lib/track";
+// Umami analytics — aliased to avoid colliding with the Supabase page_events
+// tracker imported above.
+import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
 
 type Loc = {
@@ -34,6 +37,11 @@ export default function Viewer() {
   // Shared stuck/help + venue-contact fallback sheet (arrival, checkpoints, success).
   const [helpOpen, setHelpOpen] = useState(false);
 
+  // Fire once when the public Find Me route first loads.
+  useEffect(() => {
+    trackUmami(EVENTS.FINDME_OPENED);
+  }, []);
+
   useEffect(() => {
     if (!slug) return;
     (async () => {
@@ -56,10 +64,17 @@ export default function Viewer() {
     if (!loc) return;
     if (step >= 0 && step < cps.length) {
       trackEvent(loc.id, "checkpoint_viewed", step);
+      trackUmami(EVENTS.CHECKPOINT_VIEWED, { index: step });
     } else if (cps.length > 0 && step >= cps.length) {
       trackEvent(loc.id, "completed");
+      trackUmami(EVENTS.WALK_COMPLETED);
     }
   }, [step, loc, cps.length]);
+
+  // Arrival confirmation screen render.
+  useEffect(() => {
+    if (showArrival) trackUmami(EVENTS.ARRIVAL_REACHED);
+  }, [showArrival]);
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
   if (!loc) return (
@@ -254,7 +269,7 @@ export default function Viewer() {
                 Yes, I'm here
               </button>
               <button
-                onClick={() => setHelpOpen(true)}
+                onClick={() => { trackUmami(EVENTS.ARRIVAL_NOT_YET); setHelpOpen(true); }}
                 className="w-full rounded-full py-4 font-medium text-base border-2 active:scale-[0.98] transition-smooth"
                 style={{ borderColor: accent, color: accent }}
               >
@@ -295,7 +310,7 @@ export default function Viewer() {
           {loc.start_note && <p className="text-sm text-muted-foreground mb-6 italic">"{loc.start_note}"</p>}
 
           <button
-            onClick={() => setShowArrival(true)}
+            onClick={() => { trackUmami(EVENTS.WALK_STARTED); setShowArrival(true); }}
             disabled={total === 0}
             className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 active:scale-95 transition-smooth"
             style={{ backgroundColor: accent }}
@@ -494,7 +509,7 @@ export default function Viewer() {
             </button>
           )}
           <button
-            onClick={() => setHelpOpen(true)}
+            onClick={() => { trackUmami(EVENTS.CHECKPOINT_MISMATCH, { index: step }); setHelpOpen(true); }}
             className="text-white/60 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
           >
             {walkerStrings.doesntMatch}

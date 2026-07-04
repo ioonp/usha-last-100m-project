@@ -7,6 +7,7 @@ import { CurvedArrow } from "@/components/CurvedArrow";
 import { ArrowDown, ArrowUp, Trash2, Upload, Plus, ArrowUp as ArrowUpIcon, Circle, X, RotateCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 // Legacy 8-direction value kept for backward compat with old saved data
 export type LegacyDirection =
@@ -214,11 +215,13 @@ export function CheckpointEditor({
     [next[i], next[j]] = [next[j], next[i]];
     onChange(next.map((c, idx) => ({ ...c, position: idx })));
   };
-  const add = () =>
+  const add = () => {
     onChange([
       ...checkpoints,
       { position: checkpoints.length, photo_url: "", arrow_direction: "up", note: "", indicators: [] },
     ]);
+    trackEvent(EVENTS.CHECKPOINT_ADDED, { count: checkpoints.length + 1 });
+  };
 
   const onUpload = async (i: number, file: File) => {
     if (!user) return;
