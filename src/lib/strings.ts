@@ -35,13 +35,15 @@ export const landingStrings = {
   },
   hero: {
     eyebrow: "Wayfinding for the last 100 meters",
-    headlinePrefix: "Find your way to the",
-    rotatingWords: ["studio", "venue", "gallery", "clinic", "courtyard", "door"],
+    // Static, owner-voiced headline (was a rotating word). Speaks to the studio
+    // owner's outcome, not the lost visitor, and keeps the hero calm.
+    headline: "Your students stop getting lost at the door.",
     subhead:
-      "Maps gets people to the street. Then it quits — right where the courtyard, the back gate, and the hidden door begin.",
-    ctaPrimary: "Build one now",
-    ctaSecondary: "See a demo",
-    reassurance: "No app to download — visitors just tap a link.",
+      "Maps drops them on the street. Usha walks them the rest of the way — through the courtyard, past the side gate, to your studio door. With photos, not another text from you.",
+    ctaPrimary: "Build your guide",
+    ctaSecondary: "See a student's-eye demo",
+    reassurance: "No app for your students. They just tap a link.",
+    proof: "Made in Berlin, for Berlin's Hinterhof studios.",
     map: {
       ariaLabel:
         "A map where the Google Maps route stops at the street, leaving the real door hidden in a courtyard beyond reach.",
@@ -51,27 +53,10 @@ export const landingStrings = {
       legendActualDoor: "The actual door",
     },
   },
-  turn: {
-    eyebrow: "Where Usha takes over",
-    heading: "Pick up exactly where the map gives up.",
-    lead: "You lay down a short trail of photos — each one a checkpoint with an arrow pointing to the next. Your visitor just follows the pictures, straight through the gap to your door.",
-    steps: [
-      { title: "Start where Maps drops them", desc: "Set the street pin — the spot everyone gets stuck." },
-      { title: "Drop photo checkpoints", desc: "Snap the turns. Add an arrow. That's a checkpoint." },
-      { title: "They reach the door", desc: "No more “I’m outside, where are you?” — they just arrive." },
-    ],
-    map: {
-      ariaLabel:
-        "The same map, now with a trail of photo checkpoints bridging the gap from the street to the courtyard door.",
-      courtyardLabel: "HINTERHOF",
-      legendCheckpoint: "Photo checkpoint",
-      legendDoorReached: "Door reached",
-    },
-  },
   recognition: {
-    eyebrow: "You know this conversation",
+    eyebrow: "Every studio owner knows this thread",
     heading: "The texts you’re tired of sending.",
-    lead: "Every venue with a hidden door has this thread on repeat.",
+    lead: "Every Hinterhof studio has this thread on repeat with new students.",
     thread: [
       { from: "them" as const, text: "I’m outside? I don’t see it 😅" },
       { from: "you" as const, text: "which entrance are you at?" },
@@ -82,23 +67,33 @@ export const landingStrings = {
     afterHighlight: "one link",
     afterSuffix: ".",
   },
-  how: {
-    eyebrow: "Three steps, about three minutes",
-    heading: "Build a guide from your phone.",
-    lead: "Walk the route once, photographing as you go. Share the link. Done.",
-    cards: [
-      { number: "01", title: "Drop a starting pin", desc: "Mark where Maps leaves people off — the street door your guide begins from." },
+  // The former "turn" and "how" sections merged into one — the three steps were
+  // being described twice with two schematic maps. Copy from "turn", the numbered
+  // steps from "how" (studio-voiced), and the trail map as the single visual.
+  howItWorks: {
+    eyebrow: "Where Usha takes over",
+    heading: "Pick up exactly where the map gives up.",
+    lead: "Walk the route once, photographing as you go. Your student just follows the pictures, straight through the gap to your door.",
+    steps: [
+      { number: "01", title: "Drop a starting pin", desc: "Mark where Maps leaves people off — the street your guide begins from." },
       { number: "02", title: "Add photo checkpoints", desc: "Photograph each turn and point an arrow the right way. One photo per decision." },
-      { number: "03", title: "Share a QR or link", desc: "Print it, stick it by the street, drop it in your booking email. Visitors just follow." },
+      { number: "03", title: "Share a QR or link", desc: "Print it by the street, drop it in your booking email. Students just follow." },
     ],
+    map: {
+      ariaLabel:
+        "The same map, now with a trail of photo checkpoints bridging the gap from the street to the courtyard door.",
+      courtyardLabel: "HINTERHOF",
+      legendCheckpoint: "Photo checkpoint",
+      legendDoorReached: "Door reached",
+    },
   },
   cta: {
-    eyebrow: "For studios, venues, clinics, and event hosts",
-    heading: "Make one for your door.",
-    body: "If people get lost finding you, fix it before your next booking. Building a guide takes about three minutes.",
-    ctaPrimary: "Build one now",
-    ctaSecondary: "See a demo first",
-    note: "No account needed to try · No app for your visitors",
+    eyebrow: "For studios with a door nobody can find",
+    heading: "Make one for your studio door.",
+    body: "If a new student’s first class starts with “I can’t find you,” fix it before your next drop-in. Building a guide takes about three minutes.",
+    ctaPrimary: "Build your guide",
+    ctaSecondary: "See a demo",
+    note: "No account needed to try · No app for your students",
   },
   footer: {
     tagline: "Photo wayfinding for the last 100 meters · Berlin",
