@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { landingStrings } from "@/lib/strings";
 
-const t = landingStrings.turn.map;
+const t = landingStrings.howItWorks.map;
 
 /**
  * The same street/courtyard map as the hero, redrawn with a trail of photo

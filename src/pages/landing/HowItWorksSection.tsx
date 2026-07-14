@@ -1,18 +1,21 @@
-import { Camera, DoorOpen, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { landingStrings } from "@/lib/strings";
 import { useInView } from "./hooks";
 import { TurnMapIllustration } from "./TurnMapIllustration";
 
-const t = landingStrings.turn;
-const stepIcons = [MapPin, Camera, DoorOpen];
+const t = landingStrings.howItWorks;
 
-export function TurnSection({ reducedMotion }: { reducedMotion: boolean }) {
+/**
+ * Single "how it works" section — the former Turn + How sections merged. The
+ * three steps (pin → photos → share) sit beside the trail map, which draws
+ * itself in once the section scrolls into view.
+ */
+export function HowItWorksSection({ reducedMotion }: { reducedMotion: boolean }) {
   const copy = useInView<HTMLDivElement>(reducedMotion);
   const map = useInView<HTMLDivElement>(reducedMotion);
 
   return (
-    <section className="bg-secondary py-14 md:py-[110px]">
+    <section className="py-14 md:py-[110px]">
       <div className="container mx-auto px-4 grid md:grid-cols-2 gap-9 md:gap-16 items-center">
         <div
           ref={copy.ref}
@@ -25,20 +28,17 @@ export function TurnSection({ reducedMotion }: { reducedMotion: boolean }) {
           <p className="text-base md:text-lg text-muted-foreground max-w-[52ch] leading-relaxed">{t.lead}</p>
 
           <div className="mt-6 flex flex-col gap-4">
-            {t.steps.map((step, i) => {
-              const Icon = stepIcons[i];
-              return (
-                <div key={step.title} className="flex gap-3.5 items-start">
-                  <div className="size-[38px] rounded-[11px] bg-accent-soft text-accent flex items-center justify-center shrink-0">
-                    <Icon className="size-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-[15.5px] font-semibold mb-0.5">{step.title}</h4>
-                    <p className="text-sm text-muted-foreground leading-snug">{step.desc}</p>
-                  </div>
+            {t.steps.map((step) => (
+              <div key={step.number} className="flex gap-3.5 items-start">
+                <div className="size-11 rounded-xl bg-accent-soft text-accent flex items-center justify-center shrink-0 font-mono text-sm">
+                  {step.number}
                 </div>
-              );
-            })}
+                <div>
+                  <h4 className="text-[15.5px] font-semibold mb-0.5">{step.title}</h4>
+                  <p className="text-sm text-muted-foreground leading-snug">{step.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

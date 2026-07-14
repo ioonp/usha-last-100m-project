@@ -2,9 +2,8 @@ import "./landing/landing.css";
 import { usePrefersReducedMotion } from "./landing/hooks";
 import { LandingNav } from "./landing/LandingNav";
 import { HeroSection } from "./landing/HeroSection";
-import { TurnSection } from "./landing/TurnSection";
 import { RecognitionSection } from "./landing/RecognitionSection";
-import { HowSection } from "./landing/HowSection";
+import { HowItWorksSection } from "./landing/HowItWorksSection";
 import { CtaSection } from "./landing/CtaSection";
 import { LandingFooter } from "./landing/LandingFooter";
 
@@ -14,10 +13,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <LandingNav />
-      <HeroSection reducedMotion={reducedMotion} />
-      <TurnSection reducedMotion={reducedMotion} />
+      <HeroSection />
       <RecognitionSection reducedMotion={reducedMotion} />
-      <HowSection reducedMotion={reducedMotion} />
+      <HowItWorksSection reducedMotion={reducedMotion} />
       <CtaSection reducedMotion={reducedMotion} />
       <LandingFooter />
     </div>

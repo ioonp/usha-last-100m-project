@@ -6,11 +6,10 @@ const t = landingStrings.recognition;
 
 export function RecognitionSection({ reducedMotion }: { reducedMotion: boolean }) {
   const heading = useInView<HTMLDivElement>(reducedMotion);
-  const thread = useInView<HTMLDivElement>(reducedMotion);
   const after = useInView<HTMLDivElement>(reducedMotion);
 
   return (
-    <section className="py-14 md:py-[110px] text-center">
+    <section className="bg-secondary py-14 md:py-[110px] text-center">
       <div className="container mx-auto px-4">
         <div ref={heading.ref} className={cn("usha-landing-reveal", heading.inView && "usha-landing-in")}>
           <div className="step-eyebrow text-center mb-4">{t.eyebrow}</div>
@@ -22,15 +21,14 @@ export function RecognitionSection({ reducedMotion }: { reducedMotion: boolean }
           </p>
         </div>
 
-        <div
-          ref={thread.ref}
-          className={cn("usha-landing-texts flex flex-col gap-3 max-w-[440px] mx-auto", thread.inView && "usha-landing-go")}
-        >
+        {/* Bubbles render statically — the staggered rise was dropped to keep the
+            page calm; the trail draw is the one signature motion. */}
+        <div className="flex flex-col gap-3 max-w-[440px] mx-auto">
           {t.thread.map((msg, i) => (
             <div
               key={i}
               className={cn(
-                "usha-landing-txt px-[18px] py-[13px] rounded-[18px] text-[15px] max-w-[78%]",
+                "px-[18px] py-[13px] rounded-[18px] text-[15px] max-w-[78%]",
                 msg.from === "them"
                   ? "self-start bg-card text-card-foreground shadow-card rounded-bl-[5px]"
                   : "self-end bg-[#DCE7FF] text-[#1c3b7a] rounded-br-[5px]",
