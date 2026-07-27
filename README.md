@@ -1,36 +1,92 @@
-# Usha
+<aside>
+🚪
 
-**Guides people through the last 100 meters — from where the map ends to the actual door.**
+  **Usha guides people through the last 100 meters — from where the map ends to the actual door.**
 
-## The problem
+One link. With photos, not another text message from you.
 
-Map apps drop visitors at a street address. But in Berlin, many studios, galleries, and clinics sit inside courtyards (Hinterhöfe) — behind archways, across passages, up the second staircase. The visitor is at the correct address, but still can't find the door.
+</aside>
 
-Usha picks up where Google Maps stops and walks people to the entrance, photo by photo.
+**Status:** 🌱 Early-stage side project · Berlin pilot · usha-project.lovable.app
 
-## How it works
+---
 
-**Creators** (venue owners) build a Guide in a few minutes:
-1. Set the Street Entrance — the spot where map apps drop visitors
-2. Add photo Checkpoints with directional arrows, leading to the Destination
-3. Share the public **Find Me link**
+## 🧩 The problem
 
-**Walkers** (visitors) open the link and follow a full-screen photo trail to the door. No app, no account — it just works in the browser.
+Map apps drop visitors at a street address — and stop there.
 
-## Status
+But in Berlin, many studios, galleries, and clinics sit inside courtyards (*Hinterhöfe*) — behind archways, across passages, up the second staircase. The visitor is at the **correct address** and still can't find the door.
 
-Early-stage side project. Creator wizard, Walker flow, and analytics are live. Currently onboarding first pilot studios in Berlin.
+The cost is small but constant:
 
-Try it: [usha-project.lovable.app](https://usha-project.lovable.app)
+| 😖 Today | 🧭 With Usha |
+| --- | --- |
+| "I'm at the gate — where now?" | Visitor self-serves from a photo trail |
+| Host retypes directions for every guest | Written once, reused forever |
+| Late arrivals, interrupted sessions | On-time arrivals, calm start |
 
-## Stack
+> Usha picks up where Google Maps stops and walks people to the entrance, photo by photo.
+> 
 
-- Vite + React (mobile-first)
-- Supabase — auth, database, RLS
-- Google Maps API — Places Autocomplete, map pins
-- Umami — analytics
-- Built with Claude Code, deployed via Lovable
+## ⚙️ How it works
 
-**Gotchas:**
-- Test geolocation on the deployed URL, not Lovable's editor preview (the iframe suppresses location prompts)
-- Google Maps API key is restricted at domain level: `https://usha-project.lovable.app/*`
+### 🛠️ Creators — venue owners, in a few minutes
+
+1. **📍 Set the Street Entrance** — the exact spot where map apps drop visitors
+2. **📸 Add photo Checkpoints** — each with a directional arrow, leading to the Destination
+3. **🔗 Share the public Find Me link** — in booking confirmations, emails, signatures, event invites
+
+### 🚶 Visitors
+
+Open the link → follow a full-screen photo trail to the door.
+
+**No app, no account, no install** — it just works in the browser.
+
+## 👥 Who it's for
+
+- 🧘 **Studios & teachers** — yoga, dance, music, language classes
+- 🎨 **Galleries & event hosts** — pop-ups, openings, workshops
+- 🩺 **Clinics & practices** — first-time patients, back-courtyard entrances
+- 💼 **Offices & co-working** — client visits, interviews
+- 🏠 **Hosts & viewings** — Airbnb, flat viewings, private invites
+
+<aside>
+🎯
+
+**Hero use case:** Berlin *Hinterhof* venues with recurring visitors. Everything else is a bonus, not the pitch.
+
+</aside>
+
+## 🧠 Core concepts
+
+| Term | Meaning |
+| --- | --- |
+| **Guide** | One published path for one venue |
+| **Street Entrance** | Where map apps end and Usha begins |
+| **Checkpoint** | A photo + directional arrow along the path |
+| **Destination** | The actual door |
+| **Find Me link** | The public URL shared with visitors |
+| **Creator / Walker** | Venue owner / visitor |
+
+## 📊 Status & roadmap
+
+**✅ Live**
+
+- Creator wizard
+- Walker flow
+- Analytics
+
+**🚧 Next**
+
+- [ ]  Onboard first pilot studios in Berlin
+- [ ]  Collect Walker drop-off data per checkpoint
+- [ ]  QR code + embeddable snippet for booking confirmations
+- [ ]  Multi-language guides (DE / EN)
+
+## 🧱 Stack
+
+- ⚡ **Vite + React** — mobile-first
+- 🗄️ **Supabase** — auth, database, RLS
+- 🗺️ **Google Maps API** — Places Autocomplete, map pins
+- 📈 **Umami** — analytics
+- 🤖 **Claude Code** for build, **Lovable** for deploy
