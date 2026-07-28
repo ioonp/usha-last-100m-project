@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { landingStrings } from "@/lib/strings";
@@ -39,15 +40,14 @@ export function CtaSection({ reducedMotion }: { reducedMotion: boolean }) {
                 <ArrowRight className="ml-1 size-4" />
               </Button>
             </Link>
-            <Link to="/demo">
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full px-7 h-[52px] text-[15.5px] bg-transparent text-primary-foreground border-primary-foreground/25 hover:bg-primary-foreground/10 hover:text-primary-foreground"
-              >
-                {t.ctaSecondary}
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="rounded-full px-7 h-[52px] text-[15.5px] bg-transparent text-primary-foreground border-primary-foreground/25 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              onClick={() => toast(landingStrings.demoUnavailable)}
+            >
+              {t.ctaSecondary}
+            </Button>
           </div>
           <div className="mt-5 font-mono text-[13.5px] tracking-wide text-primary-foreground/50">{t.note}</div>
         </div>

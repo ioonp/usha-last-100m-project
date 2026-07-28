@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { landingStrings } from "@/lib/strings";
 import { HeroMapIllustration } from "./HeroMapIllustration";
@@ -25,11 +26,14 @@ export function HeroSection() {
                 <ArrowRight className="ml-1 size-4" />
               </Button>
             </Link>
-            <Link to="/demo">
-              <Button size="lg" variant="ghost" className="rounded-full px-7 h-[52px] text-[15.5px]">
-                {t.ctaSecondary}
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="rounded-full px-7 h-[52px] text-[15.5px]"
+              onClick={() => toast(landingStrings.demoUnavailable)}
+            >
+              {t.ctaSecondary}
+            </Button>
           </div>
           <div className="mt-5 flex items-center gap-2 text-[13.5px] text-muted-foreground">
             <Check className="size-[15px] text-success" />
