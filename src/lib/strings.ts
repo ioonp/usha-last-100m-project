@@ -39,15 +39,17 @@ export const landingStrings = {
   demoUnavailable: "Demo not available yet",
   hero: {
     eyebrow: "Wayfinding for the last 100 meters",
-    // Static, owner-voiced headline (was a rotating word). Speaks to the studio
-    // owner's outcome, not the lost visitor, and keeps the hero calm.
-    headline: "Your students stop getting lost at the door.",
+    // Static, owner-voiced headline (was a rotating word). Speaks to the owner's
+    // outcome, not the lost visitor, and keeps the hero calm. Segment-neutral:
+    // "visitors" covers students, guests, attendees and patients alike, so the
+    // hero reads as universal and only the example section names a segment.
+    headline: "Your visitors stop getting lost at the door.",
     subhead:
-      "Maps drops them on the street. Usha walks them the rest of the way — through the courtyard, past the side gate, to your studio door. With photos, not another text from you.",
+      "Maps drops them on the street. Usha walks them the rest of the way — through the courtyard, past the side gate, to your door. With photos, not another text from you.",
     ctaPrimary: "Build your guide",
     ctaSecondary: "Check a Demo",
-    reassurance: "No app for your students. They just tap a link.",
-    proof: "Made in Berlin, for Berlin's Hinterhof studios.",
+    reassurance: "No app to download. They just tap a link.",
+    proof: "Made in Berlin, for Berlin's courtyards and back buildings.",
     map: {
       ariaLabel:
         "A map where the Google Maps route stops at the street, leaving the real door hidden in a courtyard beyond reach.",
@@ -58,14 +60,66 @@ export const landingStrings = {
     },
   },
   recognition: {
-    eyebrow: "Every studio owner knows this thread",
-    heading: "The texts you’re tired of sending.",
-    lead: "Every Hinterhof studio has this thread on repeat with new students.",
-    thread: [
-      { from: "them" as const, text: "I’m outside? I don’t see it 😅" },
-      { from: "you" as const, text: "which entrance are you at?" },
-      { from: "them" as const, text: "there’s no sign… is it the courtyard?" },
-      { from: "you" as const, text: "stay there, I’ll come get you" },
+    eyebrow: "Every hard-to-find door has this thread",
+    /** Screen-reader label for the segment pill row. */
+    segmentsLabel: "Show the example for",
+    /**
+     * One worked example per segment, all sharing the same shape — heading,
+     * one-line lead, four-message thread — so switching pills re-themes the
+     * copy without moving the layout. The first entry is the default.
+     *
+     * Presentational only: the selected segment is local component state on the
+     * landing page and is never persisted, routed, or sent anywhere.
+     */
+    segments: [
+      {
+        id: "studio",
+        label: "Studio",
+        heading: "The texts you’re tired of sending.",
+        lead: "Every Hinterhof studio has this thread on repeat with new students.",
+        thread: [
+          { from: "them" as const, text: "I’m outside? I don’t see it 😅" },
+          { from: "you" as const, text: "which entrance are you at?" },
+          { from: "them" as const, text: "there’s no sign… is it the courtyard?" },
+          { from: "you" as const, text: "stay there, I’ll come get you" },
+        ],
+      },
+      {
+        id: "rental",
+        label: "Airbnb / short-stay rental",
+        heading: "The check-in messages you answer at midnight.",
+        lead: "Every short-stay host has this thread on repeat with arriving guests.",
+        thread: [
+          { from: "them" as const, text: "I’m at the address but which building? 😅" },
+          { from: "you" as const, text: "are you by the green gate?" },
+          { from: "them" as const, text: "there are three doors, none have your name" },
+          { from: "you" as const, text: "hang on, I’ll come down" },
+        ],
+      },
+      {
+        id: "event",
+        label: "Event space",
+        heading: "The calls you take right at doors open.",
+        lead: "Every multi-building venue has this thread on repeat while guests arrive.",
+        thread: [
+          { from: "them" as const, text: "we’re on site — which building is it? 😅" },
+          { from: "you" as const, text: "have you passed the loading bay?" },
+          { from: "them" as const, text: "there’s no signage, just numbers" },
+          { from: "you" as const, text: "stay there, someone’s coming out" },
+        ],
+      },
+      {
+        id: "clinic",
+        label: "Clinic / practice",
+        heading: "The calls your front desk keeps taking.",
+        lead: "Every practice down a passage has this thread on repeat with new patients.",
+        thread: [
+          { from: "them" as const, text: "I’m at the address, I don’t see the practice 😅" },
+          { from: "you" as const, text: "are you through the passage yet?" },
+          { from: "them" as const, text: "just a row of buzzers, no names" },
+          { from: "you" as const, text: "wait there, I’ll come out" },
+        ],
+      },
     ],
     afterPrefix: "Usha replaces the whole thread with ",
     afterHighlight: "one link",
@@ -73,15 +127,15 @@ export const landingStrings = {
   },
   // The former "turn" and "how" sections merged into one — the three steps were
   // being described twice with two schematic maps. Copy from "turn", the numbered
-  // steps from "how" (studio-voiced), and the trail map as the single visual.
+  // steps from "how" (owner-voiced), and the trail map as the single visual.
   howItWorks: {
     eyebrow: "Where Usha takes over",
     heading: "Pick up exactly where the map gives up.",
-    lead: "Walk the route once, photographing as you go. Your student just follows the pictures, straight through the gap to your door.",
+    lead: "Walk the route once, photographing as you go. Your visitor just follows the pictures, straight through the gap to your door.",
     steps: [
       { number: "01", title: "Drop a starting pin", desc: "Mark where Maps leaves people off — the street your guide begins from." },
       { number: "02", title: "Add photo checkpoints", desc: "Photograph each turn and point an arrow the right way. One photo per decision." },
-      { number: "03", title: "Share a QR or link", desc: "Print it by the street, drop it in your booking email. Students just follow." },
+      { number: "03", title: "Share a QR or link", desc: "Print it by the street, drop it in your confirmation email. Visitors just follow." },
     ],
     map: {
       ariaLabel:
@@ -92,12 +146,12 @@ export const landingStrings = {
     },
   },
   cta: {
-    eyebrow: "For studios with a door nobody can find",
-    heading: "Make one for your studio door.",
-    body: "If a new student’s first class starts with “I can’t find you,” fix it before your next drop-in. Building a guide takes about three minutes.",
+    eyebrow: "For any door nobody can find",
+    heading: "Make one for your door.",
+    body: "If someone’s first visit starts with “I can’t find you,” fix it before the next one. Building a guide takes about three minutes.",
     ctaPrimary: "Build your guide",
     ctaSecondary: "See a demo",
-    note: "No account needed to try · No app for your students",
+    note: "No account needed to try · No app to download",
   },
   footer: {
     tagline: "Photo wayfinding for the last 100 meters · Berlin",
