@@ -1,5 +1,4 @@
 <aside>
-🚪
 
   **Usha guides people through the last 100 meters — from where the map ends to the actual door.**
 
@@ -11,7 +10,7 @@ One link. With photos, not another text message from you.
 
 ---
 
-## 🧩 The problem
+## The problem
 
 Map apps drop visitors at a street address — and stop there.
 
@@ -28,21 +27,21 @@ The cost is small but constant:
 > Usha picks up where Google Maps stops and walks people to the entrance, photo by photo.
 > 
 
-## ⚙️ How it works
+## How it works
 
-### 🛠️ Creators — venue owners, in a few minutes
+### Creators — venue owners, in a few minutes
 
 1. **📍 Set the Street Entrance** — the exact spot where map apps drop visitors
 2. **📸 Add photo Checkpoints** — each with a directional arrow, leading to the Destination
 3. **🔗 Share the public Find Me link** — in booking confirmations, emails, signatures, event invites
 
-### 🚶 Visitors
+### Visitors
 
 Open the link → follow a full-screen photo trail to the door.
 
 **No app, no account, no install** — it just works in the browser.
 
-## 👥 Who it's for
+## Who it's for
 
 - 🧘 **Studios & teachers** — yoga, dance, music, language classes
 - 🎨 **Galleries & event hosts** — pop-ups, openings, workshops
@@ -51,13 +50,13 @@ Open the link → follow a full-screen photo trail to the door.
 - 🏠 **Hosts & viewings** — Airbnb, flat viewings, private invites
 
 <aside>
-🎯
+
 
 **Hero use case:** Berlin *Hinterhof* venues with recurring visitors. Everything else is a bonus, not the pitch.
 
 </aside>
 
-## 🧠 Core concepts
+## Core concepts
 
 | Term | Meaning |
 | --- | --- |
@@ -68,22 +67,22 @@ Open the link → follow a full-screen photo trail to the door.
 | **Find Me link** | The public URL shared with visitors |
 | **Creator / Walker** | Venue owner / visitor |
 
-## 📊 Status & roadmap
+## Status & roadmap
 
-**✅ Live**
+**Live**
 
 - Creator wizard
 - Walker flow
 - Analytics
 
-**🚧 Next**
+**Next**
 
 - [ ]  Onboard first pilot studios in Berlin
 - [ ]  Collect Walker drop-off data per checkpoint
 - [ ]  QR code + embeddable snippet for booking confirmations
 - [ ]  Multi-language guides (DE / EN)
 
-## 🧱 Stack
+## Stack
 
 - ⚡ **Vite + React** — mobile-first
 - 🗄️ **Supabase** — auth, database, RLS
