@@ -33,6 +33,10 @@ export const landingStrings = {
     signIn: "Sign in",
     buildOne: "Build one now",
   },
+  // Shown by both demo buttons (hero + closing CTA) instead of opening /demo.
+  // The route still exists, but its canned example doesn't match the studio
+  // story this page tells, so the buttons acknowledge the click for now.
+  demoUnavailable: "Demo not available yet",
   hero: {
     eyebrow: "Wayfinding for the last 100 meters",
     // Static, owner-voiced headline (was a rotating word). Speaks to the studio
@@ -41,7 +45,7 @@ export const landingStrings = {
     subhead:
       "Maps drops them on the street. Usha walks them the rest of the way — through the courtyard, past the side gate, to your studio door. With photos, not another text from you.",
     ctaPrimary: "Build your guide",
-    ctaSecondary: "See a student's-eye demo",
+    ctaSecondary: "Check a Demo",
     reassurance: "No app for your students. They just tap a link.",
     proof: "Made in Berlin, for Berlin's Hinterhof studios.",
     map: {
