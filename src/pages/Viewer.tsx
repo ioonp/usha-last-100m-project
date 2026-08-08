@@ -11,11 +11,16 @@ import { trackEvent } from "@/lib/track";
 import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
 import { WalkerHelpSheet } from "@/components/walker/WalkerHelpSheet";
+import { ReelPlayer } from "@/components/walker/ReelPlayer";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null; start_address: string | null;
+  // Video Guide fields — 'photo' (default) renders the stepper below; 'video'
+  // hands off to the reel player. video_url/manifest/video_version are null for
+  // photo guides and populated manually for video guides.
+  type: string; video_url: string | null; manifest: unknown; video_version: string | null;
 };
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
@@ -85,6 +90,10 @@ export default function Viewer() {
       <Link to="/" className="text-accent underline">Back home</Link>
     </div>
   );
+
+  // Video Guide: hand off to the reel player. Everything below is the unchanged
+  // photo checkpoint stepper, reached only when type is 'photo' (the default).
+  if (loc.type === "video") return <ReelPlayer location={loc} checkpoints={cps} />;
 
   const accent = loc.accent_color || ACCENT;
   const total = cps.length;

@@ -199,4 +199,25 @@ export const walkerStrings = {
     openMaps: "Open in Maps",
     dismiss: "Close",
   },
+
+  /** Video Guide (reel player) chrome. The arrival instruction itself is
+   *  manifest data, not a string here; these are the surrounding UI labels. */
+  video: {
+    /** Tap-to-start overlay — the first gesture iOS needs for inline playback. */
+    tapToStart: "Tap to start",
+    /** Arrival prompt, affirmative. */
+    madeIt: "I made it",
+    /** Arrival prompt, negative — opens the help sheet. */
+    notYet: "Not yet",
+    /** Used when the manifest omits an arrival instruction. */
+    arrivalFallback: "You've arrived.",
+    /** Shown after "I made it". */
+    completedTitle: "You made it!",
+    /** Fallback heading when the video can't load. */
+    fallbackTitle: "Follow the photos",
+    /** Fallback intro line under the heading. */
+    fallbackLead: "The video couldn't load — here are the steps to the door.",
+    /** Per-step label in the fallback list, e.g. "Step 2". */
+    fallbackStep: (n: number) => `Step ${n}`,
+  },
 };
