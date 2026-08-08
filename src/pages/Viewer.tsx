@@ -10,11 +10,17 @@ import { trackEvent } from "@/lib/track";
 // tracker imported above.
 import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
+import { WalkerHelpSheet } from "@/components/walker/WalkerHelpSheet";
+import { ReelPlayer } from "@/components/walker/ReelPlayer";
 
 type Loc = {
   id: string; slug: string; studio_name: string; logo_url: string | null;
   accent_color: string; welcome_message: string; start_lat: number | null;
   start_lng: number | null; start_note: string | null; start_address: string | null;
+  // Video Guide fields — 'photo' (default) renders the stepper below; 'video'
+  // hands off to the reel player. video_url/manifest/video_version are null for
+  // photo guides and populated manually for video guides.
+  type: string; video_url: string | null; manifest: unknown; video_version: string | null;
 };
 type Indicator = EditorIndicator;
 type CP = { id: string; position: number; photo_url: string; arrow_direction: LegacyDirection; note: string | null; indicators?: any[] };
@@ -85,6 +91,10 @@ export default function Viewer() {
     </div>
   );
 
+  // Video Guide: hand off to the reel player. Everything below is the unchanged
+  // photo checkpoint stepper, reached only when type is 'photo' (the default).
+  if (loc.type === "video") return <ReelPlayer location={loc} checkpoints={cps} />;
+
   const accent = loc.accent_color || ACCENT;
   const total = cps.length;
   const cp = step >= 0 && step < total ? cps[step] : null;
@@ -119,61 +129,15 @@ export default function Viewer() {
   // routing, Supabase, or the map component. Rendered into the arrival,
   // checkpoint, and success branches below.
   const helpSheet = helpOpen ? (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-label={walkerStrings.help.title}
-    >
-      <button
-        type="button"
-        aria-label={walkerStrings.help.dismiss}
-        onClick={() => setHelpOpen(false)}
-        className="absolute inset-0 bg-black/60"
-      />
-      <div className="relative w-full max-w-md bg-[#111110] text-white rounded-t-3xl px-5 pt-3 shadow-2xl animate-fade-in-up"
-        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
-      >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/25" />
-        <h2 className="font-display text-2xl mb-1.5">{walkerStrings.help.title}</h2>
-        <p className="text-white/70 text-sm leading-snug mb-5">{walkerStrings.help.body}</p>
-
-        <div className="rounded-2xl bg-white/[0.06] border border-white/10 p-4 mb-4">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1">
-            {walkerStrings.help.venueLabel}
-          </div>
-          <div className="text-base font-semibold mb-1">{loc.studio_name}</div>
-          <div className="text-sm text-white/70 break-words">{addressLine}</div>
-          {loc.start_note && (
-            <div className="mt-2 text-sm text-white/60">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-white/40 mr-1">
-                {walkerStrings.help.lookForLabel}
-              </span>
-              {loc.start_note}
-            </div>
-          )}
-        </div>
-
-        {hasCoords && (
-          <button
-            type="button"
-            onClick={openMaps}
-            className="w-full rounded-full py-4 mb-2.5 font-semibold text-white text-base inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-smooth"
-            style={{ backgroundColor: accent }}
-          >
-            <MapPin className="size-4" />
-            {walkerStrings.help.openMaps}
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => setHelpOpen(false)}
-          className="w-full rounded-full py-3.5 font-medium text-base border border-white/25 text-white active:scale-[0.98] transition-smooth"
-        >
-          {walkerStrings.help.dismiss}
-        </button>
-      </div>
-    </div>
+    <WalkerHelpSheet
+      venueName={loc.studio_name}
+      addressLine={addressLine}
+      lookFor={loc.start_note}
+      accent={accent}
+      hasCoords={hasCoords}
+      onOpenMaps={openMaps}
+      onDismiss={() => setHelpOpen(false)}
+    />
   ) : null;
 
   // ---------- LANDING ----------
