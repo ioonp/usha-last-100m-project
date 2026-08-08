@@ -65,6 +65,7 @@ export type Database = {
           created_at: string
           id: string
           logo_url: string | null
+          manifest: Json | null
           owner_id: string
           published: boolean
           slug: string
@@ -75,7 +76,10 @@ export type Database = {
           street_arrival_caption: string | null
           street_arrival_photo_url: string | null
           studio_name: string
+          type: string
           updated_at: string
+          video_url: string | null
+          video_version: string | null
           view_count: number
           welcome_message: string
         }
@@ -85,6 +89,7 @@ export type Database = {
           created_at?: string
           id?: string
           logo_url?: string | null
+          manifest?: Json | null
           owner_id: string
           published?: boolean
           slug: string
@@ -95,7 +100,10 @@ export type Database = {
           street_arrival_caption?: string | null
           street_arrival_photo_url?: string | null
           studio_name?: string
+          type?: string
           updated_at?: string
+          video_url?: string | null
+          video_version?: string | null
           view_count?: number
           welcome_message?: string
         }
@@ -105,6 +113,7 @@ export type Database = {
           created_at?: string
           id?: string
           logo_url?: string | null
+          manifest?: Json | null
           owner_id?: string
           published?: boolean
           slug?: string
@@ -115,7 +124,10 @@ export type Database = {
           street_arrival_caption?: string | null
           street_arrival_photo_url?: string | null
           studio_name?: string
+          type?: string
           updated_at?: string
+          video_url?: string | null
+          video_version?: string | null
           view_count?: number
           welcome_message?: string
         }
