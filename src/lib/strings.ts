@@ -213,6 +213,8 @@ export const walkerStrings = {
     arrivalFallback: "You've arrived.",
     /** Shown after "I made it". */
     completedTitle: "You made it!",
+    /** Quiet restart link on the arrival screen. */
+    startAgain: "Start again",
     /** Fallback heading when the video can't load. */
     fallbackTitle: "Follow the photos",
     /** Fallback intro line under the heading. */
