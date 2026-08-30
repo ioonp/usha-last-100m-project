@@ -240,6 +240,10 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     setArrivalPrompt(false);
     setCaptionIdx(prev < 0 ? null : prev);
     setParked(prev);
+    // Backing out of the first checkpoint returns to the start overlay (studio
+    // name, address, tap-to-start) and re-arms start, rather than leaving a
+    // bare, captionless first frame. Later checkpoints just step back one stop.
+    if (prev < 0) setStarted(false);
   }, [parked, cps]);
 
   const openHelpFromCheckpoint = useCallback(() => {
