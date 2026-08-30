@@ -42,6 +42,8 @@ type WakeLockNavigator = Navigator & {
 
 // How long to wait for the video to become playable before falling back.
 const LOAD_TIMEOUT_MS = 8000;
+// How long the edge chevrons hold their stronger "teaching" opacity after start.
+const TEACH_MS = 4000;
 // A checkpoint within this many seconds of the opening frame is treated as an
 // opening instruction to read while walking the first leg, not a stop to park
 // on — otherwise a guide whose first checkpoint sits at t≈0 parks the instant
