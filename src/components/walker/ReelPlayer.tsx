@@ -42,8 +42,11 @@ type WakeLockNavigator = Navigator & {
 
 // How long to wait for the video to become playable before falling back.
 const LOAD_TIMEOUT_MS = 8000;
-// How long the edge chevrons hold their stronger "teaching" opacity after start.
-const TEACH_MS = 4000;
+// A checkpoint within this many seconds of the opening frame is treated as an
+// opening instruction to read while walking the first leg, not a stop to park
+// on — otherwise a guide whose first checkpoint sits at t≈0 parks the instant
+// it starts and looks like it never began.
+const OPENING_CHECKPOINT_EPS = 0.25;
 const ACCENT = "#c45a22";
 
 /**
@@ -208,8 +211,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     teachTimer.current = window.setTimeout(() => setTeachActive(false), TEACH_MS);
     trackUmami(EVENTS.WALK_STARTED);
     void requestWake();
-    playToward(0);
-  }, [playToward, requestWake]);
+    // Head to the first checkpoint that's actually ahead of the opening frame.
+    // If the guide opens with a checkpoint welded to t≈0, that one is an
+    // instruction for the first leg, not a stop: show its caption during the
+    // walk and play on to the next real checkpoint, so it visibly starts.
+    const target = cps.findIndex((c) => c.time > OPENING_CHECKPOINT_EPS);
+    if (target > 0) setCaptionIdx(target - 1);
+    playToward(target === -1 ? cps.length - 1 : target);
+  }, [cps, playToward, requestWake]);
 
   // Right third: play the ramp forward to the next checkpoint.
   const goForward = useCallback(() => {
