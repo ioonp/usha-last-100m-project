@@ -422,7 +422,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
               {location.start_address}
             </span>
           )}
-          <span className="mt-4 text-base font-medium text-white/90 drop-shadow-md">
+          <span
+            className="mt-4 rounded-full px-[26px] py-[11px] text-base font-medium text-white backdrop-blur-sm"
+            style={{
+              background: "rgba(0,0,0,0.55)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
+            }}
+          >
             {walkerStrings.video.tapToStart}
           </span>
         </button>
