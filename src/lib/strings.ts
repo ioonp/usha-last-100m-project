@@ -221,5 +221,16 @@ export const walkerStrings = {
     fallbackLead: "The video couldn't load — here are the steps to the door.",
     /** Per-step label in the fallback list, e.g. "Step 2". */
     fallbackStep: (n: number) => `Step ${n}`,
+    /** Arrival screen — Usha-side feedback escape hatch for a still-lost walker.
+     *  Routes the signal to Usha, never the studio; exposes no venue contact
+     *  details and no map. mailto target + prefilled subject for the pilot. */
+    feedbackCta: "Something wrong? Let us know",
+    feedbackEmail: "iapara.ion.g@gmail.com",
+    feedbackSubject: (studio: string) => `Find Me guide — ${studio}`,
+    /** Arrival screen — secondary link to the Usha landing page (new tab). */
+    createOwnCta: "Create your own guide →",
+    landingUrl: "https://usha.live",
+    /** Arrival screen — quiet signature footer near the bottom. */
+    madeInBerlin: "Made in Berlin ❤️",
   },
 };
