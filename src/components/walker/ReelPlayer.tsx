@@ -385,6 +385,12 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   // ---- completed -----------------------------------------------------------
   if (completed) {
+    // Usha-side feedback escape hatch — opens the walker's mail client with a
+    // prefilled draft to Usha. Never exposes the studio's contact details or a
+    // map; the signal comes to us, not the venue.
+    const feedbackHref = `mailto:${walkerStrings.video.feedbackEmail}?subject=${encodeURIComponent(
+      walkerStrings.video.feedbackSubject(location.studio_name),
+    )}`;
     return (
       <div
         className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
@@ -396,14 +402,28 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           <p className="text-muted-foreground mb-8">Welcome to {location.studio_name}.</p>
           <button
             type="button"
-            onClick={() => setHelpOpen(true)}
+            onClick={() => { window.location.href = feedbackHref; }}
             className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant active:scale-[0.98] transition-smooth"
             style={{ backgroundColor: accent }}
           >
-            {walkerStrings.successContact}
+            {walkerStrings.video.feedbackCta}
           </button>
+          {/* Secondary link to the Usha landing page — clear but not a button. */}
+          <a
+            href={walkerStrings.video.landingUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-block text-sm font-medium underline underline-offset-4 active:scale-95 transition-smooth"
+            style={{ color: accent }}
+          >
+            {walkerStrings.video.createOwnCta}
+          </a>
         </div>
-        {helpSheet}
+
+        {/* Quiet signature footer, pinned near the bottom. */}
+        <p className="absolute inset-x-0 bottom-0 text-center text-xs text-muted-foreground pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {walkerStrings.video.madeInBerlin}
+        </p>
       </div>
     );
   }
