@@ -467,15 +467,27 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         </span>
       </div>
 
-      {/* Tap-to-start overlay (iOS inline-autoplay gesture). */}
+      {/* Tap-to-start overlay (iOS inline-autoplay gesture). Studio name and
+          address sit above the tap prompt as a hierarchy; the same 0.45 black
+          scrim plus a text drop-shadow keeps them legible over the street photo. */}
       {!started && (
         <button
           type="button"
           onClick={start}
-          className="absolute inset-0 z-40 flex items-center justify-center text-white text-xl font-semibold"
+          className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-1.5 px-8 text-center text-white"
           style={{ background: "rgba(0,0,0,0.45)" }}
         >
-          {walkerStrings.video.tapToStart}
+          <span className="font-display text-3xl font-semibold leading-tight text-balance drop-shadow-lg">
+            {location.studio_name}
+          </span>
+          {location.start_address && (
+            <span className="text-sm font-normal leading-snug text-balance text-white/80 drop-shadow-md">
+              {location.start_address}
+            </span>
+          )}
+          <span className="mt-4 text-base font-medium text-white/90 drop-shadow-md">
+            {walkerStrings.video.tapToStart}
+          </span>
         </button>
       )}
 
