@@ -83,13 +83,18 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const wakeRef = useRef<WakeSentinel | null>(null);
   // Index we're playing toward, read by the rAF loop; null when paused/parked.
   const headingRef = useRef<number | null>(null);
+  const teachTimer = useRef<number | null>(null);
 
   const [started, setStarted] = useState(false);
   const [failed, setFailed] = useState(!hasVideo);
   // -1 = before the first checkpoint (start of the footage); 0..n-1 = parked.
   const [parked, setParked] = useState(-1);
   const [captionIdx, setCaptionIdx] = useState<number | null>(null);
-  const [chevronFaded, setChevronFaded] = useState(false);
+  // Chevron affordance state. isPlaying (from the video's own play/pause events)
+  // hides the chevrons mid-leg and shows them when paused at a checkpoint;
+  // teachActive gives them a stronger opacity for the first few seconds.
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [teachActive, setTeachActive] = useState(false);
   const [arrivalPrompt, setArrivalPrompt] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -201,7 +206,9 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   const start = useCallback(() => {
     setStarted(true);
-    setChevronFaded(false);
+    setTeachActive(true);
+    if (teachTimer.current != null) window.clearTimeout(teachTimer.current);
+    teachTimer.current = window.setTimeout(() => setTeachActive(false), TEACH_MS);
     trackUmami(EVENTS.WALK_STARTED);
     void requestWake();
     // Head to the first checkpoint that's actually ahead of the opening frame.
@@ -215,7 +222,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   // Right third: play the ramp forward to the next checkpoint.
   const goForward = useCallback(() => {
-    setChevronFaded(true);
     if (parked >= cps.length - 1) return;
     playToward(parked + 1);
   }, [parked, cps.length, playToward]);
@@ -223,7 +229,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // Left third: hard-seek instantly to the previous stop (no footage replay).
   // From the first checkpoint this steps to the very start of the footage.
   const goBack = useCallback(() => {
-    setChevronFaded(true);
     const v = videoRef.current;
     if (!v || parked < 0) return;
     v.pause();
@@ -253,6 +258,21 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     setHelpOpen(true);
   }, []);
 
+  // "Start again" from the arrival screen — reset to the tap-to-start poster at
+  // frame 0; the next tap replays from the beginning and re-arms the teach hint.
+  const restart = useCallback(() => {
+    const v = videoRef.current;
+    headingRef.current = null;
+    if (v) {
+      v.pause();
+      v.currentTime = 0;
+    }
+    setArrivalPrompt(false);
+    setParked(-1);
+    setCaptionIdx(null);
+    setStarted(false);
+  }, []);
+
   // ---- iOS first-frame poster + load-failure fallback ----------------------
   useEffect(() => {
     if (!hasVideo) return;
@@ -273,6 +293,25 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       window.clearTimeout(timer);
     };
   }, [hasVideo]);
+
+  // Chevron visibility follows the video's real play/pause state (change 2).
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    v.addEventListener("play", onPlay);
+    v.addEventListener("pause", onPause);
+    return () => {
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
+    };
+  }, []);
+
+  // Clear the teach-window timer on unmount.
+  useEffect(() => () => {
+    if (teachTimer.current != null) window.clearTimeout(teachTimer.current);
+  }, []);
 
   const helpSheet = helpOpen ? (
     <WalkerHelpSheet
@@ -368,6 +407,11 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const arrivalInstruction = manifest?.arrival?.instruction ?? walkerStrings.video.arrivalFallback;
   const atLast = parked >= cps.length - 1;
 
+  // Shown during the teach window or whenever paused at a checkpoint; hidden
+  // mid-leg. Stronger while teaching, near-invisible at rest.
+  const chevronsVisible = started && (teachActive || !isPlaying);
+  const chevronOpacity = chevronsVisible ? (teachActive ? 0.6 : 0.3) : 0;
+
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
       {/* Player surface: touch-action none suppresses horizontal swipe-scrubbing;
@@ -401,18 +445,35 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         style={{ width: "33%" }}
       />
 
-      {/* Near-invisible centre chevrons that fade after the first tap. */}
+      {/* Edge chevrons. A soft radial scrim (not a shape or button) darkens the
+          footage under each arrow for legibility; stronger during the teach
+          window, then near-invisible, and only shown when paused. Visibility
+          only — the tap zones above stay active regardless. */}
       <div
-        className="absolute inset-y-0 left-0 z-20 flex items-center pl-3 pointer-events-none transition-opacity duration-500"
-        style={{ opacity: chevronFaded ? 0 : 0.28 }}
+        className="absolute inset-y-0 left-0 z-20 flex items-center pl-1 pointer-events-none transition-opacity duration-500"
+        style={{ opacity: chevronOpacity }}
       >
-        <ChevronLeft className="size-9 text-white drop-shadow" />
+        <span className="relative flex items-center justify-center size-16">
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: "radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 68%)" }}
+          />
+          <ChevronLeft className="relative size-9 text-white drop-shadow" />
+        </span>
       </div>
       <div
-        className="absolute inset-y-0 right-0 z-20 flex items-center pr-3 pointer-events-none transition-opacity duration-500"
-        style={{ opacity: chevronFaded ? 0 : 0.28 }}
+        className="absolute inset-y-0 right-0 z-20 flex items-center pr-1 pointer-events-none transition-opacity duration-500"
+        style={{ opacity: chevronOpacity }}
       >
-        <ChevronRight className="size-9 text-white drop-shadow" />
+        <span className="relative flex items-center justify-center size-16">
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: "radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 68%)" }}
+          />
+          <ChevronRight className="relative size-9 text-white drop-shadow" />
+        </span>
       </div>
 
       {/* Tap-to-start overlay (iOS inline-autoplay gesture). Studio name and
@@ -446,13 +507,25 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         </button>
       )}
 
-      {/* Caption overlay — fixed bottom zone, swapped at each checkpoint. */}
-      {caption && !arrivalPrompt && (
+      {/* Bottom band: caption stacked above the persistent escape hatch, both
+          inside one gradient so they never share a line or overlap (change 3).
+          The band is non-interactive except the help link, so taps on the
+          caption area still fall through to the edge zones. */}
+      {started && !arrivalPrompt && (
         <div
-          className="absolute inset-x-0 bottom-0 z-30 px-5 pt-12 pb-[max(1.5rem,env(safe-area-inset-bottom))] pointer-events-none"
+          className="absolute inset-x-0 bottom-0 z-30 px-5 pt-12 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col items-start gap-3 pointer-events-none"
           style={{ background: "linear-gradient(to top, rgba(0,0,0,0.9) 35%, rgba(0,0,0,0.45) 75%, rgba(0,0,0,0))" }}
         >
-          <div className="text-white text-[17px] font-medium leading-snug text-balance">{caption}</div>
+          {caption && (
+            <div className="text-white text-[17px] font-medium leading-snug text-balance">{caption}</div>
+          )}
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); openHelpFromCheckpoint(); }}
+            className="pointer-events-auto text-white/70 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
+          >
+            {walkerStrings.doesntMatch}
+          </button>
         </div>
       )}
 
@@ -484,20 +557,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
               {walkerStrings.video.notYet}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Persistent escape hatch — above the zones, stops its own tap. */}
-      {started && !arrivalPrompt && (
-        <div
-          className="absolute inset-x-0 bottom-0 z-40 flex justify-center pb-[max(1.5rem,env(safe-area-inset-bottom))] pointer-events-none"
-        >
+          {/* Quiet restart — un-emphasized text link under the buttons; the
+              arrival instruction stays the dominant element. */}
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); openHelpFromCheckpoint(); }}
-            className="pointer-events-auto text-white/70 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
+            onClick={(e) => { e.stopPropagation(); restart(); }}
+            className="mt-4 mx-auto block text-white/45 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
           >
-            {walkerStrings.doesntMatch}
+            {walkerStrings.video.startAgain}
           </button>
         </div>
       )}
