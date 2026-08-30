@@ -414,8 +414,10 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const atLast = parked >= cps.length - 1;
 
   // Shown during the teach window or whenever paused at a checkpoint; hidden
-  // mid-leg. Stronger while teaching, near-invisible at rest.
-  const chevronsVisible = started && (teachActive || !isPlaying);
+  // mid-leg, and hidden entirely in the arrival state (nowhere to go forward,
+  // and "Start again" covers going back). Stronger while teaching, near-
+  // invisible at rest.
+  const chevronsVisible = started && !arrivalPrompt && (teachActive || !isPlaying);
   const chevronOpacity = chevronsVisible ? (teachActive ? 0.6 : 0.3) : 0;
 
   return (
