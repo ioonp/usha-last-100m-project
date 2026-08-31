@@ -232,5 +232,7 @@ export const walkerStrings = {
     landingUrl: "https://usha.live",
     /** Arrival screen — quiet signature footer near the bottom. */
     madeInBerlin: "Made in Berlin ❤️",
+    /** Accessible label for the Stories-style segmented progress bar. */
+    progressLabel: "Walk progress",
   },
 };

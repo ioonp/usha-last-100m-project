@@ -88,6 +88,8 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const [failed, setFailed] = useState(!hasVideo);
   // -1 = before the first checkpoint (start of the footage); 0..n-1 = parked.
   const [parked, setParked] = useState(-1);
+  // Video position in seconds, sampled by the rAF loop to fill the progress bar.
+  const [elapsed, setElapsed] = useState(0);
   const [captionIdx, setCaptionIdx] = useState<number | null>(null);
   // Chevron affordance state. isPlaying (from the video's own play/pause events)
   // hides the chevrons while a leg is playing and shows them when paused at a
@@ -178,6 +180,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     const tick = () => {
       const v = videoRef.current;
       const h = headingRef.current;
+      if (v) setElapsed(v.currentTime); // no-op re-render while paused (same value)
       if (v && h !== null && !v.paused && v.currentTime >= cps[h].time) {
         arriveAt(h);
       }
@@ -451,6 +454,46 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           preload="auto"
         />
       </div>
+
+      {/* Segmented progress bar (Instagram Stories style), display-only. One
+          segment per checkpoint: passed = solid white, the active one fills with
+          currentTime toward the next checkpoint, upcoming = dim white. A soft
+          top scrim keeps it legible over bright footage. pointer-events-none so
+          taps fall through to the edge zones — navigation stays on the arrows.
+          Hidden in the arrival state, like the nav arrows. */}
+      {!arrivalPrompt && (
+        <div
+          role="progressbar"
+          aria-label={walkerStrings.video.progressLabel}
+          aria-valuemin={0}
+          aria-valuemax={cps.length}
+          aria-valuenow={started ? Math.min(parked + 1, cps.length) : 0}
+          className="absolute top-0 inset-x-0 z-50 pointer-events-none px-3 pb-6 pt-[max(0.5rem,env(safe-area-inset-top))]"
+          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0))" }}
+        >
+          <div className="flex gap-1">
+            {cps.map((_, i) => {
+              const prevT = i === 0 ? 0 : cps[i - 1].time;
+              const thisT = cps[i].time;
+              const fill = !started
+                ? 0
+                : elapsed >= thisT
+                  ? 1
+                  : elapsed <= prevT || thisT <= prevT
+                    ? 0
+                    : (elapsed - prevT) / (thisT - prevT);
+              return (
+                <div key={i} className="flex-1 h-[3px] rounded-full bg-white/30 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-white"
+                    style={{ width: `${Math.round(fill * 100)}%` }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Edge tap-zones (invisible). Left third = back, right third = forward.
           z-20, below the interactive overlays which stopPropagation. */}
