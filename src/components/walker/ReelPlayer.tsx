@@ -42,8 +42,6 @@ type WakeLockNavigator = Navigator & {
 
 // How long to wait for the video to become playable before falling back.
 const LOAD_TIMEOUT_MS = 8000;
-// How long the edge chevrons hold their stronger "teaching" opacity after start.
-const TEACH_MS = 4000;
 // A checkpoint within this many seconds of the opening frame is treated as an
 // opening instruction to read while walking the first leg, not a stop to park
 // on — otherwise a guide whose first checkpoint sits at t≈0 parks the instant
@@ -85,7 +83,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const wakeRef = useRef<WakeSentinel | null>(null);
   // Index we're playing toward, read by the rAF loop; null when paused/parked.
   const headingRef = useRef<number | null>(null);
-  const teachTimer = useRef<number | null>(null);
 
   const [started, setStarted] = useState(false);
   const [failed, setFailed] = useState(!hasVideo);
@@ -93,10 +90,9 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const [parked, setParked] = useState(-1);
   const [captionIdx, setCaptionIdx] = useState<number | null>(null);
   // Chevron affordance state. isPlaying (from the video's own play/pause events)
-  // hides the chevrons mid-leg and shows them when paused at a checkpoint;
-  // teachActive gives them a stronger opacity for the first few seconds.
+  // hides the chevrons while a leg is playing and shows them when paused at a
+  // checkpoint — the same on every leg, the first included.
   const [isPlaying, setIsPlaying] = useState(false);
-  const [teachActive, setTeachActive] = useState(false);
   const [arrivalPrompt, setArrivalPrompt] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -208,9 +204,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   const start = useCallback(() => {
     setStarted(true);
-    setTeachActive(true);
-    if (teachTimer.current != null) window.clearTimeout(teachTimer.current);
-    teachTimer.current = window.setTimeout(() => setTeachActive(false), TEACH_MS);
     trackUmami(EVENTS.WALK_STARTED);
     void requestWake();
     // Head to the first checkpoint that's actually ahead of the opening frame.
@@ -228,23 +221,32 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     playToward(parked + 1);
   }, [parked, cps.length, playToward]);
 
-  // Left third: hard-seek instantly to the previous stop (no footage replay).
-  // From the first checkpoint this steps to the very start of the footage.
+  // Left third: hard-seek to the previous stop (no footage replay). Active on
+  // every leg the moment the walk has started — including the first leg, where
+  // parked is still -1 while playing toward the first checkpoint.
   const goBack = useCallback(() => {
     const v = videoRef.current;
-    if (!v || parked < 0) return;
+    if (!v || !started) return;
     v.pause();
     headingRef.current = null;
-    const prev = parked - 1;
-    v.currentTime = prev < 0 ? 0 : cps[prev].time;
     setArrivalPrompt(false);
-    setCaptionIdx(prev < 0 ? null : prev);
-    setParked(prev);
-    // Backing out of the first checkpoint returns to the start overlay (studio
-    // name, address, tap-to-start) and re-arms start, rather than leaving a
-    // bare, captionless first frame. Later checkpoints just step back one stop.
-    if (prev < 0) setStarted(false);
-  }, [parked, cps]);
+    const prev = parked - 1;
+    if (prev < 0) {
+      // Backing out of the first leg — whether mid-play before the first
+      // checkpoint (parked = -1) or parked on it (parked = 0) — returns to the
+      // start overlay (studio name, address, tap-to-start) and re-arms start,
+      // rather than leaving a bare, captionless first frame.
+      v.currentTime = 0;
+      setCaptionIdx(null);
+      setParked(-1);
+      setStarted(false);
+    } else {
+      // Later checkpoints step back one stop.
+      v.currentTime = cps[prev].time;
+      setCaptionIdx(prev);
+      setParked(prev);
+    }
+  }, [started, parked, cps]);
 
   const openHelpFromCheckpoint = useCallback(() => {
     trackUmami(EVENTS.CHECKPOINT_MISMATCH, { index: Math.max(parked, 0) });
@@ -265,7 +267,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   }, []);
 
   // "Start again" from the arrival screen — reset to the tap-to-start poster at
-  // frame 0; the next tap replays from the beginning and re-arms the teach hint.
+  // frame 0; the next tap replays the walk from the beginning.
   const restart = useCallback(() => {
     const v = videoRef.current;
     headingRef.current = null;
@@ -312,11 +314,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       v.removeEventListener("play", onPlay);
       v.removeEventListener("pause", onPause);
     };
-  }, []);
-
-  // Clear the teach-window timer on unmount.
-  useEffect(() => () => {
-    if (teachTimer.current != null) window.clearTimeout(teachTimer.current);
   }, []);
 
   const helpSheet = helpOpen ? (
@@ -433,12 +430,11 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const arrivalInstruction = manifest?.arrival?.instruction ?? walkerStrings.video.arrivalFallback;
   const atLast = parked >= cps.length - 1;
 
-  // Shown during the teach window or whenever paused at a checkpoint; hidden
-  // mid-leg, and hidden entirely in the arrival state (nowhere to go forward,
-  // and "Start again" covers going back). Stronger while teaching, near-
-  // invisible at rest.
-  const chevronsVisible = started && !arrivalPrompt && (teachActive || !isPlaying);
-  const chevronOpacity = chevronsVisible ? (teachActive ? 0.6 : 0.3) : 0;
+  // Shown whenever paused at a checkpoint (every leg, the first included);
+  // hidden while a leg is playing, and hidden entirely in the arrival state
+  // (nowhere to go forward, and "Start again" covers going back).
+  const chevronsVisible = started && !arrivalPrompt && !isPlaying;
+  const chevronOpacity = chevronsVisible ? 0.3 : 0;
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
@@ -474,9 +470,9 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       />
 
       {/* Edge chevrons. A soft radial scrim (not a shape or button) darkens the
-          footage under each arrow for legibility; stronger during the teach
-          window, then near-invisible, and only shown when paused. Visibility
-          only — the tap zones above stay active regardless. */}
+          footage under each arrow for legibility; near-invisible, and only
+          shown when paused at a checkpoint. Visibility only — the tap zones
+          above stay active regardless. */}
       <div
         className="absolute inset-y-0 left-0 z-20 flex items-center pl-1 pointer-events-none transition-opacity duration-500"
         style={{ opacity: chevronOpacity }}
