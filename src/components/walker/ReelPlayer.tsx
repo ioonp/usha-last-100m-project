@@ -440,7 +440,19 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const chevronOpacity = chevronsVisible ? 0.3 : 0;
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
+    // Stage: full viewport with a calm near-black surround. On phones the frame
+    // below fills it edge-to-edge (mobile is unchanged); on wider viewports the
+    // frame becomes a centered 9:16 panel and this shows as the letterbox.
+    <div
+      className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center bg-black no-tap-highlight select-none"
+      style={{ background: "radial-gradient(120% 120% at 50% 50%, #0b0b0d 0%, #000000 72%)" }}
+    >
+      {/* Portrait 9:16 player frame. Full-bleed on phones (h-full w-full); from
+          sm+ it is centered and capped to the viewport height minus a small
+          margin, with width derived from the 9:16 ratio so the video keeps its
+          shape instead of stretching. Every overlay lives inside this frame, so
+          they stay positioned relative to the player, not the window. */}
+      <div className="relative h-full w-full overflow-hidden bg-black sm:h-[calc(100dvh-2rem)] sm:w-auto sm:aspect-[9/16] sm:max-w-full sm:rounded-2xl sm:shadow-2xl">
       {/* Player surface: touch-action none suppresses horizontal swipe-scrubbing;
           taps still fire. Portrait only, letterboxed against black. */}
       <div className="absolute inset-0" style={{ touchAction: "none" }}>
@@ -637,6 +649,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       )}
 
       {helpSheet}
+      </div>
     </div>
   );
 }
