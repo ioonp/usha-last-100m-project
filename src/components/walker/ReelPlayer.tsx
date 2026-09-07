@@ -9,6 +9,7 @@ import { WalkerHelpSheet } from "./WalkerHelpSheet";
 // Loc, so the caller can pass its loc directly.
 type ReelLocation = {
   id: string;
+  slug: string;
   studio_name: string;
   accent_color: string;
   video_url: string | null;
@@ -154,6 +155,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     trackPageEvent(location.id, "checkpoint_viewed", parked);
     if (parked === cps.length - 1) {
       trackUmami(EVENTS.ARRIVAL_REACHED);
+      trackUmami(EVENTS.GUIDE_COMPLETED, { slug: location.slug });
       setArrivalPrompt(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,6 +210,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const start = useCallback(() => {
     setStarted(true);
     trackUmami(EVENTS.WALK_STARTED);
+    trackUmami(EVENTS.GUIDE_STARTED, { slug: location.slug });
     void requestWake();
     // Head to the first checkpoint that's actually ahead of the opening frame.
     // If the guide opens with a checkpoint welded to t≈0, that one is an
@@ -216,7 +219,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     const target = cps.findIndex((c) => c.time > OPENING_CHECKPOINT_EPS);
     if (target > 0) setCaptionIdx(target - 1);
     playToward(target === -1 ? cps.length - 1 : target);
-  }, [cps, playToward, requestWake]);
+  }, [cps, playToward, requestWake, location.slug]);
 
   // Right third: play the ramp forward to the next checkpoint.
   const goForward = useCallback(() => {
@@ -253,8 +256,9 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   const openHelpFromCheckpoint = useCallback(() => {
     trackUmami(EVENTS.CHECKPOINT_MISMATCH, { index: Math.max(parked, 0) });
+    trackUmami(EVENTS.GUIDE_HELP_CLICKED, { slug: location.slug });
     setHelpOpen(true);
-  }, [parked]);
+  }, [parked, location.slug]);
 
   const confirmArrived = useCallback(() => {
     trackUmami(EVENTS.WALK_COMPLETED);
@@ -266,12 +270,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   const rejectArrival = useCallback(() => {
     trackUmami(EVENTS.ARRIVAL_NOT_YET);
+    trackUmami(EVENTS.GUIDE_HELP_CLICKED, { slug: location.slug });
     setHelpOpen(true);
-  }, []);
+  }, [location.slug]);
 
   // "Start again" from the arrival screen — reset to the tap-to-start poster at
   // frame 0; the next tap replays the walk from the beginning.
   const restart = useCallback(() => {
+    trackUmami(EVENTS.GUIDE_RESTARTED, { slug: location.slug });
     const v = videoRef.current;
     headingRef.current = null;
     if (v) {
@@ -282,7 +288,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     setParked(-1);
     setCaptionIdx(null);
     setStarted(false);
-  }, []);
+  }, [location.slug]);
 
   // ---- iOS first-frame poster + load-failure fallback ----------------------
   useEffect(() => {
