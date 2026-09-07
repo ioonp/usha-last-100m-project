@@ -36,6 +36,14 @@ export const EVENTS = {
   CHECKPOINT_MISMATCH: "checkpoint_mismatch",
   ARRIVAL_NOT_YET: "arrival_not_yet",
 
+  // --- Video guide, per-studio funnel ---
+  // Each fires with a { slug } property so results break down per studio. No
+  // other properties — slug and event name only, never any PII.
+  GUIDE_STARTED: "guide_started",
+  GUIDE_COMPLETED: "guide_completed",
+  GUIDE_HELP_CLICKED: "guide_help_clicked",
+  GUIDE_RESTARTED: "guide_restarted",
+
   // --- Creator funnel ---
   WIZARD_STARTED: "wizard_started",
   STREET_ENTRANCE_SET: "street_entrance_set",
