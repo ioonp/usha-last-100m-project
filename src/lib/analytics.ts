@@ -43,6 +43,10 @@ export const EVENTS = {
   GUIDE_COMPLETED: "guide_completed",
   GUIDE_HELP_CLICKED: "guide_help_clicked",
   GUIDE_RESTARTED: "guide_restarted",
+  // Arrival-screen tap-only feedback. guide_feedback carries { slug, value:
+  // "positive" | "negative" }; guide_stuck carries { slug, checkpoint, label }.
+  GUIDE_FEEDBACK: "guide_feedback",
+  GUIDE_STUCK: "guide_stuck",
 
   // --- Creator funnel ---
   WIZARD_STARTED: "wizard_started",

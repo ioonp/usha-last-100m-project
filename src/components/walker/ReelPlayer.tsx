@@ -98,6 +98,11 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [arrivalPrompt, setArrivalPrompt] = useState(false);
   const [completed, setCompleted] = useState(false);
+  // Success-screen feedback: null shows the 👍/👎 question, a value shows Thanks.
+  const [feedbackChoice, setFeedbackChoice] = useState<"positive" | "negative" | null>(null);
+  // Stuck screen (reached from "Not yet"): stuckDone flips to the Thanks state.
+  const [stuck, setStuck] = useState(false);
+  const [stuckDone, setStuckDone] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
   const hasCoords = location.start_lat != null && location.start_lng != null;
@@ -126,14 +131,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === "hidden") releaseWake();
-      else if (started && !completed) void requestWake();
+      else if (started && !completed && !stuck) void requestWake();
     };
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
       releaseWake();
     };
-  }, [started, completed, requestWake, releaseWake]);
+  }, [started, completed, stuck, requestWake, releaseWake]);
 
   // ---- native maps (mirrors Viewer's openMaps) -----------------------------
   const openMaps = useCallback(() => {
@@ -155,7 +160,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     trackPageEvent(location.id, "checkpoint_viewed", parked);
     if (parked === cps.length - 1) {
       trackUmami(EVENTS.ARRIVAL_REACHED);
-      trackUmami(EVENTS.GUIDE_COMPLETED, { slug: location.slug });
       setArrivalPrompt(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -262,16 +266,33 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   const confirmArrived = useCallback(() => {
     trackUmami(EVENTS.WALK_COMPLETED);
+    trackUmami(EVENTS.GUIDE_COMPLETED, { slug: location.slug });
     trackPageEvent(location.id, "completed");
     setArrivalPrompt(false);
     setCompleted(true);
     releaseWake();
-  }, [location.id, releaseWake]);
+  }, [location.id, location.slug, releaseWake]);
 
+  // "Not yet" — open the tap-only "where did you get stuck?" screen. No email or
+  // studio contact details; the signal comes to us via the guide_stuck event.
   const rejectArrival = useCallback(() => {
     trackUmami(EVENTS.ARRIVAL_NOT_YET);
-    trackUmami(EVENTS.GUIDE_HELP_CLICKED, { slug: location.slug });
-    setHelpOpen(true);
+    setArrivalPrompt(false);
+    setStuck(true);
+    releaseWake();
+  }, [releaseWake]);
+
+  // One-tap success feedback (👍/👎) on the completed screen.
+  const sendFeedback = useCallback((value: "positive" | "negative") => {
+    trackUmami(EVENTS.GUIDE_FEEDBACK, { slug: location.slug, value });
+    setFeedbackChoice(value);
+  }, [location.slug]);
+
+  // One-tap "where did you get stuck?" pick. checkpoint is the manifest index,
+  // or -1 for the "Somewhere else" catch-all.
+  const sendStuck = useCallback((checkpoint: number, label: string) => {
+    trackUmami(EVENTS.GUIDE_STUCK, { slug: location.slug, checkpoint, label });
+    setStuckDone(true);
   }, [location.slug]);
 
   // "Start again" from the arrival screen — reset to the tap-to-start poster at
@@ -288,6 +309,11 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     setParked(-1);
     setCaptionIdx(null);
     setStarted(false);
+    // Clear the arrival/success/stuck surfaces so it returns to the start overlay.
+    setCompleted(false);
+    setFeedbackChoice(null);
+    setStuck(false);
+    setStuckDone(false);
   }, [location.slug]);
 
   // ---- iOS first-frame poster + load-failure fallback ----------------------
@@ -391,12 +417,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   // ---- completed -----------------------------------------------------------
   if (completed) {
-    // Usha-side feedback escape hatch — opens the walker's mail client with a
-    // prefilled draft to Usha. Never exposes the studio's contact details or a
-    // map; the signal comes to us, not the venue.
-    const feedbackHref = `mailto:${walkerStrings.video.feedbackEmail}?subject=${encodeURIComponent(
-      walkerStrings.video.feedbackSubject(location.studio_name),
-    )}`;
     return (
       <div
         className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
@@ -406,14 +426,33 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           <div className="text-6xl mb-4">🎉</div>
           <h1 className="font-display text-4xl mb-2">{walkerStrings.video.completedTitle}</h1>
           <p className="text-muted-foreground mb-8">Welcome to {location.studio_name}.</p>
-          <button
-            type="button"
-            onClick={() => { window.location.href = feedbackHref; }}
-            className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant active:scale-[0.98] transition-smooth"
-            style={{ backgroundColor: accent }}
-          >
-            {walkerStrings.video.feedbackCta}
-          </button>
+
+          {/* One-tap "was this easy to follow?" — 👍 / 👎, then a Thanks. No
+              typing; a single tap fires guide_feedback and confirms. */}
+          {feedbackChoice === null ? (
+            <div className="mb-2">
+              <p className="text-[15px] font-medium mb-3">{walkerStrings.video.feedbackQuestion}</p>
+              <div className="flex justify-center gap-3">
+                <button
+                  type="button"
+                  aria-label={walkerStrings.video.feedbackYes}
+                  onClick={() => sendFeedback("positive")}
+                  className="size-16 rounded-2xl bg-white/70 text-3xl shadow-soft active:scale-95 transition-smooth"
+                >👍</button>
+                <button
+                  type="button"
+                  aria-label={walkerStrings.video.feedbackNo}
+                  onClick={() => sendFeedback("negative")}
+                  className="size-16 rounded-2xl bg-white/70 text-3xl shadow-soft active:scale-95 transition-smooth"
+                >👎</button>
+              </div>
+            </div>
+          ) : (
+            <p className="mb-2 text-[15px] font-semibold" style={{ color: accent }}>
+              {walkerStrings.video.feedbackThanks}
+            </p>
+          )}
+
           {/* Secondary link to the Usha landing page — clear but not a button. */}
           <a
             href={walkerStrings.video.landingUrl}
@@ -430,6 +469,63 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         <p className="absolute inset-x-0 bottom-0 text-center text-xs text-muted-foreground pb-[max(1rem,env(safe-area-inset-bottom))]">
           {walkerStrings.video.madeInBerlin}
         </p>
+      </div>
+    );
+  }
+
+  // ---- still lost: tap-only "where did you get stuck?" ---------------------
+  if (stuck) {
+    return (
+      <div
+        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
+        style={{ backgroundColor: accent + "20" }}
+      >
+        <div className="animate-scale-in w-full max-w-sm">
+          {!stuckDone ? (
+            <>
+              <h1 className="font-display text-[26px] leading-tight mb-5">
+                {walkerStrings.video.stuckQuestion}
+              </h1>
+              {/* One tappable option per checkpoint of THIS guide (manifest
+                  captions), plus a catch-all. A single tap fires guide_stuck. */}
+              <div className="flex flex-col gap-2 text-left">
+                {cps.map((c, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => sendStuck(i, c.caption)}
+                    className="w-full rounded-2xl bg-white/70 px-4 py-3 text-[15px] leading-snug shadow-soft active:scale-[0.98] transition-smooth"
+                  >
+                    {c.caption}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => sendStuck(-1, walkerStrings.video.stuckElsewhere)}
+                  className="w-full rounded-2xl bg-white/70 px-4 py-3 text-[15px] font-medium leading-snug shadow-soft active:scale-[0.98] transition-smooth"
+                >
+                  {walkerStrings.video.stuckElsewhere}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-5xl mb-4">🙏</div>
+              <p className="mb-8 text-[15px] font-semibold" style={{ color: accent }}>
+                {walkerStrings.video.stuckThanks}
+              </p>
+              {/* Gentle next step — replay the guide. No email, no contact. */}
+              <button
+                type="button"
+                onClick={restart}
+                className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant active:scale-[0.98] transition-smooth"
+                style={{ backgroundColor: accent }}
+              >
+                {walkerStrings.video.startAgain}
+              </button>
+            </>
+          )}
+        </div>
       </div>
     );
   }
