@@ -43,17 +43,15 @@ export default function Viewer() {
   // Shared stuck/help + venue-contact fallback sheet (arrival, checkpoints, success).
   const [helpOpen, setHelpOpen] = useState(false);
 
-  // Fire once when the public Find Me route first loads.
-  useEffect(() => {
-    trackUmami(EVENTS.FINDME_OPENED);
-  }, []);
-
   useEffect(() => {
     if (!slug) return;
     (async () => {
       const { data: l } = await supabase.from("locations").select("*").eq("slug", slug).eq("published", true).eq("archived", false).maybeSingle();
       if (!l) { setLoading(false); return; }
       setLoc(l as Loc);
+      // Guide opened — fire the per-surface "opened" once a valid guide loads,
+      // split by type so photo and video funnels stay separate.
+      trackUmami((l as Loc).type === "video" ? EVENTS.VIDEO_OPENED : EVENTS.PHOTO_OPENED, { slug });
       const { data: c } = await supabase.from("checkpoints").select("*").eq("location_id", l.id).order("position");
       setCps((c as unknown as CP[]) || []);
       setLoading(false);
@@ -70,16 +68,16 @@ export default function Viewer() {
     if (!loc) return;
     if (step >= 0 && step < cps.length) {
       trackEvent(loc.id, "checkpoint_viewed", step);
-      trackUmami(EVENTS.CHECKPOINT_VIEWED, { index: step });
+      trackUmami(EVENTS.PHOTO_CHECKPOINT_VIEWED, { slug, index: step });
     } else if (cps.length > 0 && step >= cps.length) {
       trackEvent(loc.id, "completed");
-      trackUmami(EVENTS.WALK_COMPLETED);
+      trackUmami(EVENTS.PHOTO_COMPLETED, { slug });
     }
   }, [step, loc, cps.length]);
 
   // Arrival confirmation screen render.
   useEffect(() => {
-    if (showArrival) trackUmami(EVENTS.ARRIVAL_REACHED);
+    if (showArrival) trackUmami(EVENTS.PHOTO_ARRIVAL_REACHED, { slug });
   }, [showArrival]);
 
   if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
@@ -233,7 +231,7 @@ export default function Viewer() {
                 Yes, I'm here
               </button>
               <button
-                onClick={() => { trackUmami(EVENTS.ARRIVAL_NOT_YET); setHelpOpen(true); }}
+                onClick={() => { trackUmami(EVENTS.PHOTO_ARRIVAL_NOT_YET, { slug }); setHelpOpen(true); }}
                 className="w-full rounded-full py-4 font-medium text-base border-2 active:scale-[0.98] transition-smooth"
                 style={{ borderColor: accent, color: accent }}
               >
@@ -274,7 +272,7 @@ export default function Viewer() {
           {loc.start_note && <p className="text-sm text-muted-foreground mb-6 italic">"{loc.start_note}"</p>}
 
           <button
-            onClick={() => { trackUmami(EVENTS.WALK_STARTED); setShowArrival(true); }}
+            onClick={() => { trackUmami(EVENTS.PHOTO_STARTED, { slug }); setShowArrival(true); }}
             disabled={total === 0}
             className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 active:scale-95 transition-smooth"
             style={{ backgroundColor: accent }}
@@ -473,7 +471,7 @@ export default function Viewer() {
             </button>
           )}
           <button
-            onClick={() => { trackUmami(EVENTS.CHECKPOINT_MISMATCH, { index: step }); setHelpOpen(true); }}
+            onClick={() => { trackUmami(EVENTS.PHOTO_CHECKPOINT_MISMATCH, { slug, index: step }); setHelpOpen(true); }}
             className="text-white/60 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
           >
             {walkerStrings.doesntMatch}

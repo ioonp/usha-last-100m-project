@@ -45,7 +45,7 @@ export default function Wizard() {
 
   // Fire once when the guide-creation wizard opens.
   useEffect(() => {
-    trackEvent(EVENTS.WIZARD_STARTED);
+    trackEvent(EVENTS.CREATOR_WIZARD_STARTED);
   }, []);
 
   useEffect(() => {
@@ -147,14 +147,14 @@ export default function Wizard() {
       if (!ok) return;
     }
     // Step 0 validation above has passed, so the street-entrance pin is set.
-    if (step === 0) trackEvent(EVENTS.STREET_ENTRANCE_SET);
+    if (step === 0) trackEvent(EVENTS.CREATOR_ENTRANCE_SET);
     setStep((s) => Math.min(s + 1, 3));
   };
 
   const publish = async () => {
     const ok = await persist({ published: true });
     if (ok) {
-      trackEvent(EVENTS.GUIDE_PUBLISHED);
+      trackEvent(EVENTS.CREATOR_PUBLISHED);
       toast.success("Published! Share away.");
     }
   };
@@ -289,7 +289,7 @@ export default function Wizard() {
                     <p className="font-display text-xl mb-3">Your wayfinding page is published.</p>
                     <div className="flex items-center gap-2 bg-card border border-border rounded-full p-1 pl-4 shadow-input w-full max-w-full min-w-0 overflow-hidden" style={{ width: "100%", overflow: "hidden" }}>
                       <div className="text-sm font-mono flex-1 min-w-0 overflow-hidden whitespace-nowrap text-ellipsis max-w-full" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{shareUrl}</div>
-                      <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); trackEvent(EVENTS.FINDME_LINK_COPIED); toast.success("Copied"); }}>
+                      <Button size="sm" variant="ghost" className="rounded-full" onClick={() => { navigator.clipboard.writeText(shareUrl); trackEvent(EVENTS.CREATOR_LINK_COPIED); toast.success("Copied"); }}>
                         <Copy className="size-3.5" />
                       </Button>
                     </div>

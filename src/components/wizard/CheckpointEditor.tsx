@@ -220,7 +220,7 @@ export function CheckpointEditor({
       ...checkpoints,
       { position: checkpoints.length, photo_url: "", arrow_direction: "up", note: "", indicators: [] },
     ]);
-    trackEvent(EVENTS.CHECKPOINT_ADDED, { count: checkpoints.length + 1 });
+    trackEvent(EVENTS.CREATOR_CHECKPOINT_ADDED, { count: checkpoints.length + 1 });
   };
 
   const onUpload = async (i: number, file: File) => {

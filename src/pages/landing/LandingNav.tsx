@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { landingStrings } from "@/lib/strings";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 export function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -29,12 +30,12 @@ export function LandingNav() {
           <span className="font-display font-semibold text-xl -tracking-[0.01em]">Usha</span>
         </div>
         <div className="flex items-center gap-2">
-          <Link to="/auth">
+          <Link to="/auth" onClick={() => trackEvent(EVENTS.LANDING_SIGNIN_CLICKED, { placement: "nav" })}>
             <Button variant="ghost" size="sm" className="text-muted-foreground">
               {landingStrings.nav.signIn}
             </Button>
           </Link>
-          <Link to="/auth?mode=signup">
+          <Link to="/auth?mode=signup" onClick={() => trackEvent(EVENTS.LANDING_SIGNUP_CLICKED, { placement: "nav" })}>
             <Button size="sm" className="rounded-full">
               {landingStrings.nav.buildOne}
             </Button>

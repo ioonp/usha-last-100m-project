@@ -45,7 +45,7 @@ export default function Dashboard() {
     const url = `${window.location.origin}/find/${slug}`;
     try {
       await navigator.clipboard.writeText(url);
-      trackEvent(EVENTS.FINDME_LINK_COPIED);
+      trackEvent(EVENTS.CREATOR_LINK_COPIED, { slug });
       toast.success("Link copied");
     } catch {
       toast.error("Couldn't copy link");
@@ -60,6 +60,7 @@ export default function Dashboard() {
       a.href = dataUrl;
       a.download = `${slug}-qr.png`;
       a.click();
+      trackEvent(EVENTS.CREATOR_QR_DOWNLOADED, { slug });
     } catch {
       toast.error("Couldn't generate QR code");
     }
@@ -85,7 +86,7 @@ export default function Dashboard() {
             <div className="eyebrow text-muted-foreground mb-2">Your locations</div>
             <h1 className="font-display text-4xl md:text-5xl">Wayfinding pages</h1>
           </div>
-          <Link to="/capture/new">
+          <Link to="/capture/new" onClick={() => trackEvent(EVENTS.CREATOR_NEW_GUIDE_CLICKED, { placement: "header" })}>
             <Button size="lg" className="rounded-full bg-primary text-primary-foreground h-12 px-6">
               <Plus className="size-4 mr-1" /> New location
             </Button>
@@ -107,7 +108,7 @@ export default function Dashboard() {
           <div className="border border-dashed border-border rounded-3xl p-16 text-center">
             <p className="font-display text-2xl mb-2">No locations yet</p>
             <p className="text-muted-foreground mb-6">Create your first photo path.</p>
-            <Link to="/capture/new"><Button className="rounded-full">Get started</Button></Link>
+            <Link to="/capture/new" onClick={() => trackEvent(EVENTS.CREATOR_NEW_GUIDE_CLICKED, { placement: "empty_state" })}><Button className="rounded-full">Get started</Button></Link>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -133,7 +134,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Link to={`/capture/${l.id}`} className="flex-1">
+                  <Link to={`/capture/${l.id}`} className="flex-1" onClick={() => trackEvent(EVENTS.CREATOR_GUIDE_OPENED, { slug: l.slug })}>
                     <Button variant="outline" size="sm" className="w-full rounded-full"><Pencil className="size-3.5 mr-1" /> Edit</Button>
                   </Link>
                   {l.published && (
@@ -163,7 +164,7 @@ export default function Dashboard() {
                       </a>
                     </>
                   )}
-                  <Button variant="ghost" size="sm" className="rounded-full size-9 shrink-0 p-0" onClick={() => setArchived(l.id, !l.archived)}>
+                  <Button variant="ghost" size="sm" className="rounded-full size-9 shrink-0 p-0" onClick={() => { trackEvent(EVENTS.CREATOR_GUIDE_ARCHIVED, { slug: l.slug, archived: !l.archived }); setArchived(l.id, !l.archived); }}>
                     {l.archived ? <ArchiveRestore className="size-3.5" /> : <Archive className="size-3.5" />}
                   </Button>
                 </div>
