@@ -156,10 +156,10 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // final checkpoint also raises arrival_reached and shows the arrival prompt.
   useEffect(() => {
     if (parked < 0 || parked >= cps.length) return;
-    trackUmami(EVENTS.CHECKPOINT_VIEWED, { index: parked });
+    trackUmami(EVENTS.VIDEO_CHECKPOINT_VIEWED, { slug: location.slug, index: parked });
     trackPageEvent(location.id, "checkpoint_viewed", parked);
     if (parked === cps.length - 1) {
-      trackUmami(EVENTS.ARRIVAL_REACHED);
+      trackUmami(EVENTS.VIDEO_ARRIVAL_REACHED, { slug: location.slug });
       setArrivalPrompt(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,8 +213,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   const start = useCallback(() => {
     setStarted(true);
-    trackUmami(EVENTS.WALK_STARTED);
-    trackUmami(EVENTS.GUIDE_STARTED, { slug: location.slug });
+    trackUmami(EVENTS.VIDEO_STARTED, { slug: location.slug });
     void requestWake();
     // Head to the first checkpoint that's actually ahead of the opening frame.
     // If the guide opens with a checkpoint welded to t≈0, that one is an
@@ -259,14 +258,13 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   }, [started, parked, cps]);
 
   const openHelpFromCheckpoint = useCallback(() => {
-    trackUmami(EVENTS.CHECKPOINT_MISMATCH, { index: Math.max(parked, 0) });
-    trackUmami(EVENTS.GUIDE_HELP_CLICKED, { slug: location.slug });
+    trackUmami(EVENTS.VIDEO_CHECKPOINT_MISMATCH, { slug: location.slug, index: Math.max(parked, 0) });
+    trackUmami(EVENTS.VIDEO_HELP_CLICKED, { slug: location.slug });
     setHelpOpen(true);
   }, [parked, location.slug]);
 
   const confirmArrived = useCallback(() => {
-    trackUmami(EVENTS.WALK_COMPLETED);
-    trackUmami(EVENTS.GUIDE_COMPLETED, { slug: location.slug });
+    trackUmami(EVENTS.VIDEO_COMPLETED, { slug: location.slug });
     trackPageEvent(location.id, "completed");
     setArrivalPrompt(false);
     setCompleted(true);
@@ -276,7 +274,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // "Not yet" — open the tap-only "where did you get stuck?" screen. No email or
   // studio contact details; the signal comes to us via the guide_stuck event.
   const rejectArrival = useCallback(() => {
-    trackUmami(EVENTS.ARRIVAL_NOT_YET);
+    // The meaningful stuck signal is video_stuck, fired when they pick a reason.
     setArrivalPrompt(false);
     setStuck(true);
     releaseWake();
@@ -284,21 +282,21 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   // One-tap success feedback (👍/👎) on the completed screen.
   const sendFeedback = useCallback((value: "positive" | "negative") => {
-    trackUmami(EVENTS.GUIDE_FEEDBACK, { slug: location.slug, value });
+    trackUmami(EVENTS.VIDEO_FEEDBACK, { slug: location.slug, value });
     setFeedbackChoice(value);
   }, [location.slug]);
 
   // One-tap "where did you get stuck?" pick. checkpoint is the manifest index,
   // or -1 for the "Somewhere else" catch-all.
   const sendStuck = useCallback((checkpoint: number, label: string) => {
-    trackUmami(EVENTS.GUIDE_STUCK, { slug: location.slug, checkpoint, label });
+    trackUmami(EVENTS.VIDEO_STUCK, { slug: location.slug, checkpoint, label });
     setStuckDone(true);
   }, [location.slug]);
 
   // "Start again" from the arrival screen — reset to the tap-to-start poster at
   // frame 0; the next tap replays the walk from the beginning.
   const restart = useCallback(() => {
-    trackUmami(EVENTS.GUIDE_RESTARTED, { slug: location.slug });
+    trackUmami(EVENTS.VIDEO_RESTARTED, { slug: location.slug });
     const v = videoRef.current;
     headingRef.current = null;
     if (v) {

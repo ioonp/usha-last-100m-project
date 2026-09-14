@@ -3,6 +3,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { landingStrings } from "@/lib/strings";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { HeroMapIllustration } from "./HeroMapIllustration";
 
 const t = landingStrings.hero;
@@ -20,7 +21,7 @@ export function HeroSection() {
             {t.subhead}
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <Link to="/auth?mode=signup">
+            <Link to="/auth?mode=signup" onClick={() => trackEvent(EVENTS.LANDING_SIGNUP_CLICKED, { placement: "hero" })}>
               <Button size="lg" className="rounded-full px-7 h-[52px] text-[15.5px]">
                 {t.ctaPrimary}
                 <ArrowRight className="ml-1 size-4" />
@@ -30,7 +31,7 @@ export function HeroSection() {
               size="lg"
               variant="ghost"
               className="rounded-full px-7 h-[52px] text-[15.5px]"
-              onClick={() => toast(landingStrings.demoUnavailable)}
+              onClick={() => { trackEvent(EVENTS.LANDING_DEMO_CLICKED, { placement: "hero" }); toast(landingStrings.demoUnavailable); }}
             >
               {t.ctaSecondary}
             </Button>

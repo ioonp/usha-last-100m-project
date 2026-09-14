@@ -22,38 +22,50 @@ declare global {
   }
 }
 
+// Event names are namespaced by surface with a readable prefix — landing_,
+// photo_, video_, creator_ — so they cluster by surface in Umami's flat list
+// and read without a legend. Keep the surface prefix, snake_case, and a
+// past-tense verb; put everything else in properties, never in the name.
 export const EVENTS = {
-  // --- Walker funnel ---
-  FINDME_OPENED: "findme_opened",
-  WALK_STARTED: "walk_started",
-  CHECKPOINT_VIEWED: "checkpoint_viewed",
-  ARRIVAL_REACHED: "arrival_reached",
-  WALK_COMPLETED: "walk_completed",
+  // ── Landing (marketing site). Pageviews auto-track; these are CTA taps,
+  //    each with a { placement: "hero" | "cta" | "nav" } property. ──
+  LANDING_SIGNUP_CLICKED: "landing_signup_clicked",
+  LANDING_SIGNIN_CLICKED: "landing_signin_clicked",
+  LANDING_DEMO_CLICKED: "landing_demo_clicked",
 
-  // Walker fallback escapes. Both UI controls exist in the current code and are
-  // wired at their call sites (the per-checkpoint "this doesn't match" link and
-  // the arrival-screen "not yet" button in src/pages/Viewer.tsx).
-  CHECKPOINT_MISMATCH: "checkpoint_mismatch",
-  ARRIVAL_NOT_YET: "arrival_not_yet",
+  // ── Photo guide (photo-checkpoint walker). All fire with { slug }; the
+  //    checkpoint ones also carry { index }. No PII, ever. ──
+  PHOTO_OPENED: "photo_opened",
+  PHOTO_STARTED: "photo_started",
+  PHOTO_CHECKPOINT_VIEWED: "photo_checkpoint_viewed",
+  PHOTO_ARRIVAL_REACHED: "photo_arrival_reached",
+  PHOTO_COMPLETED: "photo_completed",
+  PHOTO_CHECKPOINT_MISMATCH: "photo_checkpoint_mismatch",
+  PHOTO_ARRIVAL_NOT_YET: "photo_arrival_not_yet",
 
-  // --- Video guide, per-studio funnel ---
-  // Each fires with a { slug } property so results break down per studio. No
-  // other properties — slug and event name only, never any PII.
-  GUIDE_STARTED: "guide_started",
-  GUIDE_COMPLETED: "guide_completed",
-  GUIDE_HELP_CLICKED: "guide_help_clicked",
-  GUIDE_RESTARTED: "guide_restarted",
-  // Arrival-screen tap-only feedback. guide_feedback carries { slug, value:
-  // "positive" | "negative" }; guide_stuck carries { slug, checkpoint, label }.
-  GUIDE_FEEDBACK: "guide_feedback",
-  GUIDE_STUCK: "guide_stuck",
+  // ── Video guide (reel player). All fire with { slug }; feedback carries a
+  //    { value } and stuck a { checkpoint, label }. No PII, ever. ──
+  VIDEO_OPENED: "video_opened",
+  VIDEO_STARTED: "video_started",
+  VIDEO_CHECKPOINT_VIEWED: "video_checkpoint_viewed",
+  VIDEO_ARRIVAL_REACHED: "video_arrival_reached",
+  VIDEO_COMPLETED: "video_completed",
+  VIDEO_RESTARTED: "video_restarted",
+  VIDEO_HELP_CLICKED: "video_help_clicked",
+  VIDEO_CHECKPOINT_MISMATCH: "video_checkpoint_mismatch",
+  VIDEO_FEEDBACK: "video_feedback",
+  VIDEO_STUCK: "video_stuck",
 
-  // --- Creator funnel ---
-  WIZARD_STARTED: "wizard_started",
-  STREET_ENTRANCE_SET: "street_entrance_set",
-  CHECKPOINT_ADDED: "checkpoint_added",
-  GUIDE_PUBLISHED: "guide_published",
-  FINDME_LINK_COPIED: "findme_link_copied",
+  // ── Creator (dashboard + build wizard). Guide-scoped ones carry { slug }. ──
+  CREATOR_NEW_GUIDE_CLICKED: "creator_new_guide_clicked",
+  CREATOR_GUIDE_OPENED: "creator_guide_opened",
+  CREATOR_LINK_COPIED: "creator_link_copied",
+  CREATOR_QR_DOWNLOADED: "creator_qr_downloaded",
+  CREATOR_GUIDE_ARCHIVED: "creator_guide_archived",
+  CREATOR_WIZARD_STARTED: "creator_wizard_started",
+  CREATOR_ENTRANCE_SET: "creator_entrance_set",
+  CREATOR_CHECKPOINT_ADDED: "creator_checkpoint_added",
+  CREATOR_PUBLISHED: "creator_published",
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
