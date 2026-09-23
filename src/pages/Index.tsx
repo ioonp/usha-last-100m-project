@@ -1,23 +1,23 @@
-import "./landing/landing.css";
-import { usePrefersReducedMotion } from "./landing/hooks";
 import { LandingNav } from "./landing/LandingNav";
 import { HeroSection } from "./landing/HeroSection";
-import { RecognitionSection } from "./landing/RecognitionSection";
+import { ProblemsSection } from "./landing/ProblemsSection";
+import { ExampleSection } from "./landing/ExampleSection";
+import { OptionsSection } from "./landing/OptionsSection";
 import { HowItWorksSection } from "./landing/HowItWorksSection";
-import { CtaSection } from "./landing/CtaSection";
-import { LandingFooter } from "./landing/LandingFooter";
+import { FaqSection } from "./landing/FaqSection";
+import { ClosingSection } from "./landing/ClosingSection";
 
 const Index = () => {
-  const reducedMotion = usePrefersReducedMotion();
-
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div id="top" className="min-h-screen bg-background text-foreground">
       <LandingNav />
       <HeroSection />
-      <RecognitionSection reducedMotion={reducedMotion} />
-      <HowItWorksSection reducedMotion={reducedMotion} />
-      <CtaSection reducedMotion={reducedMotion} />
-      <LandingFooter />
+      <ProblemsSection />
+      <ExampleSection />
+      <OptionsSection />
+      <HowItWorksSection />
+      <FaqSection />
+      <ClosingSection />
     </div>
   );
 };

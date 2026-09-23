@@ -28,133 +28,123 @@ export const publishStrings = {
     `Street Entrance + ${checkpoints} ${checkpoints === 1 ? "checkpoint" : "checkpoints"}`,
 };
 
+// Marketing landing page ("/") copy, from the design handoff
+// (landing.strings.en.json).
 export const landingStrings = {
   nav: {
+    howItWorks: "How it works",
+    options: "Pricing",
+    faq: "FAQ",
     signIn: "Sign in",
-    buildOne: "Build one now",
+    videoCta: "Get a video guide",
   },
-  // Shown by both demo buttons (hero + closing CTA) instead of opening /demo.
-  // The route still exists, but its canned example doesn't match the studio
-  // story this page tells, so the buttons acknowledge the click for now.
-  demoUnavailable: "Demo not available yet",
   hero: {
-    eyebrow: "Wayfinding for the last 100 meters",
-    // Static, owner-voiced headline (was a rotating word). Speaks to the owner's
-    // outcome, not the lost visitor, and keeps the hero calm. Segment-neutral:
-    // "visitors" covers students, guests, attendees and patients alike, so the
-    // hero reads as universal and only the example section names a segment.
-    headline: "Your visitors stop getting lost at the door.",
-    subhead:
-      "Maps drops them on the street. Usha walks them the rest of the way — through the courtyard, past the side gate, to your door. With photos, not another text from you.",
-    ctaPrimary: "Build your guide",
-    ctaSecondary: "Check a Demo",
-    reassurance: "No app to download. They just tap a link.",
-    proof: "Made in Berlin, for Berlin's courtyards and back buildings.",
-    map: {
-      ariaLabel:
-        "A map where the Google Maps route stops at the street, leaving the real door hidden in a courtyard beyond reach.",
-      courtyardLabel: "HINTERHOF",
-      gapLabel: "the last 100m →",
-      legendMapsStop: "Where Maps stops",
-      legendActualDoor: "The actual door",
+    eyebrow: "For venues in Berlin's Hinterhöfe",
+    title: "Guests lost in your courtyard? We guide them the",
+    titleEmphasis: "last 100 meters.",
+    subtitle:
+      "A short walking guide that takes guests from the street, through the archways, straight to your door. No app, just a link or a QR code.",
+    primaryCta: "Get a video guide",
+    secondaryCta: "or make a free photo guide",
+    note: "Video guides on request · Photo guides are free",
+    phoneAlt:
+      "Usha guide step screen: a passageway leading to the courtyard, with the instruction Keep going, it's further back",
+  },
+  problems: {
+    title: "Sound familiar?",
+    late: {
+      title: "Guests arrive late",
+      body: "They find the street, then lose minutes in the wrong courtyard.",
+    },
+    calls: {
+      title: "\"Where exactly are you?\"",
+      body: "Your team answers the same directions call before every class or booking.",
+    },
+    impression: {
+      title: "A stressful first impression",
+      body: "The visit starts with searching instead of the calm you've designed.",
     },
   },
-  recognition: {
-    eyebrow: "Every hard-to-find door has this thread",
-    /** Screen-reader label for the segment pill row. */
-    segmentsLabel: "Show the example for",
-    /**
-     * One worked example per segment, all sharing the same shape — heading,
-     * one-line lead, four-message thread — so switching pills re-themes the
-     * copy without moving the layout. The first entry is the default.
-     *
-     * Presentational only: the selected segment is local component state on the
-     * landing page and is never persisted, routed, or sent anywhere.
-     */
-    segments: [
-      {
-        id: "studio",
-        label: "Studio",
-        heading: "The texts you’re tired of sending.",
-        lead: "Every Hinterhof studio has this thread on repeat with new students.",
-        thread: [
-          { from: "them" as const, text: "I’m outside? I don’t see it 😅" },
-          { from: "you" as const, text: "which entrance are you at?" },
-          { from: "them" as const, text: "there’s no sign… is it the courtyard?" },
-          { from: "you" as const, text: "stay there, I’ll come get you" },
-        ],
-      },
-      {
-        id: "rental",
-        label: "Airbnb / short-stay rental",
-        heading: "The check-in messages you answer at midnight.",
-        lead: "Every short-stay host has this thread on repeat with arriving guests.",
-        thread: [
-          { from: "them" as const, text: "I’m at the address but which building? 😅" },
-          { from: "you" as const, text: "are you by the green gate?" },
-          { from: "them" as const, text: "there are three doors, none have your name" },
-          { from: "you" as const, text: "hang on, I’ll come down" },
-        ],
-      },
-      {
-        id: "event",
-        label: "Event space",
-        heading: "The calls you take right at doors open.",
-        lead: "Every multi-building venue has this thread on repeat while guests arrive.",
-        thread: [
-          { from: "them" as const, text: "we’re on site — which building is it? 😅" },
-          { from: "you" as const, text: "have you passed the loading bay?" },
-          { from: "them" as const, text: "there’s no signage, just numbers" },
-          { from: "you" as const, text: "stay there, someone’s coming out" },
-        ],
-      },
-      {
-        id: "clinic",
-        label: "Clinic / practice",
-        heading: "The calls your front desk keeps taking.",
-        lead: "Every practice down a passage has this thread on repeat with new patients.",
-        thread: [
-          { from: "them" as const, text: "I’m at the address, I don’t see the practice 😅" },
-          { from: "you" as const, text: "are you through the passage yet?" },
-          { from: "them" as const, text: "just a row of buzzers, no names" },
-          { from: "you" as const, text: "wait there, I’ll come out" },
-        ],
-      },
-    ],
-    afterPrefix: "Usha replaces the whole thread with ",
-    afterHighlight: "one link",
-    afterSuffix: ".",
+  example: {
+    eyebrow: "Live at Yoga Futura, Kreuzberg",
+    title: "One real courtyard, from street to door.",
+    body: "This is the guide Yoga Futura's guests use to find the studio at Kreuzberger Straße 30: short clips, one instruction per turn, straight to the door.",
+    cta: "Open the live guide",
+    ctaMobile: "Try the live guide",
+    qrTitle: "Scan to try it on your phone",
+    qrBody: "Works best standing in front of the building, but you can walk it from your desk.",
+    url: "https://usha.live/find/yoga-futura-kreuzberg",
+    startAlt: "Start screen of the Yoga Futura guide with a Tap to start button over the street view",
+    qrAlt: "QR code linking to the Yoga Futura guide",
   },
-  // The former "turn" and "how" sections merged into one — the three steps were
-  // being described twice with two schematic maps. Copy from "turn", the numbered
-  // steps from "how" (owner-voiced), and the trail map as the single visual.
-  howItWorks: {
-    eyebrow: "Where Usha takes over",
-    heading: "Pick up exactly where the map gives up.",
-    lead: "Walk the route once, photographing as you go. Your visitor just follows the pictures, straight through the gap to your door.",
+  options: {
+    eyebrow: "Two ways to get your guide",
+    title: "We do it for you, or you do it yourself.",
+    subtitle: "Start where you are. Every photo guide can be upgraded to video later.",
+    video: {
+      label: "Video guide",
+      badge: "Recommended",
+      title: "We film it for you.",
+      points: [
+        "We come by and film the route from the street to your door",
+        "Edited into a short, step-by-step video guide",
+        "Every arch, gate and door highlighted",
+        "Live within 3 days, shared by link and QR code",
+      ],
+      cta: "Request a video guide",
+      note: "Tell us your venue. We reply within a day.",
+    },
+    photo: {
+      label: "Photo guide",
+      badge: "Free",
+      title: "Do it yourself.",
+      points: [
+        "Snap a photo of each turn with your phone",
+        "Add one short instruction per photo",
+        "Publish in about 5 minutes",
+        "Upgrade to a video guide anytime",
+      ],
+      cta: "Create a free guide",
+      note: "Takes about 5 minutes on your phone.",
+      signInPrompt: "Already have a guide?",
+      signIn: "Sign in",
+    },
+  },
+  how: {
+    title: "How it works",
     steps: [
-      { number: "01", title: "Drop a starting pin", desc: "Mark where Maps leaves people off — the street your guide begins from." },
-      { number: "02", title: "Add photo checkpoints", desc: "Photograph each turn and point an arrow the right way. One photo per decision." },
-      { number: "03", title: "Share a QR or link", desc: "Print it by the street, drop it in your confirmation email. Visitors just follow." },
+      { title: "Create the guide", body: "We film your route, or you upload a photo of each turn." },
+      { title: "Share one link", body: "Add it to booking confirmations, Google Maps and your website, or print the QR code for the street entrance." },
+      { title: "Guests walk straight in", body: "One clear step at a time, from the street to the right door." },
     ],
-    map: {
-      ariaLabel:
-        "The same map, now with a trail of photo checkpoints bridging the gap from the street to the courtyard door.",
-      courtyardLabel: "HINTERHOF",
-      legendCheckpoint: "Photo checkpoint",
-      legendDoorReached: "Door reached",
-    },
   },
-  cta: {
-    eyebrow: "For any door nobody can find",
-    heading: "Make one for your door.",
-    body: "If someone’s first visit starts with “I can’t find you,” fix it before the next one. Building a guide takes about three minutes.",
-    ctaPrimary: "Build your guide",
-    ctaSecondary: "See a demo",
-    note: "No account needed to try · No app to download",
+  faq: {
+    title: "Questions",
+    items: [
+      { q: "Do guests need to download an app?", a: "No. The guide opens in the browser from a link or a QR code." },
+      { q: "How long does filming take?", a: "About 15 minutes on site. We walk the route once and handle the editing ourselves." },
+      { q: "Can I start free and switch to video later?", a: "Yes. Publish a photo guide today and request a video guide whenever you're ready." },
+      { q: "What if something in the courtyard changes?", a: "Tell us and we'll update your guide." },
+    ],
+  },
+  closing: {
+    title: "Stop giving directions over the phone.",
+    body: "Get guests to your door, from their very first visit.",
+    videoCta: "Get a video guide",
+    photoCta: "Make a free photo guide",
   },
   footer: {
-    tagline: "Photo wayfinding for the last 100 meters · Berlin",
+    domain: "usha.live",
+    madeIn: "Made in Berlin ❤️",
+    imprint: "Imprint",
+    privacy: "Privacy",
+    contact: "Contact",
+  },
+  // The video CTAs open a mailto built from these (address + subject live here
+  // as the constant).
+  videoRequestEmail: {
+    to: "iapara.ion.g@gmail.com",
+    subject: "Video guide for my venue",
   },
 };
 
