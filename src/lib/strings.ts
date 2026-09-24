@@ -146,6 +146,35 @@ export const landingStrings = {
     to: "iapara.ion.g@gmail.com",
     subject: "Video guide for my venue",
   },
+  // Video-guide request form (opened from the hero "Get a video guide" CTA).
+  // All copy lives here; the form itself is the reusable RequestForm component.
+  requestForm: {
+    heading: "Get a video guide",
+    subline: "Tell us where you are. We film the route and reply within a day.",
+    close: "Close",
+    fields: {
+      name: { label: "Your name", placeholder: "First and last name" },
+      email: { label: "Email", placeholder: "you@example.com" },
+      venue: { label: "Venue name", placeholder: "Yoga studio, café, office…" },
+      address: { label: "Address", placeholder: "Street, number, postcode" },
+      note: { label: "Anything else?", placeholder: "Anything we should know" },
+    },
+    errors: {
+      name: "Please enter your name",
+      email: "Please enter a valid email",
+      venue: "Please enter your venue name",
+      address: "Please enter the address",
+      submit: "Something went wrong. Please try again.",
+    },
+    submit: "Send request →",
+    sending: "Sending…",
+    footnote: "Free to request · Reply within 24h",
+    success: {
+      title: "Request sent",
+      body: (email: string) => `We'll email ${email} within a day to plan the shoot.`,
+      done: "Done",
+    },
+  },
 };
 
 // Walker-facing copy for the public guide-following experience (the
