@@ -21,7 +21,7 @@ export function LandingNav() {
   return (
     <header className="flex items-center justify-between px-5 py-4 md:px-[120px] md:py-6 border-b border-border">
       <Logo />
-      <nav className="hidden md:flex gap-10 text-[15px] font-medium">
+      <nav className="hidden md:flex gap-10 text-[length:var(--text-body)] font-medium">
         <a href="#how" className="no-underline text-foreground hover:text-accent transition-colors">{t.howItWorks}</a>
         <a href="#options" className="no-underline text-foreground hover:text-accent transition-colors">{t.options}</a>
         <a href="#faq" className="no-underline text-foreground hover:text-accent transition-colors">{t.faq}</a>
@@ -30,13 +30,13 @@ export function LandingNav() {
         <Link
           to={SIGN_IN_ROUTE}
           onClick={() => trackEvent(EVENTS.LANDING_SIGNIN_CLICKED, { placement: "nav" })}
-          className="inline-flex items-center h-11 px-3 md:px-[18px] rounded-full md:border md:border-border text-[15px] font-semibold text-foreground no-underline"
+          className="inline-flex items-center h-11 px-3 md:px-[18px] rounded-full md:border md:border-border text-[length:var(--text-body)] font-semibold text-foreground no-underline"
         >
           {t.signIn}
         </Link>
         <a
           href={videoMailtoHref()}
-          className="inline-flex items-center h-11 px-[18px] md:px-[22px] rounded-full bg-primary text-primary-foreground text-[15px] font-semibold no-underline"
+          className="inline-flex items-center h-11 px-[18px] md:px-[22px] rounded-full bg-primary text-primary-foreground text-[length:var(--text-body)] font-semibold no-underline"
         >
           {t.videoCta}
         </a>
