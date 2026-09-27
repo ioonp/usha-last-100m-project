@@ -27,7 +27,7 @@ const cards = [
 export function ProblemsSection() {
   return (
     <section className="flex flex-col gap-5 md:gap-10 px-5 pb-16 md:px-[120px] md:pb-28">
-      <h2 className="font-display text-[32px] md:text-[40px] font-medium -tracking-[0.02em]">{t.title}</h2>
+      <h2 className="font-display text-[length:var(--text-h2)] leading-[1.08] font-medium -tracking-[0.02em]">{t.title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
         {cards.map((c) => (
           <div key={c.title} className="flex gap-4 md:flex-col md:gap-3.5 p-5 md:p-8 rounded-[20px] md:rounded-3xl bg-card border border-border">
@@ -35,8 +35,8 @@ export function ProblemsSection() {
               {c.icon}
             </span>
             <div className="flex flex-col gap-1 md:gap-3.5">
-              <h3 className="text-lg md:text-[21px] font-semibold">{c.title}</h3>
-              <p className="text-[15px] md:text-base leading-[1.5] md:leading-[1.55] text-muted-foreground">{c.body}</p>
+              <h3 className="text-[length:var(--text-h3)] font-semibold">{c.title}</h3>
+              <p className="text-[length:var(--text-body)] leading-[1.5] md:leading-[1.55] text-muted-foreground">{c.body}</p>
             </div>
           </div>
         ))}

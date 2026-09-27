@@ -24,17 +24,17 @@ export function HeroSection() {
     <>
       <section className="flex flex-col md:flex-row md:items-center gap-[22px] md:gap-[72px] px-5 pt-9 pb-14 md:px-[120px] md:pt-[88px] md:pb-[104px]">
         <div className="flex flex-col gap-[22px] md:gap-7 md:flex-1">
-          <span className="self-start inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-4 py-1.5 md:py-2 rounded-full bg-accent-soft text-[13px] md:text-sm font-medium">
+          <span className="self-start inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-4 py-1.5 md:py-2 rounded-full bg-accent-soft text-[length:var(--text-eyebrow)] font-medium">
             <span className="w-[7px] h-[7px] md:w-2 md:h-2 rounded-full bg-accent" />
             {t.eyebrow}
           </span>
 
-          <h1 className="font-display text-[44px] md:text-[76px] leading-[1.04] md:leading-[1.02] font-medium -tracking-[0.025em]">
+          <h1 className="font-display text-[length:var(--text-display)] leading-[1.08] font-medium -tracking-[0.02em]">
             {t.title}{" "}
             <em className="italic font-normal">{t.titleEmphasis}</em>
           </h1>
 
-          <p className="text-[17px] md:text-xl leading-[1.55] text-muted-foreground md:max-w-[560px]">
+          <p className="text-[length:var(--text-lead)] leading-[1.55] text-muted-foreground md:max-w-[560px]">
             {t.subtitle}
           </p>
 
@@ -43,7 +43,7 @@ export function HeroSection() {
               type="button"
               ref={videoBtnRef}
               onClick={() => setFormOpen(true)}
-              className="flex md:inline-flex items-center justify-center md:justify-start gap-2.5 h-14 md:h-[58px] md:px-[30px] rounded-full bg-primary text-primary-foreground text-[17px] font-semibold"
+              className="flex md:inline-flex items-center justify-center md:justify-start gap-2.5 h-14 md:h-[58px] md:px-[30px] rounded-full bg-primary text-primary-foreground text-[length:var(--text-body)] font-semibold"
             >
               {t.primaryCta}
               <ArrowRight />
@@ -51,13 +51,13 @@ export function HeroSection() {
             <Link
               to={CREATE_GUIDE_ROUTE}
               onClick={() => trackEvent(EVENTS.LANDING_SIGNUP_CLICKED, { placement: "hero" })}
-              className="flex md:inline items-center justify-center h-12 md:h-auto text-base font-medium text-foreground underline underline-offset-4"
+              className="flex md:inline items-center justify-center h-12 md:h-auto text-[length:var(--text-body)] font-medium text-foreground underline underline-offset-4"
             >
               {t.secondaryCta}
             </Link>
           </div>
 
-          <p className="text-[13px] md:text-sm text-center md:text-left text-muted-foreground">{t.note}</p>
+          <p className="text-[length:var(--text-small)] text-center md:text-left text-muted-foreground">{t.note}</p>
         </div>
 
         {/* Phone frame — the real guide step screen. Decorative here (not a link). */}
