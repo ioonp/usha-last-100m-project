@@ -519,7 +519,7 @@ export default function Capture() {
                   onClick={requestGeo}
                   disabled={geoState === "loading"}
                   size="lg"
-                  variant="outline"
+                  variant="secondary"
                   className="w-full h-12 rounded-full text-base"
                 >
                   {geoState === "loading" ? (
@@ -816,14 +816,14 @@ export default function Capture() {
                 {qrDataUrl && (
                   <div className="flex flex-col items-center bg-card border border-border rounded-2xl p-6">
                     <img src={qrDataUrl} alt="QR code" className="w-40 h-40" />
-                    <Button onClick={downloadQR} variant="outline" className="rounded-full mt-4">
+                    <Button onClick={downloadQR} variant="secondary" className="rounded-full mt-4">
                       <Download className="size-4 mr-2" /> Download PNG
                     </Button>
                   </div>
                 )}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a href={shareUrl} target="_blank" rel="noreferrer" className="flex-1">
-                    <Button variant="outline" className="w-full rounded-full">
+                    <Button variant="secondary" className="w-full rounded-full">
                       Preview live page
                     </Button>
                   </a>

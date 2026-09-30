@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { BarChart3, ChevronRight, LogOut } from "lucide-react";
+import { CreatorHeader } from "@/components/CreatorHeader";
+import { BarChart3, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 type Loc = {
@@ -41,26 +42,14 @@ export default function Analytics() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
-        <div className="container mx-auto flex items-center justify-between py-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">
-              L
-            </div>
-            <span className="font-display text-lg">Usha</span>
-          </Link>
-          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
-            <LogOut className="size-4 mr-1" /> Sign out
-          </Button>
-        </div>
-      </header>
+      <CreatorHeader />
 
       <main className="container mx-auto px-4 py-10 max-w-2xl">
         <div className="mb-8">
           <div className="eyebrow text-muted-foreground mb-2 flex items-center gap-2">
             <BarChart3 className="size-3.5" /> Analytics
           </div>
-          <h1 className="font-display text-4xl">How your pages are doing</h1>
+          <h1 className="font-display font-semibold tracking-[-0.045em] text-4xl">How your pages are doing</h1>
           <p className="text-muted-foreground mt-2">Pick a location to see opens, walks, and where people drop off.</p>
         </div>
 
@@ -78,12 +67,12 @@ export default function Analytics() {
               <Link
                 key={l.id}
                 to={`/analytics/${l.id}`}
-                className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 shadow-soft hover:shadow-elegant transition-smooth"
+                className="flex items-center gap-4 bg-card border border-border rounded-3xl p-4 transition-smooth"
               >
                 {l.logo_url ? (
                   <img src={l.logo_url} alt="" className="size-12 rounded-full object-cover shrink-0" />
                 ) : (
-                  <div className="size-12 rounded-full shrink-0" style={{ backgroundColor: l.accent_color }} />
+                  <div className="size-12 rounded-full shrink-0 bg-muted" />
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="font-display text-lg truncate">{l.studio_name}</div>

@@ -5,15 +5,25 @@ import { SIGN_IN_ROUTE, videoMailtoHref } from "./links";
 
 const t = landingStrings.nav;
 
-export function Logo() {
-  return (
-    <a href="#top" className="flex items-center gap-1.5 md:gap-2 no-underline text-[#0A0A0A]">
+// Reused as the brand mark on every Creator screen too (via CreatorHeader),
+// so the wordmark treatment is plain Tailwind utilities rather than the
+// landing-scoped usha-landing-heading class — it needs to render correctly
+// on pages that never load landing.css.
+export function Logo({ to = "#top" }: { to?: string }) {
+  const mark = (
+    <>
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" className="md:w-7 md:h-7">
         <path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z" fill="#0A0A0A" />
         <circle cx="12" cy="10" r="2.6" fill="#FFFFFF" />
       </svg>
-      <span className="usha-landing-heading text-2xl md:text-[28px]">usha</span>
-    </a>
+      <span className="font-semibold tracking-[-0.05em] leading-none text-2xl md:text-[28px]">usha</span>
+    </>
+  );
+  const className = "flex items-center gap-1.5 md:gap-2 no-underline text-[#0A0A0A]";
+  return to.startsWith("#") ? (
+    <a href={to} className={className}>{mark}</a>
+  ) : (
+    <Link to={to} className={className}>{mark}</Link>
   );
 }
 

@@ -141,7 +141,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
       {/* Panel: bottom sheet on mobile, centered card on desktop. */}
       <div
         ref={panelRef}
-        className="relative w-full md:w-[520px] md:max-w-[calc(100vw-2rem)] max-h-[92vh] md:max-h-[90vh] overflow-y-auto bg-background text-foreground rounded-t-3xl md:rounded-3xl shadow-2xl px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 md:p-8 animate-fade-in-up"
+        className="relative w-full md:w-[520px] md:max-w-[calc(100vw-2rem)] max-h-[92vh] md:max-h-[90vh] overflow-y-auto bg-background text-foreground rounded-t-[28px] md:rounded-[28px] shadow-2xl px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 md:p-8 animate-fade-in-up"
       >
         {/* Mobile drag handle. */}
         <div className="md:hidden mx-auto mb-3 h-1.5 w-10 rounded-full bg-foreground/15" aria-hidden="true" />
@@ -151,7 +151,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
           type="button"
           aria-label={t.close}
           onClick={close}
-          className="absolute right-4 top-4 md:right-5 md:top-5 inline-flex items-center justify-center size-9 rounded-full text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-colors"
+          className="absolute right-4 top-4 md:right-5 md:top-5 inline-flex items-center justify-center size-11 rounded-full text-foreground/60 hover:text-foreground hover:bg-foreground/5 transition-colors"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
         </button>
@@ -161,7 +161,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
             <span className="inline-flex items-center justify-center size-14 rounded-full text-white" style={{ backgroundColor: "#2F7D5B" }}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
             </span>
-            <h2 id={headingId} className="font-display text-2xl md:text-[26px] font-medium">{t.success.title}</h2>
+            <h2 id={headingId} className="font-display text-2xl md:text-[26px] font-semibold">{t.success.title}</h2>
             <p className="text-[15px] text-muted-foreground max-w-[36ch]">{t.success.body(values.email.trim())}</p>
             <button
               type="button"
@@ -174,7 +174,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
         ) : (
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 pt-2 md:pt-0">
             <div className="flex flex-col gap-1.5 pr-8">
-              <h2 id={headingId} className="font-display text-[26px] md:text-3xl font-medium -tracking-[0.01em]">{t.heading}</h2>
+              <h2 id={headingId} className="font-display text-[26px] md:text-3xl font-semibold -tracking-[0.01em]">{t.heading}</h2>
               <p className="text-[15px] text-muted-foreground">{t.subline}</p>
             </div>
 
@@ -240,7 +240,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
                 placeholder={t.fields.note.placeholder}
                 value={values.note}
                 onChange={(e) => setField("note", e.target.value)}
-                className="w-full rounded-xl border border-border bg-card px-3.5 py-2.5 text-base leading-snug outline-none focus:border-foreground/40"
+                className="w-full rounded-input border border-border bg-background px-3.5 py-2.5 text-base leading-snug outline-none focus:border-2 focus:border-foreground"
               />
             </label>
 
@@ -251,7 +251,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
             <button
               type="submit"
               disabled={sending}
-              className="mt-1 inline-flex items-center justify-center h-12 rounded-full bg-primary text-primary-foreground text-base font-semibold disabled:opacity-60"
+              className="mt-1 w-full inline-flex items-center justify-center h-12 rounded-full bg-primary text-primary-foreground text-base font-semibold disabled:opacity-60"
             >
               {sending ? t.sending : t.submit}
             </button>
@@ -291,8 +291,8 @@ const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
-        // 48px tall, 16px text so iOS doesn't zoom on focus.
-        className={`h-12 w-full rounded-xl border bg-card px-3.5 text-base outline-none focus:border-foreground/40 ${error ? "border-[#A8241B]" : "border-border"}`}
+        // 52px tall, 16px text so iOS doesn't zoom on focus.
+        className={`h-[52px] w-full rounded-input border bg-background px-3.5 text-base outline-none focus:border-2 focus:border-foreground ${error ? "border-[#A8241B]" : "border-border"}`}
       />
       {error && <span className="text-[13px]" style={{ color: "#A8241B" }}>{error}</span>}
     </label>
