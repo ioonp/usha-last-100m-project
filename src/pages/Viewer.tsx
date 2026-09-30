@@ -80,9 +80,9 @@ export default function Viewer() {
     if (showArrival) trackUmami(EVENTS.PHOTO_ARRIVAL_REACHED, { slug });
   }, [showArrival]);
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
+  if (loading) return <div className="usha-walker-scope min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
   if (!loc) return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+    <div className="usha-walker-scope min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
       <h1 className="font-display text-3xl mb-2">Page not found</h1>
       <p className="text-muted-foreground mb-4">This wayfinding page isn't available.</p>
       <Link to="/" className="text-accent underline">Back home</Link>
@@ -145,7 +145,7 @@ export default function Viewer() {
       const arrivalPhoto = firstCp?.photo_url ?? null;
       const arrivalCaption = firstCp?.note || loc.start_note || null;
       return (
-        <div className="relative min-h-[100dvh] w-full bg-background flex flex-col no-tap-highlight">
+        <div className="usha-walker-scope relative min-h-[100dvh] w-full bg-background flex flex-col no-tap-highlight">
           {/* Top bar */}
           <div
             className="flex items-center px-4 pb-2"
@@ -246,7 +246,7 @@ export default function Viewer() {
 
     return (
       <div
-        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center bg-background no-tap-highlight"
+        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center bg-background no-tap-highlight"
         style={{ backgroundColor: accent + "12" }}
       >
         <div className="max-w-sm w-full animate-fade-in-up">
@@ -288,7 +288,7 @@ export default function Viewer() {
   if (step >= total) {
     return (
       <div
-        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
+        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
         style={{ backgroundColor: accent + "20" }}
       >
         <div className="animate-scale-in w-full max-w-sm">
@@ -330,7 +330,7 @@ export default function Viewer() {
   const annotationCaption = spotWithLabel?.label.trim() ?? null;
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
+    <div className="usha-walker-scope relative h-[100dvh] w-full overflow-hidden bg-black no-tap-highlight select-none">
       {/* Photo + indicators — fitted to the photo's true aspect ratio and centered,
           so the frame matches the creator editor and normalized coordinates map 1:1.
           Letterboxes against the black backdrop (object-contain) instead of cropping. */}
