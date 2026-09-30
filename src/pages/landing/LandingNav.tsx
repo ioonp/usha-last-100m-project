@@ -5,38 +5,38 @@ import { SIGN_IN_ROUTE, videoMailtoHref } from "./links";
 
 const t = landingStrings.nav;
 
-function Logo() {
+export function Logo() {
   return (
-    <a href="#top" className="flex items-center gap-1.5 md:gap-2 no-underline text-foreground">
+    <a href="#top" className="flex items-center gap-1.5 md:gap-2 no-underline text-[#0A0A0A]">
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" className="md:w-7 md:h-7">
-        <path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z" className="fill-accent" />
-        <circle cx="12" cy="10" r="2.6" className="fill-background" />
+        <path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z" fill="#0A0A0A" />
+        <circle cx="12" cy="10" r="2.6" fill="#FFFFFF" />
       </svg>
-      <span className="font-display text-2xl md:text-[28px] font-semibold -tracking-[0.02em]">usha</span>
+      <span className="usha-landing-heading text-2xl md:text-[28px]">usha</span>
     </a>
   );
 }
 
 export function LandingNav() {
   return (
-    <header className="flex items-center justify-between px-5 py-4 md:px-[120px] md:py-6 border-b border-border">
+    <header className="flex md:grid items-center justify-between md:justify-normal md:grid-cols-3 gap-3 px-5 py-4 md:px-[120px] md:py-6">
       <Logo />
-      <nav className="hidden md:flex gap-10 text-[length:var(--text-body)] font-medium">
-        <a href="#how" className="no-underline text-foreground hover:text-accent transition-colors">{t.howItWorks}</a>
-        <a href="#options" className="no-underline text-foreground hover:text-accent transition-colors">{t.options}</a>
-        <a href="#faq" className="no-underline text-foreground hover:text-accent transition-colors">{t.faq}</a>
+      <nav className="hidden md:flex justify-self-center gap-10 text-[length:var(--text-body)] font-medium text-[#5C5C60]">
+        <a href="#how" className="no-underline hover:text-[#0A0A0A] transition-colors">{t.howItWorks}</a>
+        <a href="#options" className="no-underline hover:text-[#0A0A0A] transition-colors">{t.options}</a>
+        <a href="#faq" className="no-underline hover:text-[#0A0A0A] transition-colors">{t.faq}</a>
       </nav>
-      <div className="flex items-center gap-1 md:gap-3">
+      <div className="flex items-center gap-2 md:gap-3 md:justify-self-end">
         <Link
           to={SIGN_IN_ROUTE}
           onClick={() => trackEvent(EVENTS.LANDING_SIGNIN_CLICKED, { placement: "nav" })}
-          className="inline-flex items-center h-11 px-3 md:px-[18px] rounded-full md:border md:border-border text-[length:var(--text-body)] font-semibold text-foreground no-underline"
+          className="inline-flex items-center h-11 px-3 md:px-[18px] whitespace-nowrap text-[length:var(--text-body)] font-medium text-[#0A0A0A] no-underline"
         >
           {t.signIn}
         </Link>
         <a
           href={videoMailtoHref()}
-          className="inline-flex items-center h-11 px-[18px] md:px-[22px] rounded-full bg-primary text-primary-foreground text-[length:var(--text-body)] font-semibold no-underline"
+          className="inline-flex items-center h-11 px-[18px] md:px-[22px] rounded-full bg-[#0A0A0A] text-white whitespace-nowrap text-[length:var(--text-body)] font-semibold no-underline"
         >
           {t.videoCta}
         </a>

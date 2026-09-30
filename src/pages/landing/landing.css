@@ -5,6 +5,22 @@
  * prefers-reduced-motion.
  */
 
+/* White-gallery type system. Scoped to the landing page only — the shared
+   Tailwind `font-display`/`font-sans` families (Fraunces/Inter) are left
+   untouched so the wizard, dashboard, auth and walker screens don't change. */
+.usha-landing-root {
+  font-family: "Geist", "Inter", system-ui, sans-serif;
+}
+.usha-landing-heading {
+  font-family: "Geist", "Inter", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.usha-landing-mono {
+  font-family: "Geist Mono", "SF Mono", monospace;
+}
+
 .usha-landing-draw {
   stroke-dasharray: var(--len);
   stroke-dashoffset: var(--len);

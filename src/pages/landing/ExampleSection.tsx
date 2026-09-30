@@ -11,45 +11,51 @@ function ArrowUpRight() {
   );
 }
 
+function PhoneFrame({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="aspect-[9/19] w-full rounded-[28px] bg-[#0A0A0A] p-2 md:p-2.5 shadow-[0_20px_48px_-20px_rgba(10,10,10,0.5)]">
+      <div className="w-full h-full rounded-[22px] overflow-hidden bg-black">
+        <img src={src} alt={alt} className="w-full h-full object-contain block" />
+      </div>
+    </div>
+  );
+}
+
 export function ExampleSection() {
   return (
-    <section className="flex flex-col md:flex-row md:items-center gap-[18px] md:gap-[72px] px-5 py-14 md:px-[120px] md:py-[104px] bg-accent-soft">
-      <div className="flex flex-col gap-[18px] md:gap-5 md:flex-1">
-        <span className="text-[length:var(--text-eyebrow)] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t.eyebrow}</span>
-        <h2 className="font-display text-[length:var(--text-h2)] leading-[1.08] font-medium -tracking-[0.02em]">{t.title}</h2>
-        <p className="text-[length:var(--text-lead)] leading-[1.55] text-muted-foreground md:max-w-[520px]">{t.body}</p>
-        <a
-          href={t.url}
-          className="hidden md:inline-flex items-center gap-2.5 self-start h-[52px] mt-2 px-[26px] rounded-full bg-primary text-primary-foreground text-[length:var(--text-body)] font-semibold no-underline"
-        >
-          {t.cta}
-          <ArrowUpRight />
-        </a>
+    <section className="flex flex-col items-center gap-8 md:gap-14 px-5 py-14 md:px-[120px] md:py-[104px] text-center">
+      <div className="flex flex-col items-center gap-3.5 md:gap-5 max-w-[640px]">
+        <span className="usha-landing-mono text-[length:var(--text-eyebrow)] uppercase tracking-[0.1em] text-[#A1A1A6]">{t.eyebrow}</span>
+        <h2 className="usha-landing-heading text-[length:var(--text-h2)]">{t.title}</h2>
+        <p className="text-[length:var(--text-lead)] leading-[1.55] text-[#5C5C60]">{t.body}</p>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center gap-2 md:gap-10 w-full md:w-auto">
-        <a
-          href={t.url}
-          aria-label={t.cta}
-          className="block shrink-0 w-[260px] h-[452px] md:w-[300px] md:h-[522px] p-[9px] md:p-2.5 rounded-[40px] md:rounded-[44px] bg-primary shadow-[0_24px_48px_-20px_rgba(28,26,23,0.45)] md:shadow-[0_30px_60px_-24px_rgba(28,26,23,0.45)] no-underline"
-        >
-          <img src="/landing/guide-start.jpg" alt={t.startAlt} className="w-full h-full object-contain rounded-[31px] md:rounded-[34px] block" />
+      <div className="w-full rounded-[32px] bg-[#F4F4F5] px-5 py-10 md:px-16 md:py-16 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+        <a href={t.url} aria-label={t.cta} className="block shrink-0 w-[220px] md:w-[260px] no-underline">
+          <PhoneFrame src="/landing/guide-start.jpg" alt={t.startAlt} />
         </a>
 
-        {/* Mobile-only CTA under the phone; the QR replaces it on desktop. */}
+        {/* Mobile-only CTA under the phone; the QR card replaces it on desktop. */}
         <a
           href={t.url}
-          className="md:hidden flex w-full items-center justify-center gap-2.5 h-14 mt-2 rounded-full bg-primary text-primary-foreground text-[length:var(--text-body)] font-semibold no-underline"
+          className="md:hidden flex w-full items-center justify-center gap-2.5 h-14 rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold no-underline"
         >
           {t.ctaMobile}
           <ArrowUpRight />
         </a>
 
         {/* QR card — desktop only. */}
-        <div className="hidden md:flex w-[200px] flex-col gap-3.5 p-5 rounded-3xl bg-card border border-border">
-          <img src="/landing/qr-yoga-futura.png" alt={t.qrAlt} className="w-40 h-40 block" />
-          <span className="text-[length:var(--text-body)] font-semibold leading-[1.35]">{t.qrTitle}</span>
-          <span className="text-[length:var(--text-small)] leading-[1.4] text-muted-foreground">{t.qrBody}</span>
+        <div className="hidden md:flex w-[220px] flex-col items-center gap-4 p-6 rounded-3xl bg-white border border-[#E7E7E9]">
+          <img src="/landing/qr-yoga-futura.png" alt={t.qrAlt} className="w-36 h-36 block" />
+          <span className="text-[length:var(--text-body)] font-semibold text-center">{t.qrTitle}</span>
+          <span className="text-[length:var(--text-small)] leading-[1.4] text-[#5C5C60] text-center">{t.qrBody}</span>
+          <a
+            href={t.url}
+            className="flex w-full items-center justify-center gap-2 h-12 rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold no-underline"
+          >
+            {t.cta}
+            <ArrowUpRight />
+          </a>
         </div>
       </div>
     </section>

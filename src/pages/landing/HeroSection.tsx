@@ -16,54 +16,103 @@ function ArrowRight() {
   );
 }
 
+function CheckIconBlack() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+/** Dark bezel wrapper shared by the three fanned hero phones. */
+function PhoneBezel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="aspect-[9/19] w-full rounded-[28px] bg-[#0A0A0A] p-2 md:p-2.5 shadow-[0_20px_48px_-20px_rgba(10,10,10,0.5)]">
+      {children}
+    </div>
+  );
+}
+
+function PhoneFrame({ src, alt }: { src: string; alt: string }) {
+  return (
+    <PhoneBezel>
+      <div className="w-full h-full rounded-[22px] overflow-hidden bg-black">
+        <img src={src} alt={alt} className="w-full h-full object-contain block" />
+      </div>
+    </PhoneBezel>
+  );
+}
+
+/** Third hero phone — built in markup, not a screenshot (arrival state). */
+function ArrivalPhoneMock() {
+  return (
+    <PhoneBezel>
+      <div className="w-full h-full rounded-[22px] bg-[#111111] flex flex-col items-center justify-center gap-4 px-5 text-center">
+        <span className="flex items-center justify-center w-14 h-14 rounded-full bg-[#FFD400]">
+          <CheckIconBlack />
+        </span>
+        <span className="usha-landing-heading text-white text-[length:var(--text-h3)]">{t.arrivalTitle}</span>
+        <span className="text-[#A1A1A6] text-[length:var(--text-small)]">{t.arrivalSubtitle}</span>
+      </div>
+    </PhoneBezel>
+  );
+}
+
 export function HeroSection() {
   const [formOpen, setFormOpen] = useState(false);
   const videoBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
     <>
-      <section className="flex flex-col md:flex-row md:items-center gap-[22px] md:gap-[72px] px-5 pt-9 pb-14 md:px-[120px] md:pt-[88px] md:pb-[104px]">
-        <div className="flex flex-col gap-[22px] md:gap-7 md:flex-1">
-          <span className="self-start inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-4 py-1.5 md:py-2 rounded-full bg-accent-soft text-[length:var(--text-eyebrow)] font-medium">
-            <span className="w-[7px] h-[7px] md:w-2 md:h-2 rounded-full bg-accent" />
-            {t.eyebrow}
-          </span>
+      <section className="flex flex-col items-center gap-[22px] md:gap-7 px-5 pt-9 pb-0 md:px-[120px] md:pt-[88px] text-center">
+        <span className="inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-4 py-1.5 md:py-2 rounded-full bg-[#F4F4F5] text-[length:var(--text-eyebrow)] font-medium text-[#5C5C60]">
+          <span className="w-[7px] h-[7px] md:w-2 md:h-2 rounded-full bg-[#1B4FFF]" />
+          {t.eyebrow}
+        </span>
 
-          <h1 className="font-display text-[length:var(--text-display)] leading-[1.08] font-medium -tracking-[0.02em]">
-            {t.title}{" "}
-            <em className="italic font-normal">{t.titleEmphasis}</em>
-          </h1>
+        <h1 className="usha-landing-heading text-[length:var(--text-display)] max-w-[820px]">
+          {t.title}{" "}
+          <span className="text-[#A1A1A6]">{t.titleEmphasis}</span>
+        </h1>
 
-          <p className="text-[length:var(--text-lead)] leading-[1.55] text-muted-foreground md:max-w-[560px]">
-            {t.subtitle}
-          </p>
+        <p className="text-[length:var(--text-lead)] leading-[1.55] text-[#5C5C60] max-w-[560px]">
+          {t.subtitle}
+        </p>
 
-          <div className="flex flex-col gap-1.5 mt-1 md:flex-row md:items-center md:gap-7 md:mt-2">
-            <button
-              type="button"
-              ref={videoBtnRef}
-              onClick={() => setFormOpen(true)}
-              className="flex md:inline-flex items-center justify-center md:justify-start gap-2.5 h-14 md:h-[58px] md:px-[30px] rounded-full bg-primary text-primary-foreground text-[length:var(--text-body)] font-semibold"
-            >
-              {t.primaryCta}
-              <ArrowRight />
-            </button>
-            <Link
-              to={CREATE_GUIDE_ROUTE}
-              onClick={() => trackEvent(EVENTS.LANDING_SIGNUP_CLICKED, { placement: "hero" })}
-              className="flex md:inline items-center justify-center h-12 md:h-auto text-[length:var(--text-body)] font-medium text-foreground underline underline-offset-4"
-            >
-              {t.secondaryCta}
-            </Link>
-          </div>
-
-          <p className="text-[length:var(--text-small)] text-center md:text-left text-muted-foreground">{t.note}</p>
+        <div className="flex flex-col gap-3 items-stretch sm:items-center sm:flex-row mt-1">
+          <button
+            type="button"
+            ref={videoBtnRef}
+            onClick={() => setFormOpen(true)}
+            className="inline-flex items-center justify-center gap-2.5 h-14 md:h-[58px] px-7 md:px-[30px] rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold"
+          >
+            {t.primaryCta}
+            <ArrowRight />
+          </button>
+          <Link
+            to={CREATE_GUIDE_ROUTE}
+            onClick={() => trackEvent(EVENTS.LANDING_SIGNUP_CLICKED, { placement: "hero" })}
+            className="inline-flex items-center justify-center h-14 md:h-[58px] px-7 md:px-[30px] rounded-full bg-[#F0F0F1] text-[#0A0A0A] text-[length:var(--text-body)] font-semibold no-underline"
+          >
+            {t.secondaryCta}
+          </Link>
         </div>
 
-        {/* Phone frame — the real guide step screen. Decorative here (not a link). */}
-        <div className="self-center md:self-auto shrink-0 w-[300px] h-[512px] md:w-[380px] md:h-[650px] mt-4 md:mt-0 p-2.5 md:p-3 rounded-[44px] md:rounded-[52px] bg-primary shadow-[0_30px_60px_-24px_rgba(28,26,23,0.45)] md:shadow-[0_40px_80px_-30px_rgba(28,26,23,0.45)]">
-          <div className="w-full h-full rounded-[34px] md:rounded-[40px] bg-black overflow-hidden">
-            <img src="/landing/guide-step.jpg" alt={t.phoneAlt} className="w-full h-full object-contain block" />
+        <p className="text-[length:var(--text-small)] text-[#A1A1A6]">{t.note}</p>
+
+        {/* Fan of three phones, cropped by the panel's bottom edge. Only the
+            centre one (the real guide step screen) shows on mobile. */}
+        <div className="relative w-full max-w-[1000px] mt-8 md:mt-14 rounded-[32px] overflow-hidden bg-[#F4F4F5] px-6 pt-10 md:pt-16 h-[340px] md:h-[560px]">
+          <div className="flex items-end justify-center gap-3 md:gap-6">
+            <div className="hidden md:block w-[190px] md:w-[220px] shrink-0 -rotate-6 translate-y-10">
+              <PhoneFrame src="/landing/guide-start.jpg" alt={landingStrings.example.startAlt} />
+            </div>
+            <div className="w-[230px] md:w-[260px] shrink-0 -translate-y-6 md:-translate-y-10 z-10">
+              <PhoneFrame src="/landing/guide-step.jpg" alt={t.phoneAlt} />
+            </div>
+            <div className="hidden md:block w-[190px] md:w-[220px] shrink-0 rotate-6 translate-y-10">
+              <ArrivalPhoneMock />
+            </div>
           </div>
         </div>
       </section>

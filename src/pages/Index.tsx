@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import "./landing/landing.css";
 import { LandingNav } from "./landing/LandingNav";
 import { HeroSection } from "./landing/HeroSection";
 import { ProblemsSection } from "./landing/ProblemsSection";
@@ -26,7 +27,7 @@ const typeScale = {
 
 const Index = () => {
   return (
-    <div id="top" style={typeScale} className="min-h-screen bg-background text-foreground">
+    <div id="top" style={typeScale} className="usha-landing-root min-h-screen bg-white text-[#0A0A0A]">
       <LandingNav />
       <HeroSection />
       <ProblemsSection />
