@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { GOOGLE_MAPS_KEY, loadGoogleMaps, staticMapUrl } from "@/lib/maps";
+import { MONOCHROME_MAP_STYLE } from "@/lib/mapStyle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, CheckCircle2 } from "lucide-react";
@@ -12,14 +13,6 @@ type Suggestion = { place_id: string; main: string; secondary: string };
 const STREET_ZOOM = 18;
 // Wider view for the empty placeholder, before any location is chosen.
 const OVERVIEW_ZOOM = 15;
-
-// Keep building/POI/man-made geometry visible so footprints render with their
-// default outlines (no feature is hidden — Creators align the pin to a building
-// edge). Labels are left at their defaults.
-const MAP_STYLES = [
-  { featureType: "poi", elementType: "geometry", stylers: [{ visibility: "on" }] },
-  { featureType: "landscape.man_made", elementType: "geometry", stylers: [{ visibility: "on" }] },
-];
 
 export function MapPinPicker({
   lat, lng, address, onChange,
@@ -95,7 +88,7 @@ export function MapPinPicker({
       disableDefaultUI: true,
       zoomControl: true,
       gestureHandling: "greedy",
-      styles: MAP_STYLES,
+      styles: MONOCHROME_MAP_STYLE,
     });
     mapRef.current = map;
     placesServiceRef.current = new g.maps.places.PlacesService(map);
@@ -216,7 +209,10 @@ export function MapPinPicker({
         )}
       </div>
 
-      <div ref={mapDivRef} className="w-full aspect-square md:aspect-auto md:h-[320px] rounded-2xl overflow-hidden border border-border bg-muted" />
+      <div
+        ref={mapDivRef}
+        className="w-full aspect-square md:aspect-auto md:h-[320px] rounded-2xl overflow-hidden border border-border bg-muted focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]"
+      />
       {pinAdjusted && (
         <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
           <CheckCircle2 className="size-4 shrink-0" />
