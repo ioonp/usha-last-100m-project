@@ -297,14 +297,14 @@ export default function Wizard() {
                   {qrDataUrl && (
                     <div className="flex flex-col items-center bg-card border border-border rounded-card shadow-card p-6 w-full">
                       <img src={qrDataUrl} alt="QR code" className="w-40 h-40 sm:w-48 sm:h-48" />
-                      <Button onClick={downloadQR} variant="ghost" className="rounded-full mt-4 border border-border text-foreground hover:bg-muted hover:text-foreground">
+                      <Button onClick={downloadQR} variant="secondary" className="rounded-full mt-4">
                         <Download className="size-4 mr-2" /> Download PNG
                       </Button>
                     </div>
                   )}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <a href={shareUrl} target="_blank" rel="noreferrer" className="flex-1 w-full">
-                      <Button variant="outline" className="w-full rounded-full">Preview live page</Button>
+                      <Button variant="secondary" className="w-full rounded-full">Preview live page</Button>
                     </a>
                     <Link to="/dashboard" className="flex-1 w-full">
                       <Button className="w-full rounded-full bg-primary text-primary-foreground">Done</Button>

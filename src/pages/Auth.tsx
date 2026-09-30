@@ -78,7 +78,7 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md animate-fade-in-up">
         <Link to="/" className="eyebrow text-muted-foreground mb-6 inline-block">← Usha</Link>
-        <div className="bg-card border border-border rounded-3xl p-8 shadow-soft">
+        <div className="bg-card border border-border rounded-3xl p-8">
           <h1 className="font-display text-4xl mb-1">{mode === "signup" ? "Create account" : "Welcome back"}</h1>
           <p className="text-muted-foreground mb-6 text-sm">
             {mode === "signup" ? "Start guiding visitors in minutes." : "Sign in to your dashboard."}
@@ -164,7 +164,7 @@ export default function AuthPage() {
       </div>
       {forgotOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-6" onClick={() => setForgotOpen(false)}>
-          <div className="w-full max-w-md bg-card border border-border rounded-3xl p-8 shadow-soft animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-card border border-border rounded-3xl p-8 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
             <h2 className="font-display text-2xl mb-1">Reset password</h2>
             <p className="text-muted-foreground mb-5 text-sm">Enter your email and we'll send you a reset link.</p>
             <form onSubmit={sendReset} className="space-y-4">
@@ -173,7 +173,7 @@ export default function AuthPage() {
                 <Input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required autoFocus />
               </div>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" className="flex-1 rounded-full h-11" onClick={() => setForgotOpen(false)}>
+                <Button type="button" variant="secondary" className="flex-1 rounded-full h-11" onClick={() => setForgotOpen(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" disabled={forgotLoading} className="flex-1 rounded-full h-11 bg-primary text-primary-foreground">

@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Pencil, Archive, ExternalLink, LogOut, ArchiveRestore, Copy, Download } from "lucide-react";
+import { CreatorHeader } from "@/components/CreatorHeader";
+import { Plus, Eye, Pencil, Archive, ExternalLink, ArchiveRestore, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
 import { trackEvent, EVENTS } from "@/lib/analytics";
@@ -68,23 +69,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/50 backdrop-blur sticky top-0 z-10">
-        <div className="container mx-auto flex items-center justify-between py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-display font-bold">L</div>
-            <span className="font-display text-lg">Usha</span>
-          </Link>
-          <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
-            <LogOut className="size-4 mr-1" /> Sign out
-          </Button>
-        </div>
-      </header>
+      <CreatorHeader />
 
       <main className="container mx-auto px-4 py-10">
         <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
           <div>
             <div className="eyebrow text-muted-foreground mb-2">Your locations</div>
-            <h1 className="font-display text-4xl md:text-5xl">Wayfinding pages</h1>
+            <h1 className="font-display font-semibold tracking-[-0.045em] text-4xl md:text-5xl">Wayfinding pages</h1>
           </div>
           <Link to="/capture/new" onClick={() => trackEvent(EVENTS.CREATOR_NEW_GUIDE_CLICKED, { placement: "header" })}>
             <Button size="lg" className="rounded-full bg-primary text-primary-foreground h-12 px-6">
@@ -93,11 +84,11 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="inline-flex gap-1 mb-6 p-1 rounded-full bg-muted">
           {(["active", "archived"] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`text-sm px-4 py-1.5 rounded-full border transition-smooth ${
-                filter === f ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-foreground"
+              className={`text-sm px-4 py-1.5 rounded-full transition-smooth ${
+                filter === f ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}>
               {f === "active" ? "Active" : "Archived"}
             </button>
@@ -113,12 +104,12 @@ export default function Dashboard() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {visible.map((l) => (
-              <div key={l.id} className="bg-card border border-border rounded-2xl p-6 shadow-soft hover:shadow-elegant transition-smooth animate-fade-in-up">
+              <div key={l.id} className="bg-card border border-border rounded-3xl p-6 transition-smooth animate-fade-in-up">
                 <div className="flex items-center gap-3 mb-4">
                   {l.logo_url ? (
                     <img src={l.logo_url} alt="" className="size-10 rounded-full object-cover" />
                   ) : (
-                    <div className="size-10 rounded-full flex items-center justify-center font-display font-bold text-white" style={{ backgroundColor: l.accent_color }}>
+                    <div className="size-10 rounded-full flex items-center justify-center font-display font-bold bg-muted text-foreground">
                       {l.studio_name?.trim().charAt(0).toUpperCase() || "?"}
                     </div>
                   )}
@@ -129,42 +120,45 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground mb-5">
                   <span className="flex items-center gap-1"><Eye className="size-3.5" /> {l.view_count}</span>
-                  <span className={`text-xs eyebrow ${l.published ? "text-success" : "text-muted-foreground"}`}>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                      l.published ? "bg-success-soft text-success" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <span className={`size-1.5 rounded-full ${l.published ? "bg-success" : "bg-tertiary-foreground"}`} />
                     {l.published ? "Live" : "Draft"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Link to={`/capture/${l.id}`} className="flex-1" onClick={() => trackEvent(EVENTS.CREATOR_GUIDE_OPENED, { slug: l.slug })}>
-                    <Button variant="outline" size="sm" className="w-full rounded-full"><Pencil className="size-3.5 mr-1" /> Edit</Button>
+                    <Button variant="secondary" className="w-full rounded-full"><Pencil className="size-3.5 mr-1" /> Edit</Button>
                   </Link>
                   {l.published && (
                     <>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full size-9 shrink-0 p-0"
+                        variant="secondary"
+                        className="rounded-full size-11 shrink-0 p-0"
                         onClick={() => copyLink(l.slug)}
                         title="Copy link"
                       >
                         <Copy className="size-3.5" />
                       </Button>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full size-9 shrink-0 p-0"
+                        variant="secondary"
+                        className="rounded-full size-11 shrink-0 p-0"
                         onClick={() => downloadQR(l.slug)}
                         title="Download QR"
                       >
                         <Download className="size-3.5" />
                       </Button>
                       <a href={`/find/${l.slug}`} target="_blank" rel="noreferrer" className="shrink-0">
-                        <Button variant="outline" size="sm" className="rounded-full size-9 shrink-0 p-0" title="Open">
+                        <Button variant="secondary" className="rounded-full size-11 shrink-0 p-0" title="Open">
                           <ExternalLink className="size-3.5" />
                         </Button>
                       </a>
                     </>
                   )}
-                  <Button variant="ghost" size="sm" className="rounded-full size-9 shrink-0 p-0" onClick={() => { trackEvent(EVENTS.CREATOR_GUIDE_ARCHIVED, { slug: l.slug, archived: !l.archived }); setArchived(l.id, !l.archived); }}>
+                  <Button variant="secondary" className="rounded-full size-11 shrink-0 p-0" onClick={() => { trackEvent(EVENTS.CREATOR_GUIDE_ARCHIVED, { slug: l.slug, archived: !l.archived }); setArchived(l.id, !l.archived); }}>
                     {l.archived ? <ArchiveRestore className="size-3.5" /> : <Archive className="size-3.5" />}
                   </Button>
                 </div>

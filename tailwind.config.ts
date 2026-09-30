@@ -40,6 +40,9 @@ export default {
           foreground: "hsl(var(--accent-foreground))",
           soft: "hsl(var(--accent-soft))",
         },
+        tertiary: {
+          foreground: "hsl(var(--tertiary-foreground))",
+        },
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
@@ -120,8 +123,14 @@ export default {
         "spot-pulse": "spot-pulse 1.5s ease-out infinite",
       },
       fontFamily: {
-        display: ["Fraunces", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        // Geist is the only UI font now (Fraunces/serif retired from the
+        // Creator surface). The `display` key is kept so every existing
+        // `font-display` className keeps working — it just resolves to Geist.
+        // Walker (/find/*) overrides both back to its original stack via the
+        // unlayered .usha-walker-scope rule in src/index.css, so it is
+        // unaffected by this change.
+        display: ["Geist", "Inter", "system-ui", "sans-serif"],
+        sans: ["Geist", "Inter", "system-ui", "sans-serif"],
       },
     },
   },

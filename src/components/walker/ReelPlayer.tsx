@@ -364,7 +364,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // ---- fallback: photo stills + captions as a text list --------------------
   if (failed) {
     return (
-      <div className="relative min-h-[100dvh] w-full bg-background text-foreground no-tap-highlight">
+      <div className="usha-walker-scope relative min-h-[100dvh] w-full bg-background text-foreground no-tap-highlight">
         <div className="max-w-md mx-auto px-5 pt-8 pb-24">
           <h1 className="font-display text-3xl mb-1.5">{walkerStrings.video.fallbackTitle}</h1>
           <p className="text-muted-foreground text-sm mb-6">{walkerStrings.video.fallbackLead}</p>
@@ -417,7 +417,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   if (completed) {
     return (
       <div
-        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
+        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
         style={{ backgroundColor: accent + "20" }}
       >
         <div className="animate-scale-in w-full max-w-sm">
@@ -475,7 +475,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   if (stuck) {
     return (
       <div
-        className="relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
+        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
         style={{ backgroundColor: accent + "20" }}
       >
         <div className="animate-scale-in w-full max-w-sm">
@@ -544,7 +544,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     // below fills it edge-to-edge (mobile is unchanged); on wider viewports the
     // frame becomes a centered 9:16 panel and this shows as the letterbox.
     <div
-      className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center bg-black no-tap-highlight select-none"
+      className="usha-walker-scope relative h-[100dvh] w-full overflow-hidden flex items-center justify-center bg-black no-tap-highlight select-none"
       style={{ background: "radial-gradient(120% 120% at 50% 50%, #0b0b0d 0%, #000000 72%)" }}
     >
       {/* Portrait 9:16 player frame. Full-bleed on phones (h-full w-full); from
