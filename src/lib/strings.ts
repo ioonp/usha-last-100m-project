@@ -49,6 +49,10 @@ export const landingStrings = {
     note: "Video guides on request · Photo guides are free",
     phoneAlt:
       "Usha guide step screen: a passageway leading to the courtyard, with the instruction Keep going, it's further back",
+    // Third hero phone mock is built in markup (not a screenshot), showing
+    // the guide's arrival state.
+    arrivalTitle: "You've arrived.",
+    arrivalSubtitle: "This is the door to Yoga Futura.",
   },
   problems: {
     title: "Sound familiar?",
@@ -135,7 +139,12 @@ export const landingStrings = {
   },
   footer: {
     domain: "usha.live",
-    madeIn: "Made in Berlin ❤️",
+    tagline: "Wayfinding for the last 100 meters.",
+    copyright: "© 2026 Usha · usha.live",
+    // Heart is rendered as an inline SVG next to this string, not an emoji.
+    madeIn: "Made in Berlin",
+    productHeading: "Product",
+    companyHeading: "Company",
     imprint: "Imprint",
     privacy: "Privacy",
     contact: "Contact",
