@@ -238,7 +238,7 @@ export const walkerStrings = {
     /** Arrival prompt, negative — opens the help sheet. */
     notYet: "Not yet",
     /** Used when the manifest omits an arrival instruction. */
-    arrivalFallback: "You've arrived.",
+    arrivalFallback: "You've arrived. Check in with the QR poster on the door.",
     /** Shown after "I made it". */
     completedTitle: "You made it!",
     /** Quiet restart link on the arrival screen. */
@@ -261,7 +261,7 @@ export const walkerStrings = {
     stuckElsewhere: "Somewhere else",
     stuckThanks: "Thanks — that helps us fix it",
     /** Arrival screen — secondary link to the Usha landing page (new tab). */
-    createOwnCta: "Create your own guide →",
+    createOwnCta: "Create your own guide",
     landingUrl: "https://usha.live",
     /** Arrival screen — quiet signature footer near the bottom. */
     // Heart is rendered as a stroke icon next to this string, not an emoji.

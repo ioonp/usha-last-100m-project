@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, Heart, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { trackEvent as trackPageEvent } from "@/lib/track";
 import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
@@ -95,7 +95,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [arrivalPrompt, setArrivalPrompt] = useState(false);
   const [completed, setCompleted] = useState(false);
-  // Success-screen feedback: null shows the thumbs up/down question, a value shows Thanks.
+  // Success-screen feedback: null until a tile is tapped, then the choice is highlighted.
   const [feedbackChoice, setFeedbackChoice] = useState<"positive" | "negative" | null>(null);
   // Stuck screen (reached from "Not yet"): stuckDone flips to the Thanks state.
   const [stuck, setStuck] = useState(false);
@@ -411,60 +411,75 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
   // ---- completed -----------------------------------------------------------
   if (completed) {
+    const tileBase =
+      "flex size-16 items-center justify-center rounded-[18px] border-2 bg-white text-[30px] leading-none transition-all active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A0A0A]";
+    const tileState = (v: "positive" | "negative") =>
+      feedbackChoice === null
+        ? "border-transparent"
+        : feedbackChoice === v
+          ? "border-[#0A0A0A]"
+          : "border-transparent opacity-40";
     return (
-      <div className="usha-walker-scope relative h-[100dvh] w-full bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div
+        className="usha-walker-scope relative h-[100dvh] w-full bg-white flex flex-col items-center justify-center px-5 text-center"
+        // Inline so it beats the scope's own white text colour.
+        style={{ color: "#0A0A0A" }}
+      >
         <div className="animate-scale-in w-full max-w-sm">
-          <span className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-[#FFD400] text-[#0A0A0A]">
-            <Check className="size-10" strokeWidth={3} aria-hidden="true" />
+          <span className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-[#0A0A0A]">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
           </span>
-          <h1 className="font-display font-semibold text-4xl mb-2">{walkerStrings.video.completedTitle}</h1>
-          <p className="text-muted-foreground mb-8">Welcome to {location.studio_name}.</p>
+          <h1 className="font-semibold text-[40px] leading-none tracking-[-0.045em] mb-3">{walkerStrings.video.completedTitle}</h1>
+          <p className="text-[17px] text-[#5C5C60] mb-8">Welcome to {location.studio_name}.</p>
 
-          {/* One-tap "was this easy to follow?" — thumbs up / down, then a
-              Thanks. No typing; a single tap fires guide_feedback and confirms. */}
-          {feedbackChoice === null ? (
-            <div className="mb-2">
-              <p className="text-[15px] font-medium mb-3">{walkerStrings.video.feedbackQuestion}</p>
-              <div className="flex justify-center gap-3">
-                <button
-                  type="button"
-                  aria-label={walkerStrings.video.feedbackYes}
-                  onClick={() => sendFeedback("positive")}
-                  className="flex size-16 items-center justify-center rounded-2xl border border-[#2E2E32] bg-[#1F1F22] text-white active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <ThumbsUp className="size-6" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  aria-label={walkerStrings.video.feedbackNo}
-                  onClick={() => sendFeedback("negative")}
-                  className="flex size-16 items-center justify-center rounded-2xl border border-[#2E2E32] bg-[#1F1F22] text-white active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                >
-                  <ThumbsDown className="size-6" aria-hidden="true" />
-                </button>
-              </div>
+          {/* One-tap "was this easy to follow?" — a single tap fires
+              guide_feedback; the chosen tile gets a 2px border and the other
+              fades. */}
+          <div className="rounded-[24px] bg-[#F4F4F5] p-6 mb-6">
+            <p className="text-base font-medium mb-4">{walkerStrings.video.feedbackQuestion}</p>
+            <div className="flex justify-center gap-3">
+              <button
+                type="button"
+                aria-label={walkerStrings.video.feedbackYes}
+                disabled={feedbackChoice !== null}
+                onClick={() => sendFeedback("positive")}
+                className={`${tileBase} ${tileState("positive")}`}
+              >
+                <span aria-hidden="true">👍</span>
+              </button>
+              <button
+                type="button"
+                aria-label={walkerStrings.video.feedbackNo}
+                disabled={feedbackChoice !== null}
+                onClick={() => sendFeedback("negative")}
+                className={`${tileBase} ${tileState("negative")}`}
+              >
+                <span aria-hidden="true">👎</span>
+              </button>
             </div>
-          ) : (
-            <p className="mb-2 text-[15px] font-semibold text-accent">
-              {walkerStrings.video.feedbackThanks}
-            </p>
-          )}
+            {feedbackChoice !== null && (
+              <p className="mt-4 text-[15px] font-semibold">{walkerStrings.video.feedbackThanks}</p>
+            )}
+          </div>
 
-          {/* Secondary link to the Usha landing page — clear but not a button. */}
+          {/* Secondary link to the Usha landing page. */}
           <a
             href={walkerStrings.video.landingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-block text-sm font-medium text-accent underline underline-offset-4 active:scale-95 transition-smooth"
+            className="inline-flex h-12 items-center gap-2 rounded-full bg-[#F0F0F1] px-6 text-base font-semibold text-[#0A0A0A] active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A0A0A]"
           >
             {walkerStrings.video.createOwnCta}
+            <ArrowRight className="size-4" aria-hidden="true" />
           </a>
         </div>
 
-        {/* Quiet signature footer, pinned near the bottom. */}
-        <p className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {/* Quiet signature footer, pinned to the bottom. */}
+        <p className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 text-center text-xs text-[#6B6B70] pb-[max(1rem,env(safe-area-inset-bottom))]">
           {walkerStrings.video.madeInBerlin}
-          <Heart className="size-3.5 text-accent" aria-hidden="true" />
+          <Heart className="size-3.5 text-[#0A0A0A]" fill="currentColor" aria-hidden="true" />
         </p>
       </div>
     );
@@ -557,7 +572,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           ref={videoRef}
           key={location.video_version ?? location.video_url ?? "reel"}
           src={location.video_url ?? undefined}
-          className="absolute inset-0 w-full h-full object-contain"
+          className={`absolute inset-0 w-full h-full ${arrivalPrompt && atLast ? "object-cover" : "object-contain"}`}
           playsInline
           muted
           preload="auto"
@@ -705,43 +720,40 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         </div>
       )}
 
-      {/* Arrival prompt at the final checkpoint. Buttons sit above the zones and
-          stopPropagation so they never register as back/forward. The bottom
-          padding adds the iOS safe area so the buttons clear the home bar. */}
+      {/* Arrival prompt at the final checkpoint: a white bottom sheet laid
+          directly over the (edge-to-edge) final frame. Buttons sit above the
+          zones and stopPropagation so they never register as back/forward.
+          Bottom padding adds the iOS safe area. */}
       {arrivalPrompt && atLast && (
         <div
-          className="absolute inset-x-0 bottom-0 z-40 px-4 pt-16"
-          style={{
-            background: "linear-gradient(to top, rgba(10,10,10,0.9), rgba(10,10,10,0))",
-            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
-          }}
+          className="absolute inset-x-0 bottom-0 z-40 rounded-t-[28px] bg-white px-5 pt-7"
+          style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="text-white text-[22px] font-semibold leading-[1.25] text-balance mb-5">
+          <div className="text-[#0A0A0A] text-[22px] font-semibold leading-[1.25] tracking-[-0.025em] text-balance mb-5">
             {arrivalInstruction}
           </div>
           <div className="flex gap-3">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); confirmArrived(); }}
-              className="h-14 flex-1 rounded-full border border-transparent bg-[#FFD400] font-semibold text-[#0A0A0A] text-base active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="h-14 flex-1 rounded-full bg-[#0A0A0A] font-semibold text-white text-[17px] active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A0A0A]"
             >
               {walkerStrings.video.madeIt}
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); rejectArrival(); }}
-              className="h-14 flex-1 rounded-full border border-[#2E2E32] bg-[#1F1F22] font-semibold text-white text-base active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="h-14 flex-1 rounded-full bg-[#F0F0F1] font-semibold text-[#0A0A0A] text-[17px] active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A0A0A]"
             >
               {walkerStrings.video.notYet}
             </button>
           </div>
-          {/* Quiet restart — un-emphasized text link under the buttons; the
-              arrival instruction stays the dominant element. */}
+          {/* Quiet restart — un-emphasized text link under the buttons. */}
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); restart(); }}
-            className="mt-4 mx-auto block text-[#8A8A8F] text-[13px] underline underline-offset-4 active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="mt-4 mx-auto block text-[#6B6B70] text-[14px] underline underline-offset-4 active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A0A0A]"
           >
             {walkerStrings.video.startAgain}
           </button>
