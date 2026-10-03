@@ -466,7 +466,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
 
           {/* Secondary link to the Usha landing page. */}
           <a
-            href={walkerStrings.video.landingUrl}
+            href={walkerStrings.video.createOwnPath}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-12 items-center gap-2 rounded-full bg-[#F0F0F1] px-6 text-base font-semibold text-[#0A0A0A] active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A0A0A]"
