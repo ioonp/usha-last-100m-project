@@ -677,11 +677,11 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-1.5 px-8 text-center text-white"
           style={{ background: "rgba(0,0,0,0.45)" }}
         >
-          <span className="font-display text-3xl font-semibold leading-tight text-balance drop-shadow-lg">
+          <span className="font-display text-3xl font-semibold leading-tight text-balance drop-shadow-lg [text-shadow:var(--walker-text-halo)]">
             {location.studio_name}
           </span>
           {location.start_address && (
-            <span className="text-sm font-normal leading-snug text-balance text-white/80 drop-shadow-md">
+            <span className="text-sm font-normal leading-snug text-balance text-white/80 drop-shadow-md [text-shadow:var(--walker-text-halo)]">
               {location.start_address}
             </span>
           )}
