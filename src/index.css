@@ -165,33 +165,33 @@ All colors MUST be HSL.
 }
 
 /* Walker player scope (/find/:slug — ReelPlayer, Viewer's photo stepper,
-   WalkerHelpSheet). Deliberately unlayered (outside any @layer block): the
-   Tailwind-generated `.font-display` utility (from tailwind.config.ts) is
-   also unlayered and would otherwise always beat a same-selector rule placed
-   inside @layer base, regardless of specificity. Being unlayered here, plus
-   the extra `.usha-walker-scope` specificity, guarantees this wins so the
-   walker keeps its exact original warm palette + serif headings while the
-   Creator surface above moves to the white/Geist system. */
+   WalkerHelpSheet). Dark signage palette: near-black surfaces, white text,
+   signage yellow as the single accent, Geist throughout. The Walker's
+   components read these through the shared token classes (bg-background,
+   text-muted-foreground, bg-card, border-border, text-accent), so redefining
+   the variables here restyles them without touching the Creator surface.
+   Deliberately unlayered so it always wins over Tailwind's generated
+   utilities. */
 .usha-walker-scope {
-  font-family: 'Inter', system-ui, sans-serif;
-  --background: 36 50% 96%;
-  --foreground: 36 10% 10%;
-  --card: 0 0% 100%;
-  --card-foreground: 36 10% 10%;
-  --muted: 36 30% 94%;
-  --muted-foreground: 33 8% 44%;
-  --accent: 16 65% 48%;
-  --accent-foreground: 0 0% 100%;
-  --border: 37 32% 89%;
-  --input: 37 32% 89%;
-  --shadow-soft: 0 1px 2px hsl(25 18% 14% / 0.04), 0 8px 30px hsl(25 18% 14% / 0.08);
-  --shadow-elegant: 0 20px 60px -20px hsl(32 75% 38% / 0.35);
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
+  color: hsl(var(--foreground));
+  --background: 0 0% 4%;             /* #0A0A0A */
+  --foreground: 0 0% 100%;
+  --card: 240 5% 13%;                /* #1F1F22 */
+  --card-foreground: 0 0% 100%;
+  --muted: 240 5% 13%;               /* #1F1F22 */
+  --muted-foreground: 240 2% 55%;    /* #8A8A8F */
+  --accent: 50 100% 50%;             /* #FFD400 signage yellow */
+  --accent-foreground: 0 0% 4%;      /* black text on yellow */
+  --border: 240 4% 19%;              /* #2E2E32 */
+  --input: 240 4% 19%;
+  --shadow-soft: none;
+  --shadow-elegant: none;
 }
 .usha-walker-scope h1,
 .usha-walker-scope h2,
 .usha-walker-scope h3,
 .usha-walker-scope .font-display {
-  font-family: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
-  font-feature-settings: 'ss01';
+  font-family: 'Geist', 'Inter', system-ui, sans-serif;
   letter-spacing: -0.02em;
 }

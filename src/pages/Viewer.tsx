@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CurvedArrow } from "@/components/CurvedArrow";
 import { normalizeIndicator, type Indicator as EditorIndicator, type LegacyDirection } from "@/components/wizard/CheckpointEditor";
 import { staticMapUrl } from "@/lib/maps";
-import { MapPin, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, MapPin, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { trackEvent } from "@/lib/track";
 // Umami analytics — aliased to avoid colliding with the Supabase page_events
 // tracker imported above.
@@ -30,7 +30,8 @@ const DIR_ICON: Record<LegacyDirection, React.ComponentType<{ className?: string
   down: ArrowDown, "down-left": ArrowDownLeft, left: ArrowLeft, "up-left": ArrowUpLeft,
 };
 
-const ACCENT = "#c45a22";
+// Signage yellow — the single Walker accent (replaces the old per-venue clay).
+const ACCENT = "#FFD400";
 
 export default function Viewer() {
   const { slug } = useParams();
@@ -83,7 +84,7 @@ export default function Viewer() {
   if (loading) return <div className="usha-walker-scope min-h-screen bg-background flex items-center justify-center text-muted-foreground">Loading…</div>;
   if (!loc) return (
     <div className="usha-walker-scope min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-      <h1 className="font-display text-3xl mb-2">Page not found</h1>
+      <h1 className="font-display font-semibold text-3xl mb-2">Page not found</h1>
       <p className="text-muted-foreground mb-4">This wayfinding page isn't available.</p>
       <Link to="/" className="text-accent underline">Back home</Link>
     </div>
@@ -93,7 +94,7 @@ export default function Viewer() {
   // photo checkpoint stepper, reached only when type is 'photo' (the default).
   if (loc.type === "video") return <ReelPlayer location={loc} checkpoints={cps} />;
 
-  const accent = loc.accent_color || ACCENT;
+  const accent = ACCENT;
   const total = cps.length;
   const cp = step >= 0 && step < total ? cps[step] : null;
 
@@ -131,7 +132,6 @@ export default function Viewer() {
       venueName={loc.studio_name}
       addressLine={addressLine}
       lookFor={loc.start_note}
-      accent={accent}
       hasCoords={hasCoords}
       onOpenMaps={openMaps}
       onDismiss={() => setHelpOpen(false)}
@@ -164,7 +164,7 @@ export default function Viewer() {
             <div className="text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: accent }}>
               Step 1 — Confirm you've arrived
             </div>
-            <h1 className="font-display text-3xl leading-tight mb-5 text-balance">
+            <h1 className="font-display font-semibold text-3xl leading-tight mb-5 text-balance">
               Do you see this on the street?
             </h1>
 
@@ -172,7 +172,7 @@ export default function Viewer() {
             <div className="flex items-start gap-3 p-4 rounded-2xl border border-border bg-card mb-4 shadow-soft">
               <div
                 className="size-9 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: accent + "20" }}
+                style={{ backgroundColor: accent + "26" }}
               >
                 <MapPin className="size-4" style={{ color: accent }} />
               </div>
@@ -225,7 +225,7 @@ export default function Viewer() {
                   if (loc) trackEvent(loc.id, "arrival_confirmed");
                 }}
                 disabled={total === 0}
-                className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant disabled:opacity-50 active:scale-[0.98] transition-smooth"
+                className="w-full rounded-full py-4 font-semibold text-[#0A0A0A] text-base disabled:opacity-50 active:scale-[0.98] transition-smooth"
                 style={{ backgroundColor: accent }}
               >
                 Yes, I'm here
@@ -247,7 +247,6 @@ export default function Viewer() {
     return (
       <div
         className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center bg-background no-tap-highlight"
-        style={{ backgroundColor: accent + "12" }}
       >
         <div className="max-w-sm w-full animate-fade-in-up">
           {loc.logo_url ? (
@@ -255,7 +254,7 @@ export default function Viewer() {
           ) : (
             <div className="size-20 rounded-full mx-auto mb-5" style={{ backgroundColor: accent }} />
           )}
-          <h1 className="font-display text-4xl mb-3">{loc.studio_name}</h1>
+          <h1 className="font-display font-semibold text-4xl mb-3">{loc.studio_name}</h1>
           <p className="text-muted-foreground mb-4 text-balance">{loc.welcome_message}</p>
 
           {total > 0 && (
@@ -274,7 +273,7 @@ export default function Viewer() {
           <button
             onClick={() => { trackUmami(EVENTS.PHOTO_STARTED, { slug }); setShowArrival(true); }}
             disabled={total === 0}
-            className="w-full rounded-full py-4 font-medium text-white text-lg shadow-elegant disabled:opacity-50 active:scale-95 transition-smooth"
+            className="w-full rounded-full py-4 font-semibold text-[#0A0A0A] text-lg disabled:opacity-50 active:scale-95 transition-smooth"
             style={{ backgroundColor: accent }}
           >
             Start the walk →
@@ -288,16 +287,17 @@ export default function Viewer() {
   if (step >= total) {
     return (
       <div
-        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
-        style={{ backgroundColor: accent + "20" }}
+        className="usha-walker-scope relative h-[100dvh] w-full bg-background flex flex-col items-center justify-center p-6 text-center"
       >
         <div className="animate-scale-in w-full max-w-sm">
-          <div className="text-6xl mb-4">🎉</div>
-          <h1 className="font-display text-4xl mb-2">You made it!</h1>
+          <span className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-[#FFD400] text-[#0A0A0A]">
+            <Check className="size-10" strokeWidth={3} aria-hidden="true" />
+          </span>
+          <h1 className="font-display font-semibold text-4xl mb-2">You made it!</h1>
           <p className="text-muted-foreground mb-8">Welcome to {loc.studio_name}.</p>
           <button
             onClick={() => setHelpOpen(true)}
-            className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant active:scale-[0.98] transition-smooth"
+            className="w-full rounded-full py-4 font-semibold text-[#0A0A0A] text-base active:scale-[0.98] transition-smooth"
             style={{ backgroundColor: accent }}
           >
             {walkerStrings.successContact}
@@ -369,11 +369,11 @@ export default function Viewer() {
                         />
                         <span
                           className="relative block size-5 rounded-full border-2"
-                          style={{ backgroundColor: accent, borderColor: "#FFFDF8" }}
+                          style={{ backgroundColor: accent, borderColor: "#FFFFFF" }}
                         />
                       </div>
                       {ind.label && (
-                        <span className="mt-1.5 px-2 py-0.5 text-[11px] font-medium text-foreground bg-white/95 rounded-md">
+                        <span className="mt-1.5 px-2 py-0.5 text-[11px] font-medium text-[#0A0A0A] bg-white/95 rounded-md">
                           {ind.label}
                         </span>
                       )}
@@ -429,7 +429,7 @@ export default function Viewer() {
         onClick={goPrev}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-30 size-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center active:scale-95 transition-smooth"
       >
-        <ChevronLeft className="size-6 text-foreground" />
+        <ChevronLeft className="size-6 text-[#0A0A0A]" />
       </button>
       <button
         type="button"
@@ -437,7 +437,7 @@ export default function Viewer() {
         onClick={goNext}
         className="absolute right-4 top-1/2 -translate-y-1/2 z-30 size-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center active:scale-95 transition-smooth"
       >
-        <ChevronRight className="size-6 text-foreground" />
+        <ChevronRight className="size-6 text-[#0A0A0A]" />
       </button>
 
       {/* Bottom info panel */}
