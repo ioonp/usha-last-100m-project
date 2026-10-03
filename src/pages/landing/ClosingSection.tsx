@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { landingStrings } from "@/lib/strings";
 import { trackEvent, EVENTS } from "@/lib/analytics";
-import { CREATE_GUIDE_ROUTE, videoMailtoHref } from "./links";
+import { CREATE_GUIDE_ROUTE } from "./links";
+import { useVideoRequest } from "./videoRequestContext";
 import { Logo } from "./LandingNav";
 
 const t = landingStrings.closing;
@@ -28,6 +29,8 @@ const productLinks = [
 ];
 
 export function ClosingSection() {
+  const { openVideoRequest } = useVideoRequest();
+
   return (
     <>
       <section className="px-5 py-14 md:px-[120px] md:py-[104px]">
@@ -35,12 +38,13 @@ export function ClosingSection() {
           <h2 className="usha-landing-heading text-[length:var(--text-h2-lead)] md:max-w-[820px]">{t.title}</h2>
           <p className="text-[length:var(--text-lead)] leading-[1.5] text-[#5C5C60]">{t.body}</p>
           <div className="flex flex-col gap-3 mt-2 md:flex-row md:gap-4 md:mt-3">
-            <a
-              href={videoMailtoHref()}
-              className="flex md:inline-flex items-center justify-center h-14 md:h-[58px] md:px-[30px] rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold no-underline"
+            <button
+              type="button"
+              onClick={(e) => openVideoRequest(e.currentTarget)}
+              className="flex md:inline-flex items-center justify-center h-14 md:h-[58px] md:px-[30px] rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold"
             >
               {t.videoCta}
-            </a>
+            </button>
             <Link
               to={CREATE_GUIDE_ROUTE}
               onClick={() => trackEvent(EVENTS.LANDING_SIGNUP_CLICKED, { placement: "closing" })}

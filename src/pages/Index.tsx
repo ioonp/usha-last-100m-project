@@ -8,6 +8,7 @@ import { OptionsSection } from "./landing/OptionsSection";
 import { HowItWorksSection } from "./landing/HowItWorksSection";
 import { FaqSection } from "./landing/FaqSection";
 import { ClosingSection } from "./landing/ClosingSection";
+import { VideoRequestProvider } from "./landing/VideoRequestProvider";
 
 // Landing-page type scale: nine fluid roles, each a clamp from 390px → 1440px.
 // Scoped to the landing root only (not the global theme or Tailwind config) so
@@ -27,16 +28,18 @@ const typeScale = {
 
 const Index = () => {
   return (
-    <div id="top" style={typeScale} className="usha-landing-root min-h-screen bg-white text-[#0A0A0A]">
-      <LandingNav />
-      <HeroSection />
-      <ProblemsSection />
-      <ExampleSection />
-      <OptionsSection />
-      <HowItWorksSection />
-      <FaqSection />
-      <ClosingSection />
-    </div>
+    <VideoRequestProvider>
+      <div id="top" style={typeScale} className="usha-landing-root min-h-screen bg-white text-[#0A0A0A]">
+        <LandingNav />
+        <HeroSection />
+        <ProblemsSection />
+        <ExampleSection />
+        <OptionsSection />
+        <HowItWorksSection />
+        <FaqSection />
+        <ClosingSection />
+      </div>
+    </VideoRequestProvider>
   );
 };
 

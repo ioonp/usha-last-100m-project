@@ -1,9 +1,8 @@
-import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { landingStrings } from "@/lib/strings";
 import { trackEvent, EVENTS } from "@/lib/analytics";
-import { RequestForm } from "@/components/RequestForm";
 import { CREATE_GUIDE_ROUTE } from "./links";
+import { useVideoRequest } from "./videoRequestContext";
 
 const t = landingStrings.hero;
 
@@ -59,11 +58,9 @@ function ArrivalPhoneMock() {
 }
 
 export function HeroSection() {
-  const [formOpen, setFormOpen] = useState(false);
-  const videoBtnRef = useRef<HTMLButtonElement>(null);
+  const { openVideoRequest } = useVideoRequest();
 
   return (
-    <>
       <section className="flex flex-col items-center gap-[22px] md:gap-7 px-5 pt-9 pb-0 md:px-[120px] md:pt-[88px] text-center">
         <span className="inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-4 py-1.5 md:py-2 rounded-full bg-[#F4F4F5] text-[length:var(--text-eyebrow)] font-medium text-[#5C5C60]">
           <span className="w-[7px] h-[7px] md:w-2 md:h-2 rounded-full bg-[#1B4FFF]" />
@@ -82,8 +79,7 @@ export function HeroSection() {
         <div className="flex flex-col gap-3 items-stretch sm:items-center sm:flex-row mt-1">
           <button
             type="button"
-            ref={videoBtnRef}
-            onClick={() => setFormOpen(true)}
+            onClick={(e) => openVideoRequest(e.currentTarget)}
             className="inline-flex items-center justify-center gap-2.5 h-14 md:h-[58px] px-7 md:px-[30px] rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold"
           >
             {t.primaryCta}
@@ -116,13 +112,5 @@ export function HeroSection() {
           </div>
         </div>
       </section>
-
-      <RequestForm
-        formType="video_guide"
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        triggerRef={videoBtnRef}
-      />
-    </>
   );
 }

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { landingStrings } from "@/lib/strings";
 import { trackEvent, EVENTS } from "@/lib/analytics";
-import { SIGN_IN_ROUTE, CREATE_GUIDE_ROUTE, videoMailtoHref } from "./links";
+import { SIGN_IN_ROUTE, CREATE_GUIDE_ROUTE } from "./links";
+import { useVideoRequest } from "./videoRequestContext";
 
 const t = landingStrings.options;
 
@@ -33,6 +34,7 @@ function Points({ points }: { points: readonly string[] }) {
 }
 
 export function OptionsSection() {
+  const { openVideoRequest } = useVideoRequest();
   const titlePrefix = t.title.slice(0, t.title.length - TITLE_GREY_SUFFIX.length);
 
   return (
@@ -57,9 +59,13 @@ export function OptionsSection() {
           <Points points={t.video.points} />
           <div className="grow" />
           <div className="flex flex-col gap-3 mt-1">
-            <a href={videoMailtoHref()} className="flex items-center justify-center h-14 md:h-[58px] rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold no-underline">
+            <button
+              type="button"
+              onClick={(e) => openVideoRequest(e.currentTarget)}
+              className="flex w-full items-center justify-center h-14 md:h-[58px] rounded-full bg-[#0A0A0A] text-white text-[length:var(--text-body)] font-semibold"
+            >
               {t.video.cta}
-            </a>
+            </button>
             <span className="text-center text-[length:var(--text-small)] text-[#A1A1A6]">{t.video.note}</span>
           </div>
         </div>
