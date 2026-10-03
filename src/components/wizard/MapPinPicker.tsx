@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { GOOGLE_MAPS_KEY, loadGoogleMaps, staticMapUrl } from "@/lib/maps";
-import { MONOCHROME_MAP_STYLE } from "@/lib/mapStyle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, CheckCircle2 } from "lucide-react";
@@ -88,7 +87,6 @@ export function MapPinPicker({
       disableDefaultUI: true,
       zoomControl: true,
       gestureHandling: "greedy",
-      styles: MONOCHROME_MAP_STYLE,
     });
     mapRef.current = map;
     placesServiceRef.current = new g.maps.places.PlacesService(map);
