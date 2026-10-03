@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { landingStrings } from "@/lib/strings";
 import { trackEvent, EVENTS } from "@/lib/analytics";
-import { SIGN_IN_ROUTE, videoMailtoHref } from "./links";
+import { SIGN_IN_ROUTE } from "./links";
+import { useVideoRequest } from "./videoRequestContext";
 
 const t = landingStrings.nav;
 
@@ -28,6 +29,8 @@ export function Logo({ to = "#top" }: { to?: string }) {
 }
 
 export function LandingNav() {
+  const { openVideoRequest } = useVideoRequest();
+
   return (
     <header className="flex md:grid items-center justify-between md:justify-normal md:grid-cols-3 gap-3 px-5 py-4 md:px-[120px] md:py-6">
       <Logo />
@@ -44,12 +47,13 @@ export function LandingNav() {
         >
           {t.signIn}
         </Link>
-        <a
-          href={videoMailtoHref()}
-          className="inline-flex items-center h-11 px-[18px] md:px-[22px] rounded-full bg-[#0A0A0A] text-white whitespace-nowrap text-[length:var(--text-body)] font-semibold no-underline"
+        <button
+          type="button"
+          onClick={(e) => openVideoRequest(e.currentTarget)}
+          className="inline-flex items-center h-11 px-[18px] md:px-[22px] rounded-full bg-[#0A0A0A] text-white whitespace-nowrap text-[length:var(--text-body)] font-semibold"
         >
           {t.videoCta}
-        </a>
+        </button>
       </div>
     </header>
   );
