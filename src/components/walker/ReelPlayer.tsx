@@ -685,15 +685,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
               {location.start_address}
             </span>
           )}
-          <span
-            className="mt-4 rounded-full px-[26px] py-[11px] text-base font-medium text-white backdrop-blur-sm"
-            style={{
-              background: "rgba(0,0,0,0.55)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
-            }}
-          >
-            {walkerStrings.video.tapToStart}
+          {/* Wrapper carries the ripple rings as siblings of the glass pill, so the
+              pill's own backdrop-filter / clipping never cuts them off. */}
+          <span className="usha-ripple-wrap relative mt-4 inline-flex">
+            <span className="usha-ripple-ring usha-ripple-ring-1" aria-hidden="true" />
+            <span className="usha-ripple-ring usha-ripple-ring-2" aria-hidden="true" />
+            <span className="usha-glass-pill relative rounded-full px-[26px] py-[11px] text-base font-medium text-white">
+              {walkerStrings.video.tapToStart}
+            </span>
           </span>
         </button>
       )}
