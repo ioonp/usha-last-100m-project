@@ -264,7 +264,8 @@ export const walkerStrings = {
     createOwnCta: "Create your own guide →",
     landingUrl: "https://usha.live",
     /** Arrival screen — quiet signature footer near the bottom. */
-    madeInBerlin: "Made in Berlin ❤️",
+    // Heart is rendered as a stroke icon next to this string, not an emoji.
+    madeInBerlin: "Made in Berlin",
     /** Accessible label for the Stories-style segmented progress bar. */
     progressLabel: "Walk progress",
   },

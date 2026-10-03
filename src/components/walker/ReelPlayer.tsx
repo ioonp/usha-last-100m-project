@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Heart, ThumbsDown, ThumbsUp } from "lucide-react";
 import { trackEvent as trackPageEvent } from "@/lib/track";
 import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
@@ -11,7 +11,6 @@ type ReelLocation = {
   id: string;
   slug: string;
   studio_name: string;
-  accent_color: string;
   video_url: string | null;
   manifest: unknown;
   video_version: string | null;
@@ -48,7 +47,6 @@ const LOAD_TIMEOUT_MS = 8000;
 // on — otherwise a guide whose first checkpoint sits at t≈0 parks the instant
 // it starts and looks like it never began.
 const OPENING_CHECKPOINT_EPS = 0.25;
-const ACCENT = "#c45a22";
 
 /**
  * Defensive parse of the manually-populated jsonb manifest. Keeps only
@@ -77,7 +75,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const manifest = useMemo(() => parseManifest(location.manifest), [location.manifest]);
   const cps = useMemo(() => manifest?.checkpoints ?? [], [manifest]);
   const hasVideo = Boolean(location.video_url) && cps.length > 0;
-  const accent = location.accent_color || ACCENT;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -98,7 +95,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [arrivalPrompt, setArrivalPrompt] = useState(false);
   const [completed, setCompleted] = useState(false);
-  // Success-screen feedback: null shows the 👍/👎 question, a value shows Thanks.
+  // Success-screen feedback: null shows the thumbs up/down question, a value shows Thanks.
   const [feedbackChoice, setFeedbackChoice] = useState<"positive" | "negative" | null>(null);
   // Stuck screen (reached from "Not yet"): stuckDone flips to the Thanks state.
   const [stuck, setStuck] = useState(false);
@@ -280,7 +277,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     releaseWake();
   }, [releaseWake]);
 
-  // One-tap success feedback (👍/👎) on the completed screen.
+  // One-tap success feedback (thumbs up/down) on the completed screen.
   const sendFeedback = useCallback((value: "positive" | "negative") => {
     trackUmami(EVENTS.VIDEO_FEEDBACK, { slug: location.slug, value });
     setFeedbackChoice(value);
@@ -354,7 +351,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       venueName={location.studio_name}
       addressLine={addressLine}
       lookFor={location.start_note}
-      accent={accent}
       hasCoords={hasCoords}
       onOpenMaps={openMaps}
       onDismiss={() => setHelpOpen(false)}
@@ -366,7 +362,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     return (
       <div className="usha-walker-scope relative min-h-[100dvh] w-full bg-background text-foreground no-tap-highlight">
         <div className="max-w-md mx-auto px-5 pt-8 pb-24">
-          <h1 className="font-display text-3xl mb-1.5">{walkerStrings.video.fallbackTitle}</h1>
+          <h1 className="font-display font-semibold text-3xl mb-1.5">{walkerStrings.video.fallbackTitle}</h1>
           <p className="text-muted-foreground text-sm mb-6">{walkerStrings.video.fallbackLead}</p>
 
           <ol className="space-y-5">
@@ -378,7 +374,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
                     <img src={still} alt="" className="w-full aspect-[4/3] object-cover bg-muted" />
                   )}
                   <div className="p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: accent }}>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider mb-1 text-accent">
                       {walkerStrings.video.fallbackStep(i + 1)}
                     </div>
                     <div className="text-[15px] leading-snug">
@@ -416,17 +412,16 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // ---- completed -----------------------------------------------------------
   if (completed) {
     return (
-      <div
-        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
-        style={{ backgroundColor: accent + "20" }}
-      >
+      <div className="usha-walker-scope relative h-[100dvh] w-full bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="animate-scale-in w-full max-w-sm">
-          <div className="text-6xl mb-4">🎉</div>
-          <h1 className="font-display text-4xl mb-2">{walkerStrings.video.completedTitle}</h1>
+          <span className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-[#FFD400] text-[#0A0A0A]">
+            <Check className="size-10" strokeWidth={3} aria-hidden="true" />
+          </span>
+          <h1 className="font-display font-semibold text-4xl mb-2">{walkerStrings.video.completedTitle}</h1>
           <p className="text-muted-foreground mb-8">Welcome to {location.studio_name}.</p>
 
-          {/* One-tap "was this easy to follow?" — 👍 / 👎, then a Thanks. No
-              typing; a single tap fires guide_feedback and confirms. */}
+          {/* One-tap "was this easy to follow?" — thumbs up / down, then a
+              Thanks. No typing; a single tap fires guide_feedback and confirms. */}
           {feedbackChoice === null ? (
             <div className="mb-2">
               <p className="text-[15px] font-medium mb-3">{walkerStrings.video.feedbackQuestion}</p>
@@ -435,18 +430,22 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
                   type="button"
                   aria-label={walkerStrings.video.feedbackYes}
                   onClick={() => sendFeedback("positive")}
-                  className="size-16 rounded-2xl bg-white/70 text-3xl shadow-soft active:scale-95 transition-smooth"
-                >👍</button>
+                  className="flex size-16 items-center justify-center rounded-2xl border border-[#2E2E32] bg-[#1F1F22] text-white active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <ThumbsUp className="size-6" aria-hidden="true" />
+                </button>
                 <button
                   type="button"
                   aria-label={walkerStrings.video.feedbackNo}
                   onClick={() => sendFeedback("negative")}
-                  className="size-16 rounded-2xl bg-white/70 text-3xl shadow-soft active:scale-95 transition-smooth"
-                >👎</button>
+                  className="flex size-16 items-center justify-center rounded-2xl border border-[#2E2E32] bg-[#1F1F22] text-white active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <ThumbsDown className="size-6" aria-hidden="true" />
+                </button>
               </div>
             </div>
           ) : (
-            <p className="mb-2 text-[15px] font-semibold" style={{ color: accent }}>
+            <p className="mb-2 text-[15px] font-semibold text-accent">
               {walkerStrings.video.feedbackThanks}
             </p>
           )}
@@ -456,16 +455,16 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
             href={walkerStrings.video.landingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-block text-sm font-medium underline underline-offset-4 active:scale-95 transition-smooth"
-            style={{ color: accent }}
+            className="mt-6 inline-block text-sm font-medium text-accent underline underline-offset-4 active:scale-95 transition-smooth"
           >
             {walkerStrings.video.createOwnCta}
           </a>
         </div>
 
         {/* Quiet signature footer, pinned near the bottom. */}
-        <p className="absolute inset-x-0 bottom-0 text-center text-xs text-muted-foreground pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <p className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground pb-[max(1rem,env(safe-area-inset-bottom))]">
           {walkerStrings.video.madeInBerlin}
+          <Heart className="size-3.5 text-accent" aria-hidden="true" />
         </p>
       </div>
     );
@@ -474,14 +473,11 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // ---- still lost: tap-only "where did you get stuck?" ---------------------
   if (stuck) {
     return (
-      <div
-        className="usha-walker-scope relative h-[100dvh] w-full flex flex-col items-center justify-center p-6 text-center"
-        style={{ backgroundColor: accent + "20" }}
-      >
+      <div className="usha-walker-scope relative h-[100dvh] w-full bg-background flex flex-col items-center justify-center p-6 text-center">
         <div className="animate-scale-in w-full max-w-sm">
           {!stuckDone ? (
             <>
-              <h1 className="font-display text-[26px] leading-tight mb-5">
+              <h1 className="font-display font-semibold text-[26px] leading-tight mb-5">
                 {walkerStrings.video.stuckQuestion}
               </h1>
               {/* One tappable option per checkpoint of THIS guide (manifest
@@ -492,7 +488,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
                     key={i}
                     type="button"
                     onClick={() => sendStuck(i, c.caption)}
-                    className="w-full rounded-2xl bg-white/70 px-4 py-3 text-[15px] leading-snug shadow-soft active:scale-[0.98] transition-smooth"
+                    className="w-full rounded-2xl border border-[#2E2E32] bg-[#1F1F22] px-4 py-3 text-[15px] leading-snug text-white active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     {c.caption}
                   </button>
@@ -500,7 +496,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
                 <button
                   type="button"
                   onClick={() => sendStuck(-1, walkerStrings.video.stuckElsewhere)}
-                  className="w-full rounded-2xl bg-white/70 px-4 py-3 text-[15px] font-medium leading-snug shadow-soft active:scale-[0.98] transition-smooth"
+                  className="w-full rounded-2xl border border-[#2E2E32] bg-[#1F1F22] px-4 py-3 text-[15px] font-medium leading-snug text-white active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
                   {walkerStrings.video.stuckElsewhere}
                 </button>
@@ -508,16 +504,17 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
             </>
           ) : (
             <>
-              <div className="text-5xl mb-4">🙏</div>
-              <p className="mb-8 text-[15px] font-semibold" style={{ color: accent }}>
+              <span className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-[#FFD400] text-[#0A0A0A]">
+                <Heart className="size-8" strokeWidth={2.5} aria-hidden="true" />
+              </span>
+              <p className="mb-8 text-[15px] font-semibold text-accent">
                 {walkerStrings.video.stuckThanks}
               </p>
               {/* Gentle next step — replay the guide. No email, no contact. */}
               <button
                 type="button"
                 onClick={restart}
-                className="w-full rounded-full py-4 font-semibold text-white text-base shadow-elegant active:scale-[0.98] transition-smooth"
-                style={{ backgroundColor: accent }}
+                className="h-14 w-full rounded-full bg-[#FFD400] font-semibold text-[#0A0A0A] text-base active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {walkerStrings.video.startAgain}
               </button>
@@ -709,29 +706,32 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       )}
 
       {/* Arrival prompt at the final checkpoint. Buttons sit above the zones and
-          stopPropagation so they never register as back/forward. */}
+          stopPropagation so they never register as back/forward. The bottom
+          padding adds the iOS safe area so the buttons clear the home bar. */}
       {arrivalPrompt && atLast && (
         <div
-          className="absolute inset-x-0 bottom-0 z-40 px-5 pt-12 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.5) 80%, rgba(0,0,0,0))" }}
+          className="absolute inset-x-0 bottom-0 z-40 px-4 pt-16"
+          style={{
+            background: "linear-gradient(to top, rgba(10,10,10,0.9), rgba(10,10,10,0))",
+            paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="text-white text-[18px] font-semibold leading-snug text-balance mb-4">
+          <div className="text-white text-[22px] font-semibold leading-[1.25] text-balance mb-5">
             {arrivalInstruction}
           </div>
-          <div className="flex gap-2.5">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); confirmArrived(); }}
-              className="flex-1 rounded-full py-3.5 font-semibold text-white text-base active:scale-[0.98] transition-smooth"
-              style={{ backgroundColor: accent }}
+              className="h-14 flex-1 rounded-full border border-transparent bg-[#FFD400] font-semibold text-[#0A0A0A] text-base active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {walkerStrings.video.madeIt}
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); rejectArrival(); }}
-              className="flex-1 rounded-full py-3.5 font-medium text-base border border-white/40 text-white active:scale-[0.98] transition-smooth"
+              className="h-14 flex-1 rounded-full border border-[#2E2E32] bg-[#1F1F22] font-semibold text-white text-base active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {walkerStrings.video.notYet}
             </button>
@@ -741,7 +741,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); restart(); }}
-            className="mt-4 mx-auto block text-white/45 text-[13px] underline underline-offset-2 active:scale-95 transition-smooth"
+            className="mt-4 mx-auto block text-[#8A8A8F] text-[13px] underline underline-offset-4 active:scale-95 transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {walkerStrings.video.startAgain}
           </button>

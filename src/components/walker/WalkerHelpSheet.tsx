@@ -8,8 +8,6 @@ type WalkerHelpSheetProps = {
   addressLine: string;
   /** Optional "look for" hint (loc.start_note). */
   lookFor?: string | null;
-  /** Brand accent for the Open-in-Maps action. */
-  accent: string;
   /** Whether start coordinates exist — gates the Open-in-Maps button. */
   hasCoords: boolean;
   /** Opens the venue location in the native maps app. */
@@ -30,7 +28,6 @@ export function WalkerHelpSheet({
   venueName,
   addressLine,
   lookFor,
-  accent,
   hasCoords,
   onOpenMaps,
   onDismiss,
@@ -53,7 +50,7 @@ export function WalkerHelpSheet({
         style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/25" />
-        <h2 className="font-display text-2xl mb-1.5">{walkerStrings.help.title}</h2>
+        <h2 className="font-display font-semibold text-2xl mb-1.5">{walkerStrings.help.title}</h2>
         <p className="text-white/70 text-sm leading-snug mb-5">{walkerStrings.help.body}</p>
 
         <div className="rounded-2xl bg-white/[0.06] border border-white/10 p-4 mb-4">
@@ -76,8 +73,7 @@ export function WalkerHelpSheet({
           <button
             type="button"
             onClick={onOpenMaps}
-            className="w-full rounded-full py-4 mb-2.5 font-semibold text-white text-base inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-smooth"
-            style={{ backgroundColor: accent }}
+            className="w-full h-14 rounded-full mb-2.5 bg-[#FFD400] font-semibold text-[#0A0A0A] text-base inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <MapPin className="size-4" />
             {walkerStrings.help.openMaps}
