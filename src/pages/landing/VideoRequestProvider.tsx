@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { RequestForm } from "@/components/RequestForm";
+import { VIDEO_REQUEST_PARAM, VIDEO_REQUEST_PARAM_VALUE } from "./links";
 import { VideoRequestContext } from "./videoRequestContext";
 
 // The one and only video-guide request modal on the landing page. Every
@@ -14,6 +15,25 @@ export function VideoRequestProvider({ children }: { children: ReactNode }) {
     triggerRef.current = trigger ?? null;
     setOpen(true);
   }, []);
+
+  // Deep link: /?request=video opens the modal once the page has rendered,
+  // then drops the parameter (other params and the hash stay) so a refresh,
+  // back, or closing the modal never reopens it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get(VIDEO_REQUEST_PARAM) !== VIDEO_REQUEST_PARAM_VALUE) return;
+    const timer = window.setTimeout(() => {
+      openVideoRequest(null);
+      params.delete(VIDEO_REQUEST_PARAM);
+      const qs = params.toString();
+      window.history.replaceState(
+        window.history.state,
+        "",
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash,
+      );
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [openVideoRequest]);
 
   const value = useMemo(() => ({ openVideoRequest }), [openVideoRequest]);
 

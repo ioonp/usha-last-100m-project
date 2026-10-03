@@ -262,7 +262,9 @@ export const walkerStrings = {
     stuckThanks: "Thanks — that helps us fix it",
     /** Arrival screen — secondary link to the Usha landing page (new tab). */
     createOwnCta: "Create your own guide",
-    landingUrl: "https://usha.live",
+    // Landing page with the video-guide request modal already open. The
+    // landing page reads ?request=video; "from" only tags this traffic.
+    createOwnPath: "/?request=video&from=guide-end",
     /** Arrival screen — quiet signature footer near the bottom. */
     // Heart is rendered as a stroke icon next to this string, not an emoji.
     madeInBerlin: "Made in Berlin",
