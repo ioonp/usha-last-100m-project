@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { landingStrings } from "@/lib/strings";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { CREATE_GUIDE_ROUTE } from "./links";
+import { useRef, useState } from "react";
+import { RequestForm } from "@/components/RequestForm";
 import { useVideoRequest } from "./videoRequestContext";
 import { Logo } from "./LandingNav";
 
@@ -30,6 +32,8 @@ const productLinks = [
 
 export function ClosingSection() {
   const { openVideoRequest } = useVideoRequest();
+  const [contactOpen, setContactOpen] = useState(false);
+  const contactRef = useRef<HTMLButtonElement>(null);
 
   return (
     <>
@@ -73,9 +77,14 @@ export function ClosingSection() {
             </div>
             <div className="flex flex-col gap-3">
               <span className="text-[length:var(--text-small)] font-semibold text-[#0A0A0A]">{f.companyHeading}</span>
-              <a href={`mailto:${landingStrings.videoRequestEmail.to}`} className="text-[length:var(--text-small)] text-[#5C5C60] no-underline">
+              <button
+                ref={contactRef}
+                type="button"
+                onClick={() => setContactOpen(true)}
+                className="text-left text-[length:var(--text-small)] text-[#5C5C60]"
+              >
                 {f.contact}
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -87,6 +96,13 @@ export function ClosingSection() {
           </span>
         </div>
       </footer>
+      <RequestForm
+        formType="contact"
+        variant="contact"
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        triggerRef={contactRef}
+      />
     </>
   );
 }

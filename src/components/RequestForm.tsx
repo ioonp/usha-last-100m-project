@@ -5,12 +5,14 @@ import { landingStrings } from "@/lib/strings";
 
 const t = landingStrings.requestForm;
 
-type FieldKey = "name" | "email" | "venue" | "address";
+type FieldKey = "name" | "email" | "venue" | "address" | "note";
 type Status = "idle" | "sending" | "success" | "error";
 
 type RequestFormProps = {
   /** Which form this is — future forms reuse the component with a different type. */
   formType: string;
+  /** "contact" hides venue/address, makes the message required and relabels the copy. */
+  variant?: "video_guide" | "contact";
   open: boolean;
   onClose: () => void;
   /** Focus returns here on close (the button that opened the form). */
@@ -20,7 +22,9 @@ type RequestFormProps = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMPTY = { name: "", email: "", venue: "", address: "", note: "" };
 
-export function RequestForm({ formType, open, onClose, triggerRef }: RequestFormProps) {
+export function RequestForm({ formType, variant = "video_guide", open, onClose, triggerRef }: RequestFormProps) {
+  const isContact = variant === "contact";
+  const c = landingStrings.requestForm.contact;
   const [values, setValues] = useState({ ...EMPTY });
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -84,15 +88,19 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
 
   const setField = (key: keyof typeof EMPTY, v: string) => {
     setValues((s) => ({ ...s, [key]: v }));
-    if (key !== "note" && errors[key as FieldKey]) setErrors((e) => ({ ...e, [key]: undefined }));
+    if (errors[key as FieldKey]) setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
   const validate = () => {
     const next: Partial<Record<FieldKey, string>> = {};
     if (!values.name.trim()) next.name = t.errors.name;
     if (!EMAIL_RE.test(values.email.trim())) next.email = t.errors.email;
-    if (!values.venue.trim()) next.venue = t.errors.venue;
-    if (!values.address.trim()) next.address = t.errors.address;
+    if (isContact) {
+      if (!values.note.trim()) next.note = c.messageError;
+    } else {
+      if (!values.venue.trim()) next.venue = t.errors.venue;
+      if (!values.address.trim()) next.address = t.errors.address;
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -106,6 +114,7 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
       const { data, error } = await supabase.functions.invoke("send-request-email", {
         body: {
           formType,
+          source: variant,
           name: values.name.trim(),
           email: values.email.trim(),
           venue_name: values.venue.trim(),
@@ -161,8 +170,8 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
             <span className="inline-flex items-center justify-center size-14 rounded-full text-white" style={{ backgroundColor: "#2F7D5B" }}>
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
             </span>
-            <h2 id={headingId} className="font-display text-2xl md:text-[26px] font-semibold">{t.success.title}</h2>
-            <p className="text-[15px] text-muted-foreground max-w-[36ch]">{t.success.body(values.email.trim())}</p>
+            <h2 id={headingId} className="font-display text-2xl md:text-[26px] font-semibold">{(isContact ? c.success : t.success).title}</h2>
+            <p className="text-[15px] text-muted-foreground max-w-[36ch]">{(isContact ? c.success : t.success).body(values.email.trim())}</p>
             <button
               type="button"
               onClick={close}
@@ -174,8 +183,8 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
         ) : (
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 pt-2 md:pt-0">
             <div className="flex flex-col gap-1.5 pr-8">
-              <h2 id={headingId} className="font-display text-[26px] md:text-3xl font-semibold -tracking-[0.01em]">{t.heading}</h2>
-              <p className="text-[15px] text-muted-foreground">{t.subline}</p>
+              <h2 id={headingId} className="font-display text-[26px] md:text-3xl font-semibold -tracking-[0.01em]">{isContact ? c.heading : t.heading}</h2>
+              <p className="text-[15px] text-muted-foreground">{isContact ? c.subline : t.subline}</p>
             </div>
 
             {/* Honeypot — hidden from users, catches bots. */}
@@ -214,34 +223,38 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Field
-                label={t.fields.venue.label}
-                placeholder={t.fields.venue.placeholder}
-                autoComplete="organization"
-                value={values.venue}
-                onChange={(v) => setField("venue", v)}
-                error={errors.venue}
-              />
-              <Field
-                label={t.fields.address.label}
-                placeholder={t.fields.address.placeholder}
-                autoComplete="street-address"
-                value={values.address}
-                onChange={(v) => setField("address", v)}
-                error={errors.address}
-              />
-            </div>
+            {!isContact && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Field
+                  label={t.fields.venue.label}
+                  placeholder={t.fields.venue.placeholder}
+                  autoComplete="organization"
+                  value={values.venue}
+                  onChange={(v) => setField("venue", v)}
+                  error={errors.venue}
+                />
+                <Field
+                  label={t.fields.address.label}
+                  placeholder={t.fields.address.placeholder}
+                  autoComplete="street-address"
+                  value={values.address}
+                  onChange={(v) => setField("address", v)}
+                  error={errors.address}
+                />
+              </div>
+            )}
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">{t.fields.note.label}</span>
+              <span className="text-sm font-medium">{isContact ? c.messageLabel : t.fields.note.label}</span>
               <textarea
                 rows={3}
-                placeholder={t.fields.note.placeholder}
+                placeholder={isContact ? c.messagePlaceholder : t.fields.note.placeholder}
                 value={values.note}
                 onChange={(e) => setField("note", e.target.value)}
-                className="w-full rounded-input border border-border bg-background px-3.5 py-2.5 text-base leading-snug outline-none focus:border-2 focus:border-foreground"
+                aria-invalid={errors.note ? true : undefined}
+                className={`w-full rounded-input border bg-background px-3.5 py-2.5 text-base leading-snug outline-none focus:border-2 focus:border-foreground ${errors.note ? "border-[#A8241B]" : "border-border"}`}
               />
+              {errors.note && <span className="text-[13px]" style={{ color: "#A8241B" }}>{errors.note}</span>}
             </label>
 
             {status === "error" && (
@@ -253,9 +266,10 @@ export function RequestForm({ formType, open, onClose, triggerRef }: RequestForm
               disabled={sending}
               className="mt-1 w-full inline-flex items-center justify-center h-12 rounded-full bg-primary text-primary-foreground text-base font-semibold disabled:opacity-60"
             >
-              {sending ? t.sending : t.submit}
+              {sending ? t.sending : isContact ? c.submit : t.submit}
             </button>
-            <p className="text-center text-[13px] text-muted-foreground">{t.footnote}</p>
+            <p className="text-center text-[13px] text-muted-foreground">{isContact ? c.footnote : t.footnote}</p>
+            {isContact && <ShowEmail />}
           </form>
         )}
       </div>
@@ -298,3 +312,55 @@ const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     </label>
   );
 });
+
+/** "Or show my email": reveals the address as plain text with a Copy button.
+ *  The address is assembled here at click time — never written into markup. */
+function ShowEmail() {
+  const c = landingStrings.requestForm.contact;
+  const [address, setAddress] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const timer = useRef<number>();
+
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const copy = async () => {
+    if (!address) return;
+    window.clearTimeout(timer.current);
+    try {
+      await navigator.clipboard.writeText(address);
+      setMessage(c.copied);
+    } catch {
+      setMessage(c.copyFailed);
+    }
+    timer.current = window.setTimeout(() => setMessage(""), 2000);
+  };
+
+  const ring =
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {address === null ? (
+        <button
+          type="button"
+          onClick={() => setAddress(landingStrings.contactEmailParts.join("@"))}
+          className={`min-h-11 px-4 rounded-full text-[13px] text-muted-foreground hover:text-foreground underline underline-offset-4 ${ring}`}
+        >
+          {c.showEmail}
+        </button>
+      ) : (
+        <div className="flex flex-wrap items-center justify-center gap-x-2">
+          <span className="text-[15px] select-all break-all">{address}</span>
+          <button
+            type="button"
+            onClick={copy}
+            className={`min-h-11 min-w-11 px-4 rounded-full border border-border text-[13px] font-medium hover:bg-foreground/5 ${ring}`}
+          >
+            {message === c.copied ? c.copied : c.copy}
+          </button>
+        </div>
+      )}
+      <span role="status" aria-live="polite" className="sr-only">{message}</span>
+    </div>
+  );
+}

@@ -150,12 +150,9 @@ export const landingStrings = {
     privacy: "Privacy",
     contact: "Contact",
   },
-  // The video CTAs open a mailto built from these (address + subject live here
-  // as the constant).
-  videoRequestEmail: {
-    to: "iapara.ion.g@gmail.com",
-    subject: "Video guide for my venue",
-  },
+  // Contact address, stored in pieces and joined in code at click time so it
+  // never appears as static text in the markup.
+  contactEmailParts: ["iapara.ion.g", "gmail.com"],
   // Video-guide request form (opened from the hero "Get a video guide" CTA).
   // All copy lives here; the form itself is the reusable RequestForm component.
   requestForm: {
@@ -183,6 +180,24 @@ export const landingStrings = {
       title: "Request sent",
       body: (email: string) => `We'll email ${email} within a day to plan the shoot.`,
       done: "Done",
+    },
+    // Contact variant of the same form (footer "Contact" link).
+    contact: {
+      heading: "Get in touch",
+      subline: "Questions or ideas? Write to us and we reply within a day.",
+      messageLabel: "Your message",
+      messagePlaceholder: "What can we help with? Mention your venue if you have one.",
+      messageError: "Please enter a message",
+      submit: "Send message",
+      footnote: "Reply within 24h",
+      showEmail: "Or show my email",
+      copy: "Copy",
+      copied: "Copied",
+      copyFailed: "Copy failed. Select the address instead.",
+      success: {
+        title: "Message sent",
+        body: (email: string) => `We'll reply to ${email} within a day.`,
+      },
     },
   },
 };
