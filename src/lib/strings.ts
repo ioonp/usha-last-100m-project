@@ -237,10 +237,11 @@ export const walkerStrings = {
    *  handler; there is no phone/email column to expose. */
   help: {
     title: "Can't find the door?",
-    body: "Open the map to get your bearings, or head back to the street entrance and follow the photos from there.",
-    venueLabel: "Venue",
-    lookForLabel: "Look for",
-    openMaps: "Open in Maps",
+    body: "Go back to the street entrance and start again.",
+    startOver: "Start over from the street entrance",
+    openEntranceMaps: "Open street entrance in Maps",
+    callVenue: (venueName: string) => `Call ${venueName}`,
+    /** Accessible name for the top-right close icon and the backdrop. */
     dismiss: "Close",
   },
 

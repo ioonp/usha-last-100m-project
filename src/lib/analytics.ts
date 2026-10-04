@@ -42,6 +42,7 @@ export const EVENTS = {
   PHOTO_COMPLETED: "photo_completed",
   PHOTO_CHECKPOINT_MISMATCH: "photo_checkpoint_mismatch",
   PHOTO_ARRIVAL_NOT_YET: "photo_arrival_not_yet",
+  PHOTO_HELP_OPENED: "photo_help_opened",
 
   // ── Video guide (reel player). All fire with { slug }; feedback carries a
   //    { value } and stuck a { checkpoint, label }. No PII, ever. ──
@@ -55,6 +56,7 @@ export const EVENTS = {
   VIDEO_CHECKPOINT_MISMATCH: "video_checkpoint_mismatch",
   VIDEO_FEEDBACK: "video_feedback",
   VIDEO_STUCK: "video_stuck",
+  VIDEO_HELP_OPENED: "video_help_opened",
 
   // ── Creator (dashboard + build wizard). Guide-scoped ones carry { slug }. ──
   CREATOR_NEW_GUIDE_CLICKED: "creator_new_guide_clicked",

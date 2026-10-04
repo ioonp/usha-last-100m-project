@@ -137,16 +137,6 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     };
   }, [started, completed, stuck, requestWake, releaseWake]);
 
-  // ---- native maps (mirrors Viewer's openMaps) -----------------------------
-  const openMaps = useCallback(() => {
-    if (location.start_lat == null || location.start_lng == null) return;
-    const { start_lat: lat, start_lng: lng } = location;
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    window.location.href = isIOS
-      ? `maps://maps.apple.com/?q=${lat},${lng}`
-      : `https://maps.google.com/?q=${lat},${lng}`;
-  }, [location]);
-
   // ---- checkpoint analytics (parity with the photo path's step effect) -----
   // Fires whenever a valid checkpoint becomes the parked one — forward arrival
   // or back-seek alike — on both Umami and Supabase page_events. Reaching the
@@ -350,10 +340,14 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
     <WalkerHelpSheet
       venueName={location.studio_name}
       addressLine={addressLine}
-      lookFor={location.start_note}
-      hasCoords={hasCoords}
-      onOpenMaps={openMaps}
+      entranceLat={location.start_lat}
+      entranceLng={location.start_lng}
+      venuePhone={(location as { phone?: string | null }).phone}
+      onStartOver={restart}
       onDismiss={() => setHelpOpen(false)}
+      helpEvent={EVENTS.VIDEO_HELP_OPENED}
+      slug={location.slug}
+      stepIndex={Math.max(parked, 0)}
     />
   ) : null;
 
