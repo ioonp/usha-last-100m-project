@@ -1,37 +1,58 @@
-import { MapPin } from "lucide-react";
+import { useEffect } from "react";
+import { MapPin, Phone, X } from "lucide-react";
 import { walkerStrings } from "@/lib/strings";
+import { trackEvent, type EventName } from "@/lib/analytics";
 
 type WalkerHelpSheetProps = {
-  /** Venue name shown in the contact card (loc.studio_name). */
+  /** Venue name (loc.studio_name). */
   venueName: string;
   /** Pre-formatted address / coordinates line. */
   addressLine: string;
-  /** Optional "look for" hint (loc.start_note). */
-  lookFor?: string | null;
-  /** Whether start coordinates exist — gates the Open-in-Maps button. */
-  hasCoords: boolean;
-  /** Opens the venue location in the native maps app. */
-  onOpenMaps: () => void;
+  /** Street Entrance coordinates — the Maps button is hidden without both. */
+  entranceLat?: number | null;
+  entranceLng?: number | null;
+  /** Optional venue phone; the Call button renders only when present. */
+  venuePhone?: string | null;
+  /** Restarts the guide from the beginning (the caller's existing mechanism). */
+  onStartOver: () => void;
   /** Dismisses the sheet (backdrop, close button). */
   onDismiss: () => void;
+  /** Analytics: the surface's help_opened event, guide slug and current step. */
+  helpEvent: EventName;
+  slug: string;
+  stepIndex: number;
 };
 
+const PILL =
+  "w-full h-[52px] rounded-full inline-flex items-center justify-center gap-2 text-base font-medium no-underline active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+const GHOST = `${PILL} border border-[rgba(255,255,255,0.28)] bg-transparent text-white`;
+
 /**
- * Shared stuck/help + venue-contact fallback sheet, reached from both walker
- * formats — the photo stepper and the video reel. Content is walkerStrings.help;
- * it surfaces the venue details that exist and defers to the caller's map
- * handler. Extracted verbatim from Viewer's inline sheet, so both paths render
- * and behave identically. The parent gates visibility; this only renders the
- * open sheet.
+ * Shared stuck/help sheet, reached from both walker formats — the photo
+ * stepper and the video reel. Content is walkerStrings.help. The parent gates
+ * visibility; this only renders the open sheet.
  */
 export function WalkerHelpSheet({
   venueName,
   addressLine,
-  lookFor,
-  hasCoords,
-  onOpenMaps,
+  entranceLat,
+  entranceLng,
+  venuePhone,
+  onStartOver,
   onDismiss,
+  helpEvent,
+  slug,
+  stepIndex,
 }: WalkerHelpSheetProps) {
+  // The sheet mounts only while open, so mount == "help opened".
+  useEffect(() => {
+    trackEvent(helpEvent, { slug, index: stepIndex });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const hasEntrance = entranceLat != null && entranceLng != null;
+  const phone = venuePhone?.trim();
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
@@ -46,46 +67,53 @@ export function WalkerHelpSheet({
         className="absolute inset-0 bg-black/60"
       />
       <div
-        className="relative w-full max-w-md bg-[#111110] text-white rounded-t-3xl px-5 pt-3 shadow-2xl animate-fade-in-up"
+        className="relative w-full max-w-md max-h-[92dvh] overflow-y-auto bg-[#111110] text-white rounded-t-3xl px-5 pt-3 shadow-2xl animate-fade-in-up"
         style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/25" />
-        <h2 className="font-display font-semibold text-2xl mb-1.5">{walkerStrings.help.title}</h2>
-        <p className="text-white/70 text-sm leading-snug mb-5">{walkerStrings.help.body}</p>
-
-        <div className="rounded-2xl bg-white/[0.06] border border-white/10 p-4 mb-4">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1">
-            {walkerStrings.help.venueLabel}
-          </div>
-          <div className="text-base font-semibold mb-1">{venueName}</div>
-          <div className="text-sm text-white/70 break-words">{addressLine}</div>
-          {lookFor && (
-            <div className="mt-2 text-sm text-white/60">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-white/40 mr-1">
-                {walkerStrings.help.lookForLabel}
-              </span>
-              {lookFor}
-            </div>
-          )}
-        </div>
-
-        {hasCoords && (
-          <button
-            type="button"
-            onClick={onOpenMaps}
-            className="w-full h-14 rounded-full mb-2.5 bg-[#FFD400] font-semibold text-[#0A0A0A] text-base inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-smooth focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <MapPin className="size-4" />
-            {walkerStrings.help.openMaps}
-          </button>
-        )}
         <button
           type="button"
+          aria-label={walkerStrings.help.dismiss}
           onClick={onDismiss}
-          className="w-full rounded-full py-3.5 font-medium text-base border border-white/25 text-white active:scale-[0.98] transition-smooth"
+          className="absolute right-2 top-2 inline-flex size-11 items-center justify-center rounded-full text-white/70 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          {walkerStrings.help.dismiss}
+          <X className="size-5" aria-hidden="true" />
         </button>
+        <h2 className="font-display font-semibold text-2xl mb-1.5 pr-10">{walkerStrings.help.title}</h2>
+        <p className="text-white/70 text-sm leading-snug mb-4">{walkerStrings.help.body}</p>
+        <p className="text-[14px] leading-snug text-white/55 break-words mb-6">
+          {venueName} · {addressLine}
+        </p>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              onDismiss();
+              onStartOver();
+            }}
+            className={`${PILL} bg-white text-[#0A0A0A]`}
+          >
+            {walkerStrings.help.startOver}
+          </button>
+          {hasEntrance && (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${entranceLat},${entranceLng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={GHOST}
+            >
+              <MapPin className="size-4" aria-hidden="true" />
+              {walkerStrings.help.openEntranceMaps}
+            </a>
+          )}
+          {phone && (
+            <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className={GHOST}>
+              <Phone className="size-4" aria-hidden="true" />
+              {walkerStrings.help.callVenue(venueName)}
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -131,10 +131,14 @@ export default function Viewer() {
     <WalkerHelpSheet
       venueName={loc.studio_name}
       addressLine={addressLine}
-      lookFor={loc.start_note}
-      hasCoords={hasCoords}
-      onOpenMaps={openMaps}
+      entranceLat={loc.start_lat}
+      entranceLng={loc.start_lng}
+      venuePhone={(loc as { phone?: string | null }).phone}
+      onStartOver={() => { setShowArrival(false); setStep(-1); }}
       onDismiss={() => setHelpOpen(false)}
+      helpEvent={EVENTS.PHOTO_HELP_OPENED}
+      slug={slug ?? ""}
+      stepIndex={Math.max(step, 0)}
     />
   ) : null;
 
