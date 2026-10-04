@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
 
     const {
       formType = "video_guide",
+      source = "video_guide",
       name = "",
       email = "",
       venue_name = "",
@@ -52,6 +53,10 @@ Deno.serve(async (req) => {
     // Bot trap: a filled honeypot is silently accepted so the bot sees success
     // but nothing is stored or emailed.
     if (typeof honeypot === "string" && honeypot.trim() !== "") return json({ ok: true });
+
+    // Which form sent this. Anything unrecognised (or missing) is treated as
+    // the original video-guide form so existing callers keep working.
+    const src: "video_guide" | "contact" = source === "contact" ? "contact" : "video_guide";
 
     const clean = {
       formType: String(formType).trim() || "video_guide",
@@ -65,8 +70,7 @@ Deno.serve(async (req) => {
     const invalid: string[] = [];
     if (!clean.name) invalid.push("name");
     if (!EMAIL_RE.test(clean.email)) invalid.push("email");
-    if (!clean.venue_name) invalid.push("venue_name");
-    if (!clean.address) invalid.push("address");
+    if (src === "contact" && !clean.note) invalid.push("note");
     if (invalid.length) return json({ error: "Invalid submission", fields: invalid }, 400);
 
     // Insert with the service role — the table's RLS denies direct client writes.
@@ -97,24 +101,48 @@ Deno.serve(async (req) => {
     }
 
     const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(clean.address)}`;
-    const subject = `New video guide request: ${clean.venue_name}`;
-    const text =
-      `Form: ${clean.formType}\n` +
-      `Name: ${clean.name}\n` +
-      `Email: ${clean.email}\n` +
-      `Venue: ${clean.venue_name}\n` +
-      `Address: ${clean.address}\n` +
-      `Map: ${mapsLink}\n` +
-      `Note: ${clean.note || "—"}\n`;
-    const html =
-      `<h2>New video guide request</h2>` +
-      `<p><strong>Venue:</strong> ${esc(clean.venue_name)}</p>` +
-      `<p><strong>Name:</strong> ${esc(clean.name)}</p>` +
-      `<p><strong>Email:</strong> <a href="mailto:${esc(clean.email)}">${esc(clean.email)}</a></p>` +
-      `<p><strong>Address:</strong> ${esc(clean.address)}<br>` +
-      `<a href="${esc(mapsLink)}">Open in Google Maps</a></p>` +
-      `<p><strong>Note:</strong> ${esc(clean.note) || "—"}</p>` +
-      `<p style="color:#7A7268">Form: ${esc(clean.formType)}</p>`;
+    let subject: string;
+    let text: string;
+    let html: string;
+    if (src === "contact") {
+      subject = "New contact message";
+      text =
+        `Form: ${clean.formType}\n` +
+        `Name: ${clean.name}\n` +
+        `Email: ${clean.email}\n` +
+        (clean.venue_name ? `Venue: ${clean.venue_name}\n` : "") +
+        (clean.address ? `Address: ${clean.address}\nMap: ${mapsLink}\n` : "") +
+        `Message: ${clean.note}\n`;
+      html =
+        `<h2>New contact message</h2>` +
+        `<p><strong>Name:</strong> ${esc(clean.name)}</p>` +
+        `<p><strong>Email:</strong> <a href="mailto:${esc(clean.email)}">${esc(clean.email)}</a></p>` +
+        (clean.venue_name ? `<p><strong>Venue:</strong> ${esc(clean.venue_name)}</p>` : "") +
+        (clean.address
+          ? `<p><strong>Address:</strong> ${esc(clean.address)}<br><a href="${esc(mapsLink)}">Open in Google Maps</a></p>`
+          : "") +
+        `<p><strong>Message:</strong> ${esc(clean.note)}</p>` +
+        `<p style="color:#7A7268">Form: ${esc(clean.formType)}</p>`;
+    } else {
+      subject = `New video guide request: ${clean.venue_name}`;
+      text =
+        `Form: ${clean.formType}\n` +
+        `Name: ${clean.name}\n` +
+        `Email: ${clean.email}\n` +
+        `Venue: ${clean.venue_name}\n` +
+        `Address: ${clean.address}\n` +
+        `Map: ${mapsLink}\n` +
+        `Note: ${clean.note || "—"}\n`;
+      html =
+        `<h2>New video guide request</h2>` +
+        `<p><strong>Venue:</strong> ${esc(clean.venue_name)}</p>` +
+        `<p><strong>Name:</strong> ${esc(clean.name)}</p>` +
+        `<p><strong>Email:</strong> <a href="mailto:${esc(clean.email)}">${esc(clean.email)}</a></p>` +
+        `<p><strong>Address:</strong> ${esc(clean.address)}<br>` +
+        `<a href="${esc(mapsLink)}">Open in Google Maps</a></p>` +
+        `<p><strong>Note:</strong> ${esc(clean.note) || "—"}</p>` +
+        `<p style="color:#7A7268">Form: ${esc(clean.formType)}</p>`;
+    }
 
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
