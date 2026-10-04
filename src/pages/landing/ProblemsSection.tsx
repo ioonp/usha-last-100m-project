@@ -6,8 +6,8 @@ const cards = [t.late, t.calls, t.impression];
 
 export function ProblemsSection() {
   return (
-    <section className="flex flex-col gap-8 md:gap-14 px-5 pb-16 md:px-[120px] md:pb-28 text-center">
-      <h2 className="usha-landing-heading text-[length:var(--text-h2)] mx-auto">{t.title}</h2>
+    <section className="flex flex-col px-5 pb-16 md:px-[120px] md:pb-28 text-center">
+      <h2 className="usha-landing-heading text-[length:var(--text-h2)] mx-auto mt-[clamp(64px,8vw,120px)] mb-[clamp(32px,4vw,56px)]">{t.title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x md:divide-[#E7E7E9]">
         {cards.map((c, i) => (
           <div
