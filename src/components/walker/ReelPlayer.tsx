@@ -79,27 +79,25 @@ function parseManifest(raw: unknown): VideoManifest | null {
 }
 
 /**
- * Venue wordmark chip for the start screen. Stays hidden (display: none, so
- * it takes no space) until the image has actually loaded, and renders nothing
- * if it fails, so the screen is identical to a guide without a logo.
+ * Venue logo tile for the start screen. Stays display: none (no layout space)
+ * until the image has actually loaded, and renders nothing if it fails, so the
+ * screen is identical to a guide without a logo. data-logo-loaded lets the
+ * overlay shift its content down only once the logo is really showing.
  */
 function StartLogo({ url, alt }: { url: string; alt: string }) {
   const [status, setStatus] = useState<"loading" | "loaded" | "failed">("loading");
   if (status === "failed") return null;
   return (
-    <span
-      className={`mb-3.5 rounded-2xl bg-white px-[22px] py-[14px] shadow-[0_4px_16px_rgba(0,0,0,0.25)] ${
-        status === "loaded" ? "inline-flex" : "hidden"
+    <img
+      src={url}
+      alt={alt}
+      onLoad={() => setStatus("loaded")}
+      onError={() => setStatus("failed")}
+      data-logo-loaded={status === "loaded" ? "" : undefined}
+      className={`mb-3.5 size-24 rounded-[22px] object-cover shadow-[0_4px_16px_rgba(0,0,0,0.25)] ${
+        status === "loaded" ? "block" : "hidden"
       }`}
-    >
-      <img
-        src={url}
-        alt={alt}
-        onLoad={() => setStatus("loaded")}
-        onError={() => setStatus("failed")}
-        className="h-[26px] w-auto max-w-[150px] object-contain"
-      />
-    </span>
+    />
   );
 }
 
@@ -700,7 +698,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         <button
           type="button"
           onClick={start}
-          className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-1.5 px-8 text-center text-white"
+          className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-1.5 px-8 text-center text-white has-[[data-logo-loaded]]:pt-[120px]"
           style={{ background: "rgba(0,0,0,0.45)" }}
         >
           {manifest?.logoUrl && (
