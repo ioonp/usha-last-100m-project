@@ -219,11 +219,11 @@ All colors MUST be HSL.
     background: rgba(16, 16, 16, 0.6);
   }
 }
-/* Reel navigation arrow halo: a soft dark radial glow behind the chevron, no
-   visible container. The radial mask feathers the blur to nothing at the rim.
+/* Reel navigation arrow halo: a soft dark radial glow behind the glass chevron,
+   no visible container. The radial mask feathers the blur to nothing at the rim.
    Without backdrop-filter support the dark gradient alone still renders. */
 .usha-halo-arrow {
-  background: radial-gradient(circle closest-side, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.18) 45%, rgba(0, 0, 0, 0) 72%);
+  background: radial-gradient(circle closest-side, rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.12) 45%, rgba(0, 0, 0, 0) 72%);
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   backdrop-filter: blur(10px) saturate(1.4);
   -webkit-mask-image: radial-gradient(circle closest-side, #000 45%, transparent 72%);
