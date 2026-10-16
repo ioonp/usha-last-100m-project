@@ -573,7 +573,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   // hidden while a leg is playing, and hidden entirely in the arrival state
   // (nowhere to go forward, and "Start again" covers going back).
   const chevronsVisible = started && !arrivalPrompt && !isPlaying;
-  const chevronOpacity = chevronsVisible ? 0.3 : 0;
+  const chevronOpacity = chevronsVisible ? 1 : 0;
 
   return (
     // Stage: full viewport with a calm near-black surround. On phones the frame
@@ -649,45 +649,45 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         type="button"
         aria-label="Back"
         onClick={goBack}
-        className="absolute left-0 top-0 bottom-0 z-20"
+        className="peer/back absolute left-0 top-0 bottom-0 z-20"
         style={{ width: "33%" }}
       />
       <button
         type="button"
         aria-label="Forward"
         onClick={goForward}
-        className="absolute right-0 top-0 bottom-0 z-20"
+        className="peer/fwd absolute right-0 top-0 bottom-0 z-20"
         style={{ width: "33%" }}
       />
 
-      {/* Edge chevrons. A soft radial scrim (not a shape or button) darkens the
-          footage under each arrow for legibility; near-invisible, and only
-          shown when paused at a checkpoint. Visibility only — the tap zones
-          above stay active regardless. */}
+      {/* Edge arrows: round glass buttons (same glass as the start pill). Purely
+          visual and pointer-events-none — the tap zones above do the work — so
+          each one scales down while its zone is pressed, via the zone's named
+          peer. Visibility only; the zones stay active regardless. */}
       <div
-        className="absolute inset-y-0 left-0 z-20 flex items-center pl-1 pointer-events-none transition-opacity duration-500"
+        className="absolute inset-y-0 left-0 z-20 flex items-center pl-3 pointer-events-none transition-opacity duration-500 peer-active/back:[&>span]:scale-[0.94]"
         style={{ opacity: chevronOpacity }}
       >
-        <span className="relative flex items-center justify-center size-16">
-          <span
-            aria-hidden
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 68%)" }}
+        <span className="usha-glass-arrow flex size-[52px] items-center justify-center rounded-full transition-transform duration-100">
+          <ChevronLeft
+            className="size-7 text-white"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.35))" }}
           />
-          <ChevronLeft className="relative size-9 text-white drop-shadow" />
         </span>
       </div>
       <div
-        className="absolute inset-y-0 right-0 z-20 flex items-center pr-1 pointer-events-none transition-opacity duration-500"
+        className="absolute inset-y-0 right-0 z-20 flex items-center pr-3 pointer-events-none transition-opacity duration-500 peer-active/fwd:[&>span]:scale-[0.94]"
         style={{ opacity: chevronOpacity }}
       >
-        <span className="relative flex items-center justify-center size-16">
-          <span
-            aria-hidden
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(circle at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 68%)" }}
+        <span className="usha-glass-arrow flex size-[52px] items-center justify-center rounded-full transition-transform duration-100">
+          <ChevronRight
+            className="size-7 text-white"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.35))" }}
           />
-          <ChevronRight className="relative size-9 text-white drop-shadow" />
         </span>
       </div>
 
