@@ -101,6 +101,12 @@ function StartLogo({ url, alt }: { url: string; alt: string }) {
   );
 }
 
+// Edge-arrow sizes, in px. The chevron is drawn in a 48-unit viewBox, so its
+// strokes scale with this one value. The box is the transparent button area and
+// also the halo behind the chevron (the halo fills the box).
+const ARROW_CHEVRON_PX = 38;
+const ARROW_BOX_PX = 64;
+
 /**
  * Glass-letter chevron for the reel's edge arrows: a translucent white body
  * with a thin bright rim, like the glass digits of a lock-screen clock. Two
@@ -120,7 +126,8 @@ function GlassChevron({ dir }: { dir: "left" | "right" }) {
   return (
     <svg
       viewBox="0 0 48 48"
-      className="relative size-16 overflow-visible transition-transform duration-100"
+      className="relative overflow-visible transition-transform duration-100"
+      style={{ width: ARROW_CHEVRON_PX, height: ARROW_CHEVRON_PX }}
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -702,7 +709,7 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
       />
 
       {/* Edge arrows: a glass-letter chevron over a faint dark halo, no container
-          and no drop shadow. The 96px box sits 8px past the screen edge. Purely
+          and no drop shadow. The box sits flush with the screen edge. Purely
           visual and pointer-events-none — the tap zones above do the work — so
           the chevron scales down while its zone is pressed, via the zone's named
           peer. Visibility only; the zones stay active. */}
@@ -710,7 +717,10 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         className="absolute inset-y-0 left-0 z-20 flex items-center pointer-events-none transition-opacity duration-500 peer-active/back:[&_svg]:scale-[0.92]"
         style={{ opacity: chevronOpacity }}
       >
-        <span className="relative flex size-24 -ml-2 items-center justify-center">
+        <span
+          className="relative flex items-center justify-center"
+          style={{ width: ARROW_BOX_PX, height: ARROW_BOX_PX }}
+        >
           <span aria-hidden className="usha-halo-arrow absolute inset-0 rounded-full" />
           <GlassChevron dir="left" />
         </span>
@@ -719,7 +729,10 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         className="absolute inset-y-0 right-0 z-20 flex items-center pointer-events-none transition-opacity duration-500 peer-active/fwd:[&_svg]:scale-[0.92]"
         style={{ opacity: chevronOpacity }}
       >
-        <span className="relative flex size-24 -mr-2 items-center justify-center">
+        <span
+          className="relative flex items-center justify-center"
+          style={{ width: ARROW_BOX_PX, height: ARROW_BOX_PX }}
+        >
           <span aria-hidden className="usha-halo-arrow absolute inset-0 rounded-full" />
           <GlassChevron dir="right" />
         </span>
