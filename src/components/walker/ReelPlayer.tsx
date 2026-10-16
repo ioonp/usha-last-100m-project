@@ -660,33 +660,38 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         style={{ width: "33%" }}
       />
 
-      {/* Edge arrows: round glass buttons (same glass as the start pill). Purely
-          visual and pointer-events-none — the tap zones above do the work — so
-          each one scales down while its zone is pressed, via the zone's named
-          peer. Visibility only; the zones stay active regardless. */}
+      {/* Edge arrows: a white chevron over a soft dark halo, no visible container.
+          The 96px box sits 10px past the screen edge, so the chevron lands about
+          38px in. Purely visual and pointer-events-none — the tap zones above do
+          the work — so the chevron scales down while its zone is pressed, via
+          the zone's named peer. Visibility only; the zones stay active. */}
       <div
-        className="absolute inset-y-0 left-0 z-20 flex items-center pl-3 pointer-events-none transition-opacity duration-500 peer-active/back:[&>span]:scale-[0.94]"
+        className="absolute inset-y-0 left-0 z-20 flex items-center pointer-events-none transition-opacity duration-500 peer-active/back:[&_svg]:scale-[0.9]"
         style={{ opacity: chevronOpacity }}
       >
-        <span className="usha-glass-arrow flex size-[52px] items-center justify-center rounded-full transition-transform duration-100">
+        <span className="relative flex size-24 -ml-2.5 items-center justify-center">
+          <span aria-hidden className="usha-halo-arrow absolute inset-0 rounded-full" />
           <ChevronLeft
-            className="size-7 text-white"
-            strokeWidth={2.5}
+            className="relative size-[38px] text-white transition-transform duration-100"
+            strokeWidth={3.2}
             strokeLinecap="round"
-            style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.35))" }}
+            strokeLinejoin="round"
+            style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.55))" }}
           />
         </span>
       </div>
       <div
-        className="absolute inset-y-0 right-0 z-20 flex items-center pr-3 pointer-events-none transition-opacity duration-500 peer-active/fwd:[&>span]:scale-[0.94]"
+        className="absolute inset-y-0 right-0 z-20 flex items-center pointer-events-none transition-opacity duration-500 peer-active/fwd:[&_svg]:scale-[0.9]"
         style={{ opacity: chevronOpacity }}
       >
-        <span className="usha-glass-arrow flex size-[52px] items-center justify-center rounded-full transition-transform duration-100">
+        <span className="relative flex size-24 -mr-2.5 items-center justify-center">
+          <span aria-hidden className="usha-halo-arrow absolute inset-0 rounded-full" />
           <ChevronRight
-            className="size-7 text-white"
-            strokeWidth={2.5}
+            className="relative size-[38px] text-white transition-transform duration-100"
+            strokeWidth={3.2}
             strokeLinecap="round"
-            style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.35))" }}
+            strokeLinejoin="round"
+            style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.55))" }}
           />
         </span>
       </div>
