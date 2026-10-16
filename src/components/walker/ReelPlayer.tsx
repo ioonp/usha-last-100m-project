@@ -32,6 +32,8 @@ type ManifestCheckpoint = { time: number; caption: string };
 type VideoManifest = {
   checkpoints: ManifestCheckpoint[];
   arrival: { instruction: string } | null;
+  /** Optional venue wordmark shown above the name on the start screen. */
+  logoUrl?: string;
 };
 
 // Minimal shapes for the Screen Wake Lock API, which isn't in every lib.dom yet.
@@ -68,7 +70,37 @@ function parseManifest(raw: unknown): VideoManifest | null {
   const arrivalObj = (obj.arrival ?? null) as Record<string, unknown> | null;
   const instruction =
     arrivalObj && typeof arrivalObj.instruction === "string" ? arrivalObj.instruction : null;
-  return { checkpoints, arrival: instruction ? { instruction } : null };
+  const logoUrl = typeof obj.logoUrl === "string" ? obj.logoUrl.trim() : "";
+  return {
+    checkpoints,
+    arrival: instruction ? { instruction } : null,
+    ...(logoUrl ? { logoUrl } : {}),
+  };
+}
+
+/**
+ * Venue wordmark chip for the start screen. Stays hidden (display: none, so
+ * it takes no space) until the image has actually loaded, and renders nothing
+ * if it fails, so the screen is identical to a guide without a logo.
+ */
+function StartLogo({ url, alt }: { url: string; alt: string }) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "failed">("loading");
+  if (status === "failed") return null;
+  return (
+    <span
+      className={`mb-3.5 rounded-2xl bg-white px-[22px] py-[14px] shadow-[0_4px_16px_rgba(0,0,0,0.25)] ${
+        status === "loaded" ? "inline-flex" : "hidden"
+      }`}
+    >
+      <img
+        src={url}
+        alt={alt}
+        onLoad={() => setStatus("loaded")}
+        onError={() => setStatus("failed")}
+        className="h-[26px] w-auto max-w-[150px] object-contain"
+      />
+    </span>
+  );
 }
 
 export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
@@ -671,6 +703,9 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
           className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-1.5 px-8 text-center text-white"
           style={{ background: "rgba(0,0,0,0.45)" }}
         >
+          {manifest?.logoUrl && (
+            <StartLogo key={manifest.logoUrl} url={manifest.logoUrl} alt={location.studio_name} />
+          )}
           <span className="font-display text-3xl font-semibold leading-tight text-balance drop-shadow-lg [text-shadow:var(--walker-text-halo)]">
             {location.studio_name}
           </span>
