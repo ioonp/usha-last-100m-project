@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Heart, MapPin } from "lucide-react";
 import { trackEvent as trackPageEvent } from "@/lib/track";
 import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
@@ -722,6 +722,37 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
             </span>
           </span>
         </button>
+      )}
+
+      {/* Start-screen entrance link + footer. Siblings of the start button, not
+          children: that overlay is one tap-to-start button, so links nested in it
+          would be invalid HTML and would start the video. The wrapper ignores
+          pointer events; only the links catch taps. */}
+      {!started && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[41] flex flex-col items-center pb-[calc(env(safe-area-inset-bottom)+4px)] text-white">
+          {Number.isFinite(location.start_lat) && Number.isFinite(location.start_lng) && (
+            <a
+              href={walkerStrings.video.entranceDirectionsUrl(location.start_lat as number, location.start_lng as number)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pointer-events-auto inline-flex min-h-[44px] items-center gap-1.5 px-4 text-[14px] text-white/90 underline underline-offset-2 [text-shadow:var(--walker-text-halo)]"
+            >
+              <MapPin className="size-4" aria-hidden="true" />
+              {walkerStrings.video.entranceLink}
+            </a>
+          )}
+          <a
+            href={walkerStrings.video.homeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto inline-flex min-h-[44px] items-center gap-1.5 px-4 text-[13px] text-white/60 [text-shadow:var(--walker-text-halo)]"
+          >
+            {walkerStrings.video.directionsBy}
+            <span className="text-[15px] font-bold leading-none tracking-[-0.05em] text-white">
+              {walkerStrings.video.wordmark}
+            </span>
+          </a>
+        </div>
       )}
 
       {/* Bottom band: caption stacked above the persistent escape hatch, both

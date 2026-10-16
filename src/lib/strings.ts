@@ -250,6 +250,15 @@ export const walkerStrings = {
   video: {
     /** Tap-to-start overlay — the first gesture iOS needs for inline playback. */
     tapToStart: "Tap to start",
+    /** Start-screen link out to walking directions for the street entrance. */
+    entranceLink: "Navigate to the street entrance",
+    /** Start-screen footer: "Directions by" + the usha wordmark, linking home. */
+    directionsBy: "Directions by",
+    wordmark: "usha",
+    homeUrl: "https://usha.live",
+    /** Google Maps walking directions to the guide's start (Street Entrance). */
+    entranceDirectionsUrl: (lat: number, lng: number) =>
+      `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`,
     /** Arrival prompt, affirmative. */
     madeIt: "I made it",
     /** Arrival prompt, negative — opens the help sheet. */
