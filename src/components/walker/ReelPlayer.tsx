@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Heart, MapPin } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Heart, MapPin } from "lucide-react";
 import { trackEvent as trackPageEvent } from "@/lib/track";
 import { trackEvent as trackUmami, EVENTS } from "@/lib/analytics";
 import { walkerStrings } from "@/lib/strings";
@@ -101,53 +101,10 @@ function StartLogo({ url, alt }: { url: string; alt: string }) {
   );
 }
 
-// Edge-arrow sizes, in px. The chevron is drawn in a 48-unit viewBox, so its
-// strokes scale with this one value. The box is the transparent button area and
-// also the halo behind the chevron (the halo fills the box).
-const ARROW_CHEVRON_PX = 38;
-const ARROW_BOX_PX = 64;
-
-/**
- * Glass-letter chevron for the reel's edge arrows: a translucent white body
- * with a thin bright rim, like the glass digits of a lock-screen clock. Two
- * stacked strokes and nothing else (no shadow, no blur filter). The rim is
- * wider than the body and masked so only the part outside the body shows.
- * Ids are per direction so the two arrows' gradients and masks don't clash.
- */
-const CHEVRON_PATH = {
-  left: "M30 8 L14 24 L30 40",
-  right: "M18 8 L34 24 L18 40",
-} as const;
-
-function GlassChevron({ dir }: { dir: "left" | "right" }) {
-  const d = CHEVRON_PATH[dir];
-  const gradId = `usha-chevron-${dir}-body`;
-  const maskId = `usha-chevron-${dir}-rim-mask`;
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      className="relative overflow-visible transition-transform duration-100"
-      style={{ width: ARROW_CHEVRON_PX, height: ARROW_CHEVRON_PX }}
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={gradId} gradientUnits="userSpaceOnUse" x1="0" y1="8" x2="0" y2="40">
-          <stop offset="0" stopColor="#fff" stopOpacity="0.6" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0.2" />
-        </linearGradient>
-        <mask id={maskId} maskUnits="userSpaceOnUse" x="-8" y="-8" width="64" height="64">
-          <rect x="-8" y="-8" width="64" height="64" fill="#fff" />
-          <path d={d} stroke="#000" strokeWidth="8.5" />
-        </mask>
-      </defs>
-      <path d={d} stroke={`url(#${gradId})`} strokeWidth="8.5" />
-      <path d={d} stroke="#fff" strokeOpacity="0.95" strokeWidth="11" mask={`url(#${maskId})`} />
-    </svg>
-  );
-}
+// Edge-arrow chevron: size in px and stroke width in lucide's 24-unit viewBox.
+// Tune both here. (The original arrows were 36px with a stroke of 2.)
+const ARROW_CHEVRON_PX = 45;
+const ARROW_STROKE_WIDTH = 3;
 
 export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
   const manifest = useMemo(() => parseManifest(location.manifest), [location.manifest]);
@@ -708,33 +665,38 @@ export function ReelPlayer({ location, checkpoints }: ReelPlayerProps) {
         style={{ width: "33%" }}
       />
 
-      {/* Edge arrows: a glass-letter chevron over a faint dark halo, no container
-          and no drop shadow. The box sits flush with the screen edge. Purely
-          visual and pointer-events-none — the tap zones above do the work — so
-          the chevron scales down while its zone is pressed, via the zone's named
-          peer. Visibility only; the zones stay active. */}
+      {/* Edge chevrons: plain white chevrons with a soft drop shadow, no container,
+          halo or blur. Purely visual and pointer-events-none — the tap zones above
+          do the work — so the chevron scales down while its zone is pressed, via
+          the zone's named peer. Visibility only; the zones stay active. */}
       <div
-        className="absolute inset-y-0 left-0 z-20 flex items-center pointer-events-none transition-opacity duration-500 peer-active/back:[&_svg]:scale-[0.92]"
+        className="absolute inset-y-0 left-0 z-20 flex items-center pl-1 pointer-events-none transition-opacity duration-500 peer-active/back:[&_svg]:scale-[0.92]"
         style={{ opacity: chevronOpacity }}
       >
-        <span
-          className="relative flex items-center justify-center"
-          style={{ width: ARROW_BOX_PX, height: ARROW_BOX_PX }}
-        >
-          <span aria-hidden className="usha-halo-arrow absolute inset-0 rounded-full" />
-          <GlassChevron dir="left" />
+        <span className="relative flex items-center justify-center size-16">
+          <ChevronLeft
+            className="relative text-white transition-transform duration-100"
+            size={ARROW_CHEVRON_PX}
+            strokeWidth={ARROW_STROKE_WIDTH}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.55))" }}
+          />
         </span>
       </div>
       <div
-        className="absolute inset-y-0 right-0 z-20 flex items-center pointer-events-none transition-opacity duration-500 peer-active/fwd:[&_svg]:scale-[0.92]"
+        className="absolute inset-y-0 right-0 z-20 flex items-center pr-1 pointer-events-none transition-opacity duration-500 peer-active/fwd:[&_svg]:scale-[0.92]"
         style={{ opacity: chevronOpacity }}
       >
-        <span
-          className="relative flex items-center justify-center"
-          style={{ width: ARROW_BOX_PX, height: ARROW_BOX_PX }}
-        >
-          <span aria-hidden className="usha-halo-arrow absolute inset-0 rounded-full" />
-          <GlassChevron dir="right" />
+        <span className="relative flex items-center justify-center size-16">
+          <ChevronRight
+            className="relative text-white transition-transform duration-100"
+            size={ARROW_CHEVRON_PX}
+            strokeWidth={ARROW_STROKE_WIDTH}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.55))" }}
+          />
         </span>
       </div>
 
